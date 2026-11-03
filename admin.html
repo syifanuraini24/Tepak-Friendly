@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Titik Rotasi</title>
+  <title>Admin - Tepak Friendly</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-4 font-sans">
 
   <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-    <h1 class="text-xl font-bold text-center mb-6">Panel Admin Titik Rotasi</h1>
+    <h1 class="text-xl font-bold text-center mb-6">Panel Admin Tepak Friendly</h1>
     
     <div id="loginSection" class="mb-4">
       <label for="passInput" class="block text-sm font-medium text-gray-700 mb-1">Password Admin</label>
@@ -28,7 +28,7 @@
 
     function login() {
       const pass = document.getElementById('passInput').value;
-      if (pass === 'titikrotasi') { 
+      if (pass === 'helloadmin..') { 
         document.getElementById('loginSection').classList.add('hidden');
         document.getElementById('adminPanel').classList.remove('hidden');
         loadDataAdmin();
