@@ -105,9 +105,8 @@
               data-sisa="${sisaKuota}" 
               data-full="${isFull}"
               ${isFull ? 'disabled' : ''}>
-              ${j.info}${statusTeks}
+              [${j.id}] ${j.info}${statusTeks}
             </option>`;
-        });
 
         // Render Live Player List Berdasarkan ID Jadwal (Grid Kiri & Kanan)
         const container = document.getElementById('containerListKegiatan');
