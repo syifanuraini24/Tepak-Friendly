@@ -8,11 +8,11 @@
 </head>
 <body class="bg-gray-100 p-4 font-sans text-gray-800">
 
-  <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+  <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 mb-6">
     <h1 class="text-2xl font-bold text-center mb-6">🏸 Tepak Friendly</h1>
     
     <!-- Area Form Pendaftaran -->
-    <div id="formArea" class="mb-6 p-4 border border-blue-100 rounded bg-blue-50">
+    <div id="formArea" class="mb-6 p-4 border border-blue-100 rounded bg-blue-50 max-w-md mx-auto">
       <h2 class="font-bold mb-3">Daftar Mabar</h2>
       
       <label for="pilihJadwal" class="block text-sm font-medium text-gray-700 mb-1">Jadwal Mabar</label>
@@ -26,7 +26,6 @@
       <label for="emailPemain" class="block text-sm font-medium text-gray-700 mb-1">Alamat Email</label>
       <input type="email" id="emailPemain" placeholder="Untuk menerima e-ticket lunas..." class="w-full p-2 border rounded mb-3">
       
-      <!-- Kotak Informasi Detail Dinamis & Sisa Kuota -->
       <div id="infoTransfer" class="text-xs text-gray-700 mb-3 p-3 bg-white border border-blue-200 rounded leading-relaxed shadow-sm">
         *Pilih jadwal terlebih dahulu untuk melihat detail mabar & info pembayaran.
       </div>
@@ -37,7 +36,7 @@
     </div>
 
     <!-- Area Pembayaran dengan Kode Unik -->
-    <div id="paymentArea" class="hidden mb-6 p-5 border-2 border-green-400 rounded-lg bg-green-50 text-center shadow-inner">
+    <div id="paymentArea" class="hidden mb-6 p-5 border-2 border-green-400 rounded-lg bg-green-50 text-center shadow-inner max-w-md mx-auto">
       <h2 class="font-bold text-green-800 text-lg mb-1">🎉 Pendaftaran Berhasil!</h2>
       <p class="text-xs text-gray-600 mb-3">Silakan transfer persis hingga digit terakhir agar otomatis terverifikasi.</p>
       
@@ -56,10 +55,11 @@
       </button>
     </div>
 
-    <h2 class="font-bold mb-3 border-b pb-2">Live Player List</h2>
-    <ul id="listPemain" class="space-y-3">
-      <li class="text-center text-gray-500 text-sm">Memuat data...</li>
-    </ul>
+    <!-- Bagian Live Player List Berkelompok (Grid 2 Kolom: Kiri & Kanan) -->
+    <h2 class="font-bold mb-4 border-b pb-2 text-lg">Live Player List per Kegiatan</h2>
+    <div id="containerListKegiatan" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="text-center text-gray-500 text-sm col-span-2">Memuat data kegiatan...</div>
+    </div>
   </div>
 
   <script>
@@ -76,8 +76,6 @@
         data.jadwal.forEach(j => {
           const isFull = j.terisi >= j.kuota;
           const sisaKuota = j.kuota - j.terisi;
-          
-          // Dropdown dibuat simpel: Hanya menampilkan Tanggal & Lokasi (ditandai jika penuh)
           const statusTeks = isFull ? ' (PENUH)' : '';
           
           selectJadwal.innerHTML += `
@@ -94,24 +92,56 @@
             </option>`;
         });
 
-        const list = document.getElementById('listPemain');
-        list.innerHTML = '';
-        if(data.pemain.length === 0) list.innerHTML = '<li class="text-center text-sm text-gray-400">Belum ada pemain yang mendaftar.</li>';
-        
-        data.pemain.forEach((item, index) => {
-          const isLunas = item.status.includes('Lunas');
-          list.innerHTML += `
-            <li class="p-3 border rounded ${isLunas ? 'bg-green-50 border-green-100' : 'bg-gray-50'} flex flex-col">
-              <div class="flex justify-between items-center mb-1">
-                <span class="font-bold text-sm">${index + 1}. ${item.nama}</span>
-                <span class="text-xs font-semibold ${isLunas ? 'text-green-600' : 'text-orange-500'}">${item.status}</span>
+        // Render Live Player List Berdasarkan Kotak Kategori Kegiatan (Grid Kiri & Kanan)
+        const container = document.getElementById('containerListKegiatan');
+        container.innerHTML = '';
+
+        if(data.jadwal.length === 0) {
+          container.innerHTML = '<div class="text-center text-sm text-gray-400 col-span-2">Belum ada jadwal tersedia.</div>';
+          return;
+        }
+
+        data.jadwal.forEach(j => {
+          // Filter pemain yang mendaftar sesuai nama jadwal / kegiatan ini
+          const pemainJadwal = data.pemain.filter(p => p.jadwal === j.info);
+
+          let listPemainHtml = '';
+          if (pemainJadwal.length === 0) {
+            listPemainHtml = '<li class="text-center text-gray-400 text-xs py-3">Belum ada peserta terdaftar.</li>';
+          } else {
+            pemainJadwal.forEach((p, idx) => {
+              const isLunas = p.status.includes('Lunas');
+              listPemainHtml += `
+                <li class="p-2 border-b last:border-b-0 flex justify-between items-center text-xs">
+                  <span>${idx + 1}. <strong>${p.nama}</strong></span>
+                  <span class="font-semibold ${isLunas ? 'text-green-600' : 'text-orange-500'}">${p.status}</span>
+                </li>`;
+            });
+          }
+
+          // Buat kotak card untuk masing-masing jadwal (tersusun 2 kolom kiri-kanan otomatis)
+          container.innerHTML += `
+            <div class="border rounded-lg p-4 bg-gray-50 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex justify-between items-center mb-2 border-b pb-2">
+                  <span class="font-bold text-sm text-blue-800">📌 ID: ${j.id}</span>
+                  <span class="text-xs bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded">Ku: ${pemainJadwal.length}/${j.kuota}</span>
+                </div>
+                <div class="text-xs font-semibold text-gray-700 mb-1">📍 ${j.info}</div>
+                <div class="text-xs text-gray-500 mb-3">⏰ ${j.jam}</div>
+                
+                <div class="bg-white rounded border p-2 mb-2">
+                  <ul class="divide-y">
+                    ${listPemainHtml}
+                  </ul>
+                </div>
               </div>
-              <span class="text-xs text-gray-500">📍 ${item.jadwal}</span>
-            </li>`;
+            </div>`;
         });
+
       } catch (error) {
         console.error("Gagal memuat data dari GAS:", error);
-        document.getElementById('listPemain').innerHTML = '<li class="text-center text-red-500 text-sm">Gagal memuat data. Refresh halaman.</li>';
+        document.getElementById('containerListKegiatan').innerHTML = '<div class="text-center text-red-500 text-sm col-span-2">Gagal memuat data. Refresh halaman.</div>';
       }
     }
 
