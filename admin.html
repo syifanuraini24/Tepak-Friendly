@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Titik Rotasi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-4 font-sans">
+
+  <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+    <h1 class="text-xl font-bold text-center mb-6">Panel Admin Titik Rotasi</h1>
+    
+    <div id="loginSection" class="mb-4">
+      <!-- Penambahan Label untuk Input Password -->
+      <label for="passInput" class="block text-sm font-medium text-gray-700 mb-1">Password Admin</label>
+      <input type="password" id="passInput" placeholder="Masukkan password..." class="w-full p-2 border rounded mb-3">
+      <button onclick="login()" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold p-2 rounded">Masuk</button>
+    </div>
+
+    <div id="adminPanel" class="hidden">
+      <h2 class="font-bold mb-3 border-b pb-2">Perlu Dikonfirmasi</h2>
+      <ul id="listMenunggu" class="space-y-3"></ul>
+    </div>
+  </div>
+
+  <script>
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1L8QX-I2xH_joKIK4ihQMGLNlkeBzQ2XtNfW2Bs66dfvhlpnTQJ212j32MARIX1TnPw/exec'; 
+
+    function login() {
+      const pass = document.getElementById('passInput').value;
+      if (pass === 'titikrotasi') { 
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        loadDataAdmin();
+      } else {
+        alert('Password salah!');
+      }
+    }
+
+    async function loadDataAdmin() {
+      const list = document.getElementById('listMenunggu');
+      list.innerHTML = '<li class="text-center text-sm text-gray-500">Memuat data...</li>';
+      
+      try {
+        const response = await fetch(GAS_URL);
+        const data = await response.json();
+        list.innerHTML = '';
+        
+        const pendingList = data.pemain.filter(item => item.status.includes('Menunggu'));
+        
+        if(pendingList.length === 0) {
+          list.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded">Semua pembayaran sudah Lunas! 🎉</li>';
+        }
+
+        pendingList.forEach(item => {
+          list.innerHTML += `
+            <li class="p-3 border border-orange-200 bg-orange-50 rounded flex flex-col">
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-bold text-sm">${item.nama}</span>
+                <button onclick="accPemain(${item.rowIndex}, this)" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded transition">
+                  ACC LUNAS
+                </button>
+              </div>
+              <span class="text-xs text-gray-600">📍 ${item.jadwal}</span>
+            </li>`;
+        });
+      } catch (error) {
+        // Penanganan eror S2486: Menggunakan objek error
+        console.error("Gagal memuat data dari GAS:", error);
+        list.innerHTML = '<li class="text-center text-red-500 text-sm">Gagal memuat. Periksa koneksi.</li>';
+      }
+    }
+
+    async function accPemain(rowIndex, btnElement) {
+      if(!confirm('Konfirmasi pemain ini sudah bayar?')) return;
+      
+      btnElement.innerText = 'Proses...';
+      btnElement.disabled = true;
+      
+      try {
+        await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex })
+        });
+        
+        // Memuat ulang data setelah sukses update
+        await loadDataAdmin(); 
+      } catch (error) {
+        // Praktik terbaik tambahan: handle eror saat POST update status
+        console.error("Gagal melakukan ACC:", error);
+        alert('Gagal mengupdate status. Silakan coba lagi.');
+        btnElement.innerText = 'ACC LUNAS';
+        btnElement.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
