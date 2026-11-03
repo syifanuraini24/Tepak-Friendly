@@ -26,7 +26,6 @@
       <label for="emailPemain" class="block text-sm font-medium text-gray-700 mb-1">Alamat Email</label>
       <input type="email" id="emailPemain" placeholder="Untuk menerima e-ticket lunas..." class="w-full p-2 border rounded mb-3">
       
-      <!-- Informasi HTM Asli & Jam Main -->
       <div id="infoTransfer" class="text-xs text-gray-700 mb-3 p-2 bg-white border rounded leading-relaxed">
         *Pilih jadwal terlebih dahulu untuk melihat info pembayaran & jam main.
       </div>
@@ -41,12 +40,13 @@
       <h2 class="font-bold text-green-800 text-lg mb-1">🎉 Pendaftaran Berhasil!</h2>
       <p class="text-xs text-gray-600 mb-3">Silakan transfer persis hingga digit terakhir agar otomatis terverifikasi.</p>
       
-      <!-- Nominal Total dengan Kode Unik -->
       <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Total yang Harus Dibayar:</div>
       <div class="text-3xl font-extrabold text-blue-700 mb-4 tracking-wider bg-white p-2 border border-blue-200 rounded shadow-sm" id="txtTagihan">Rp 0</div>
       
-      <!-- Gambar QRIS (Pastikan file qris.png ada di folder yang sama) -->
-      <img src="qris.png" alt="QRIS Tepak Friendly" class="mx-auto border p-2 bg-white rounded-lg shadow-sm mb-4 w-48 h-48 object-cover">
+      <!-- GAMBAR QRIS (Diperbaiki ukurannya agar tidak pecah/blur) -->
+      <div class="bg-white p-3 rounded-lg border shadow-sm inline-block mb-4">
+        <img src="qris.png" alt="QRIS Tepak Friendly" class="mx-auto w-56 h-56 object-contain">
+      </div>
       
       <p class="text-sm font-semibold mb-1">Atau Transfer Bank:</p>
       <p class="text-sm text-gray-600 mb-4 font-mono bg-white p-2 border rounded">BCA 123456789 a.n Syifa Nur Aini</p>
@@ -63,7 +63,7 @@
   </div>
 
   <script>
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1L8QX-I2xH_joKIK4ihQMGLNlkeBzQ2XtNfW2Bs66dfvhlpnTQJ212j32MARIX1TnPw/exec'; 
+    const GAS_URL = 'PASTE_URL_GAS_DI_SINI'; 
 
     async function loadData() {
       try {
@@ -142,7 +142,6 @@
         });
         const result = await response.json();
         
-        // Sembunyikan form pendaftaran dan tampilkan instruksi pembayaran
         document.getElementById('formArea').classList.add('hidden');
         
         const formatRupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(result.totalTagihan);
