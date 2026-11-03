@@ -71,7 +71,7 @@
       </button>
     </div>
 
-    <!-- Live Player List Berkelompok (Grid 2 Kolom: Kiri & Kanan) -->
+    <!-- Live Player List Berkelompok (Grid 2 Kolom: Kiri & Kanan berdasarkan ID) -->
     <h2 class="font-bold mb-4 border-b pb-2 text-lg">Live Player List per Kegiatan</h2>
     <div id="containerListKegiatan" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="text-center text-gray-500 text-sm col-span-2">Memuat data kegiatan...</div>
@@ -95,7 +95,8 @@
           const statusTeks = isFull ? ' (PENUH)' : '';
           
           selectJadwal.innerHTML += `
-            <option value="${j.info}" 
+            <option value="${j.id}" 
+              data-id="${j.id}"
               data-info="${j.info}" 
               data-htm="${j.htm}" 
               data-jam="${j.jam}" 
@@ -108,7 +109,7 @@
             </option>`;
         });
 
-        // Render Live Player List Berdasarkan Kotak Kategori Kegiatan (Grid Kiri & Kanan)
+        // Render Live Player List Berdasarkan ID Jadwal (Grid Kiri & Kanan)
         const container = document.getElementById('containerListKegiatan');
         container.innerHTML = '';
 
@@ -118,7 +119,7 @@
         }
 
         data.jadwal.forEach(j => {
-          const pemainJadwal = data.pemain.filter(p => p.jadwal === j.info);
+          const pemainJadwal = data.pemain.filter(p => p.jadwalId === j.id);
 
           let listPemainHtml = '';
           if (pemainJadwal.length === 0) {
@@ -205,13 +206,16 @@
 
     async function daftar() {
       const select = document.getElementById('pilihJadwal');
-      const jadwal = select.value;
-      const htmString = select.options[select.selectedIndex]?.getAttribute('data-htm');
+      const option = select.options[select.selectedIndex];
+      
+      const jadwalId = option.getAttribute('data-id');
+      const jadwalInfo = option.getAttribute('data-info');
+      const htmString = option.getAttribute('data-htm');
       const nama = document.getElementById('namaPemain').value.trim();
       const email = document.getElementById('emailPemain').value.trim();
       const btn = document.getElementById('btnSubmit');
       
-      if(!jadwal) return alert('Pilih jadwal terlebih dahulu!');
+      if(!jadwalId) return alert('Pilih jadwal terlebih dahulu!');
       if(!nama) return alert('Isi nama lengkapmu!');
       if(!email || !email.includes('@')) return alert('Alamat email tidak valid!');
 
@@ -221,7 +225,14 @@
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'register', nama: nama, email: email, jadwal: jadwal, htm: htmString })
+          body: JSON.stringify({ 
+            action: 'register', 
+            nama: nama, 
+            email: email, 
+            jadwalId: jadwalId, 
+            jadwalInfo: jadwalInfo, 
+            htm: htmString 
+          })
         });
         const result = await response.json();
         
