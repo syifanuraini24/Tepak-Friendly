@@ -24,7 +24,7 @@
   </div>
 
   <script>
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1L8QX-I2xH_joKIK4ihQMGLNlkeBzQ2XtNfW2Bs66dfvhlpnTQJ212j32MARIX1TnPw/exec'; 
+    const GAS_URL = 'MASUKKAN_URL_WEB_APP_GAS_DISINI'; 
 
     function login() {
       const pass = document.getElementById('passInput').value;
@@ -90,14 +90,18 @@
         });
         
         const result = await response.json();
-        if(result.status === 'updated') {
+        
+        // Cek apakah server merespons sukses (menerima status updated atau success)
+        if(result.status === 'updated' || result.status === 'success') {
           await loadDataAdmin(); 
         } else {
-          throw new Error("Gagal mengupdate di server");
+          // Jika respons tidak sesuai, cetak detailnya ke console agar terlihat jelas
+          console.error("Respon server:", result);
+          throw new Error(result.message || "Gagal mengupdate di server");
         }
       } catch (error) {
         console.error("Gagal melakukan ACC:", error);
-        alert('Gagal mengupdate status. Silakan coba lagi.');
+        alert('Gagal mengupdate status. Error: ' + error.message);
         btnElement.innerText = 'ACC LUNAS';
         btnElement.disabled = false;
       }
