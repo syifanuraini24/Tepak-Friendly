@@ -46,16 +46,17 @@
         const data = await response.json();
         list.innerHTML = '';
         
-        const pendingList = data.pemain.filter(item => item.status.includes('Menunggu'));
+        const pendingList = data.pemain.filter(item => item.status && item.status.includes('Menunggu'));
         
         if(pendingList.length === 0) {
           list.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded">Semua pembayaran sudah Lunas! 🎉</li>';
+          return;
         }
 
         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
 
         pendingList.forEach(item => {
-          const tagihanRp = formatRp.format(item.tagihan);
+          const tagihanRp = formatRp.format(item.tagihan || 0);
           list.innerHTML += `
             <li class="p-3 border border-orange-200 bg-orange-50 rounded flex flex-col">
               <div class="flex justify-between items-center mb-2">
@@ -72,7 +73,7 @@
         });
       } catch (error) {
         console.error("Gagal memuat data dari GAS:", error);
-        list.innerHTML = '<li class="text-center text-red-500 text-sm">Gagal memuat. Periksa koneksi.</li>';
+        list.innerHTML = '<li class="text-center text-red-500 text-sm">Gagal memuat. Periksa koneksi atau URL GAS.</li>';
       }
     }
 
@@ -83,12 +84,17 @@
       btnElement.disabled = true;
       
       try {
-        await fetch(GAS_URL, {
+        const response = await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex })
         });
         
-        await loadDataAdmin(); 
+        const result = await response.json();
+        if(result.status === 'updated') {
+          await loadDataAdmin(); 
+        } else {
+          throw new Error("Gagal mengupdate di server");
+        }
       } catch (error) {
         console.error("Gagal melakukan ACC:", error);
         alert('Gagal mengupdate status. Silakan coba lagi.');
