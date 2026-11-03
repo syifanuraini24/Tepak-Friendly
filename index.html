@@ -11,7 +11,8 @@
   <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
     <h1 class="text-2xl font-bold text-center mb-6">🏸 Tepak Friendly</h1>
     
-    <div class="mb-6 p-4 border border-blue-100 rounded bg-blue-50">
+    <!-- Area Form Pendaftaran -->
+    <div id="formArea" class="mb-6 p-4 border border-blue-100 rounded bg-blue-50">
       <h2 class="font-bold mb-3">Daftar Mabar</h2>
       
       <label for="pilihJadwal" class="block text-sm font-medium text-gray-700 mb-1">Jadwal Mabar</label>
@@ -22,12 +23,33 @@
       <label for="namaPemain" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
       <input type="text" id="namaPemain" placeholder="Masukkan nama..." class="w-full p-2 border rounded mb-3">
       
+      <label for="emailPemain" class="block text-sm font-medium text-gray-700 mb-1">Alamat Email</label>
+      <input type="email" id="emailPemain" placeholder="Untuk menerima bukti lunas..." class="w-full p-2 border rounded mb-3">
+      
       <p id="infoTransfer" class="text-xs text-gray-600 mb-3 leading-relaxed">
-        *Pilih jadwal terlebih dahulu untuk melihat info pembayaran & jam main.
+        *Pilih jadwal terlebih dahulu. Pembayaran dengan nominal unik dilakukan di langkah selanjutnya.
       </p>
       
       <button onclick="daftar()" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
-        Submit & Join List
+        Dapatkan Tagihan & Join List
+      </button>
+    </div>
+
+    <!-- Area Pembayaran Unik -->
+    <div id="paymentArea" class="hidden mb-6 p-5 border-2 border-green-400 rounded-lg bg-green-50 text-center shadow-inner">
+      <h2 class="font-bold text-green-800 text-lg mb-2">🎉 Pendaftaran Berhasil!</h2>
+      <p class="text-sm text-gray-700 mb-4">Penting: Transfer sesuai <strong class="text-red-500">KODE UNIK</strong> agar otomatis diverifikasi.</p>
+      
+      <div class="text-3xl font-extrabold text-blue-700 mb-4 tracking-wider" id="txtTagihan">Rp 0</div>
+      
+      <!-- GANTI LINK SRC INI DENGAN LINK GAMBAR QRIS KAMU -->
+      <img src="https://via.placeholder.com/200?text=QRIS+Tepak+Friendly" alt="QRIS Tepak Friendly" class="mx-auto border p-2 bg-white rounded-lg shadow-sm mb-4 w-48 h-48 object-cover">
+      
+      <p class="text-sm font-semibold mb-1">Atau Transfer Bank:</p>
+      <p class="text-sm text-gray-600 mb-4 font-mono bg-white p-2 border rounded">BCA 123456789 a.n Syifa Nur Aini</p>
+      
+      <button onclick="window.location.reload()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition">
+        Tutup & Cek Status
       </button>
     </div>
 
@@ -38,7 +60,6 @@
   </div>
 
   <script>
-    // PASTIKAN MENGGANTI INI DENGAN URL WEB APP GAS KAMU
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1L8QX-I2xH_joKIK4ihQMGLNlkeBzQ2XtNfW2Bs66dfvhlpnTQJ212j32MARIX1TnPw/exec'; 
 
     async function loadData() {
@@ -49,23 +70,18 @@
         const selectJadwal = document.getElementById('pilihJadwal');
         selectJadwal.innerHTML = '<option value="">-- Pilih Jadwal Mabar --</option>';
         
-        // Render opsi jadwal beserta kuota
         data.jadwal.forEach(j => {
           const isFull = j.terisi >= j.kuota;
           const statusKuota = isFull ? '(PENUH)' : `[${j.terisi}/${j.kuota}]`;
-          const teksOpsi = `${j.info} | ${statusKuota}`;
-          
           selectJadwal.innerHTML += `
             <option value="${j.info}" data-htm="${j.htm}" data-jam="${j.jam}" ${isFull ? 'disabled' : ''}>
-              ${teksOpsi}
+              ${j.info} | ${statusKuota}
             </option>`;
         });
 
         const list = document.getElementById('listPemain');
         list.innerHTML = '';
-        if(data.pemain.length === 0) {
-          list.innerHTML = '<li class="text-center text-sm text-gray-400">Belum ada pemain yang mendaftar.</li>';
-        }
+        if(data.pemain.length === 0) list.innerHTML = '<li class="text-center text-sm text-gray-400">Belum ada pemain yang mendaftar.</li>';
         
         data.pemain.forEach((item, index) => {
           const isLunas = item.status.includes('Lunas');
@@ -86,49 +102,51 @@
 
     function updateHTM() {
       const select = document.getElementById('pilihJadwal');
-      const selectedOption = select.options[select.selectedIndex];
+      const option = select.options[select.selectedIndex];
+      const htm = option.getAttribute('data-htm');
+      const jam = option.getAttribute('data-jam');
       
-      const htm = selectedOption.getAttribute('data-htm');
-      const jam = selectedOption.getAttribute('data-jam');
-      const infoText = document.getElementById('infoTransfer');
-
       if (htm && htm !== "undefined" && htm !== "null") {
-        infoText.innerHTML = `
-          ⏰ <strong>Jam Main:</strong> ${jam} <br>
-          💸 <strong>HTM:</strong> ${htm} <br>
-          *Silakan transfer ke <strong>BCA 123456789 a.n Syifa Nur Aini</strong> sebelum submit.`;
+        document.getElementById('infoTransfer').innerHTML = `⏰ <strong>Jam Main:</strong> ${jam} <br>💸 <strong>Estimasi HTM:</strong> ${htm}`;
       } else {
-        infoText.innerHTML = '*Pilih jadwal terlebih dahulu untuk melihat info pembayaran & jam main.';
+        document.getElementById('infoTransfer').innerHTML = '*Pilih jadwal terlebih dahulu untuk melihat info pembayaran & jam main.';
       }
     }
 
     async function daftar() {
+      const select = document.getElementById('pilihJadwal');
+      const jadwal = select.value;
+      const htmString = select.options[select.selectedIndex]?.getAttribute('data-htm');
       const nama = document.getElementById('namaPemain').value.trim();
-      const jadwal = document.getElementById('pilihJadwal').value;
+      const email = document.getElementById('emailPemain').value.trim();
       const btn = document.getElementById('btnSubmit');
       
       if(!jadwal) return alert('Pilih jadwal terlebih dahulu!');
       if(!nama) return alert('Isi nama lengkapmu!');
+      if(!email || !email.includes('@')) return alert('Isi alamat email yang valid!');
 
       btn.innerText = 'Memproses...';
       btn.disabled = true;
 
       try {
-        await fetch(GAS_URL, {
+        const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'register', nama: nama, jadwal: jadwal })
+          body: JSON.stringify({ action: 'register', nama: nama, email: email, jadwal: jadwal, htm: htmString })
         });
+        const result = await response.json();
         
-        document.getElementById('pilihJadwal').value = '';
-        document.getElementById('namaPemain').value = '';
-        updateHTM(); // Reset info transfer kembali ke awal
-        alert('Berhasil daftar! Status kamu sekarang Menunggu Konfirmasi.');
+        // Sembunyikan form dan tampilkan area tagihan
+        document.getElementById('formArea').classList.add('hidden');
+        
+        const formatRupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(result.totalTagihan);
+        document.getElementById('txtTagihan').innerText = formatRupiah;
+        document.getElementById('paymentArea').classList.remove('hidden');
+
         await loadData();
       } catch (error) {
         console.error("Gagal mengirim data pendaftaran:", error);
         alert('Terjadi kesalahan saat mendaftar.');
-      } finally {
-        btn.innerText = 'Submit & Join List';
+        btn.innerText = 'Dapatkan Tagihan & Join List';
         btn.disabled = false;
       }
     }
