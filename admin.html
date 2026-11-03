@@ -12,7 +12,6 @@
     <h1 class="text-xl font-bold text-center mb-6">Panel Admin Titik Rotasi</h1>
     
     <div id="loginSection" class="mb-4">
-      <!-- Penambahan Label untuk Input Password -->
       <label for="passInput" class="block text-sm font-medium text-gray-700 mb-1">Password Admin</label>
       <input type="password" id="passInput" placeholder="Masukkan password..." class="w-full p-2 border rounded mb-3">
       <button onclick="login()" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold p-2 rounded">Masuk</button>
@@ -66,7 +65,6 @@
             </li>`;
         });
       } catch (error) {
-        // Penanganan eror S2486: Menggunakan objek error
         console.error("Gagal memuat data dari GAS:", error);
         list.innerHTML = '<li class="text-center text-red-500 text-sm">Gagal memuat. Periksa koneksi.</li>';
       }
@@ -84,10 +82,8 @@
           body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex })
         });
         
-        // Memuat ulang data setelah sukses update
         await loadDataAdmin(); 
       } catch (error) {
-        // Praktik terbaik tambahan: handle eror saat POST update status
         console.error("Gagal melakukan ACC:", error);
         alert('Gagal mengupdate status. Silakan coba lagi.');
         btnElement.innerText = 'ACC LUNAS';
