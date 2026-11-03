@@ -11,24 +11,29 @@
   <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
     <h1 class="text-xl font-bold text-center mb-6">Panel Admin Tepak Friendly</h1>
     
+    <!-- Bagian Login -->
     <div id="loginSection" class="mb-4">
       <label for="passInput" class="block text-sm font-medium text-gray-700 mb-1">Password Admin</label>
       <input type="password" id="passInput" placeholder="Masukkan password..." class="w-full p-2 border rounded mb-3">
       <button onclick="login()" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold p-2 rounded transition">Masuk</button>
     </div>
 
+    <!-- Panel Utama Admin -->
     <div id="adminPanel" class="hidden">
-      <h2 class="font-bold mb-3 border-b pb-2">Menunggu Konfirmasi Pembayaran</h2>
+      <div class="flex justify-between items-center mb-3 border-b pb-2">
+        <h2 class="font-bold text-sm">Menunggu Konfirmasi Pembayaran</h2>
+        <button onclick="loadDataAdmin()" class="text-xs text-blue-600 underline font-semibold">Refresh Data</button>
+      </div>
       <ul id="listMenunggu" class="space-y-3"></ul>
     </div>
   </div>
 
   <script>
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1L8QX-I2xH_joKIK4ihQMGLNlkeBzQ2XtNfW2Bs66dfvhlpnTQJ212j32MARIX1TnPw/exec'; 
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1L8QX-I2xH_joKIK4ihQMGLNlkeBzQ2XtNfW2Bs66dfvhlpnTQJ212j32MARIX1TnPw/exec'; // Ganti dengan URL Web App Apps Script kamu
 
     function login() {
       const pass = document.getElementById('passInput').value;
-      if (pass === 'asdfgh') { 
+      if (pass === 'tepakfriendly') { 
         document.getElementById('loginSection').classList.add('hidden');
         document.getElementById('adminPanel').classList.remove('hidden');
         loadDataAdmin();
@@ -39,7 +44,7 @@
 
     async function loadDataAdmin() {
       const list = document.getElementById('listMenunggu');
-      list.innerHTML = '<li class="text-center text-sm text-gray-500">Memuat data...</li>';
+      list.innerHTML = '<li class="text-center text-sm text-gray-500 py-4">Memuat data...</li>';
       
       try {
         const response = await fetch(GAS_URL);
@@ -49,31 +54,69 @@
         const pendingList = data.pemain.filter(item => item.status && item.status.includes('Menunggu'));
         
         if(pendingList.length === 0) {
-          list.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded">Semua pembayaran sudah Lunas! 🎉</li>';
+          list.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
           return;
         }
 
         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+        const waktuSekarang = new Date().getTime();
+        const batasWaktuMs = 2 * 60 * 60 * 1000; // Batas 2 jam
 
         pendingList.forEach(item => {
           const tagihanRp = formatRp.format(item.tagihan || 0);
+          
+          // Hitung waktu pendaftaran & sisa waktu kedaluwarsa 2 jam
+          const waktuDaftar = new Date(item.timestamp || new Date());
+          const jamDaftarString = waktuDaftar.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+          
+          const waktuBerlakuSampai = waktuDaftar.getTime() + batasWaktuMs;
+          const sisaMs = waktuBerlakuSampai - waktuSekarang;
+          
+          let sisaWaktuTeks = '';
+          let warnaSisa = 'text-gray-600';
+          
+          if (sisaMs > 0) {
+            const totalMenit = Math.floor(sisaMs / (1000 * 60));
+            const jamSisa = Math.floor(totalMenit / 60);
+            const menitSisa = totalMenit % 60;
+            
+            if (jamSisa > 0) {
+              sisaWaktuTeks = `Sisa waktu: ${jamSisa} jam ${menitSisa} menit lagi`;
+            } else {
+              sisaWaktuTeks = `Sisa waktu: ${menitSisa} menit lagi`;
+            }
+            if (totalMenit < 30) warnaSisa = 'text-red-600 font-bold animate-pulse'; // Peringatan jika < 30 menit
+          } else {
+            sisaWaktuTeks = '⚠️ Sudah lewat 2 jam (Segera hapus)';
+            warnaSisa = 'text-red-600 font-bold';
+          }
+
           list.innerHTML += `
-            <li class="p-3 border border-orange-200 bg-orange-50 rounded flex flex-col">
-              <div class="flex justify-between items-center mb-2">
+            <li class="p-3 border border-orange-200 bg-orange-50 rounded flex flex-col shadow-sm">
+              <div class="flex justify-between items-start mb-2">
                 <div>
                   <span class="font-bold text-sm block">${item.nama}</span>
-                  <span class="text-xs font-mono text-red-600 font-bold bg-white px-1 border rounded">${tagihanRp}</span>
+                  <span class="text-xs text-gray-500">📧 ${item.email || '-'}</span>
+                  <span class="text-xs font-mono text-blue-700 font-bold bg-white px-1.5 py-0.5 border rounded mt-1 inline-block">${tagihanRp}</span>
                 </div>
-                <button onclick="accPemain(${item.rowIndex}, this)" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-3 py-2 rounded transition shadow">
-                  ACC LUNAS
-                </button>
+                <div class="flex flex-col gap-1.5">
+                  <button onclick="accPemain(${item.rowIndex}, this)" class="bg-green-500 hover:bg-green-600 text-white text-xs font-bold px-3 py-1.5 rounded transition shadow">
+                    ACC LUNAS
+                  </button>
+                  <button onclick="hapusPemain(${item.rowIndex}, this)" class="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded transition shadow">
+                    HAPUS
+                  </button>
+                </div>
               </div>
-              <span class="text-xs text-gray-600 mt-1">📍 ${item.jadwal}</span>
+              <div class="text-xs text-gray-600 mt-1 border-t pt-1.5 flex flex-col gap-0.5">
+                <span>📍 ${item.jadwal}</span>
+                <span>⏰ Daftar pukul: <strong>${jamDaftarString}</strong> | <span class="${warnaSisa}">${sisaWaktuTeks}</span></span>
+              </div>
             </li>`;
         });
       } catch (error) {
         console.error("Gagal memuat data dari GAS:", error);
-        list.innerHTML = '<li class="text-center text-red-500 text-sm">Gagal memuat. Periksa koneksi atau URL GAS.</li>';
+        list.innerHTML = '<li class="text-center text-red-500 text-sm">Gagal memuat data. Periksa koneksi atau URL GAS.</li>';
       }
     }
 
@@ -90,17 +133,41 @@
         });
         
         const result = await response.json();
-        
         if(result.status === 'updated' || result.status === 'success') {
           await loadDataAdmin(); 
         } else {
-          console.error("Respon server:", result);
           throw new Error(result.message || "Gagal mengupdate di server");
         }
       } catch (error) {
         console.error("Gagal melakukan ACC:", error);
         alert('Gagal mengupdate status. Error: ' + error.message);
         btnElement.innerText = 'ACC LUNAS';
+        btnElement.disabled = false;
+      }
+    }
+
+    async function hapusPemain(rowIndex, btnElement) {
+      if(!confirm('Yakin ingin menghapus peserta ini? Slot kuota akan langsung terbuka kembali.')) return;
+      
+      btnElement.innerText = 'Hapus...';
+      btnElement.disabled = true;
+      
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'delete_row', rowIndex: rowIndex })
+        });
+        
+        const result = await response.json();
+        if(result.status === 'deleted' || result.status === 'success') {
+          await loadDataAdmin(); 
+        } else {
+          throw new Error(result.message || "Gagal menghapus data");
+        }
+      } catch (error) {
+        console.error("Gagal menghapus pemain:", error);
+        alert('Gagal menghapus data. Error: ' + error.message);
+        btnElement.innerText = 'HAPUS';
         btnElement.disabled = false;
       }
     }
