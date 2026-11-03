@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Titik Rotasi - Pendaftaran Mabar</title>
+  <title>Tepak Friendly - Pendaftaran Mabar</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 p-4 font-sans text-gray-800">
 
   <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-    <h1 class="text-2xl font-bold text-center mb-6">🏸 Titik Rotasi</h1>
+    <h1 class="text-2xl font-bold text-center mb-6">🏸 Tepak Friendly</h1>
     
     <div class="mb-6 p-4 border border-blue-100 rounded bg-blue-50">
       <h2 class="font-bold mb-3">Daftar Mabar</h2>
@@ -23,7 +23,7 @@
       <input type="text" id="namaPemain" placeholder="Masukkan nama..." class="w-full p-2 border rounded mb-3">
       
       <p id="infoTransfer" class="text-xs text-gray-600 mb-3 leading-relaxed">
-        *Pilih jadwal terlebih dahulu untuk melihat info pembayaran.
+        *Pilih jadwal terlebih dahulu untuk melihat info pembayaran & jam main.
       </p>
       
       <button onclick="daftar()" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
@@ -38,6 +38,7 @@
   </div>
 
   <script>
+    // PASTIKAN MENGGANTI INI DENGAN URL WEB APP GAS KAMU
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1L8QX-I2xH_joKIK4ihQMGLNlkeBzQ2XtNfW2Bs66dfvhlpnTQJ212j32MARIX1TnPw/exec'; 
 
     async function loadData() {
@@ -47,8 +48,17 @@
         
         const selectJadwal = document.getElementById('pilihJadwal');
         selectJadwal.innerHTML = '<option value="">-- Pilih Jadwal Mabar --</option>';
+        
+        // Render opsi jadwal beserta kuota
         data.jadwal.forEach(j => {
-          selectJadwal.innerHTML += `<option value="${j.info}" data-htm="${j.htm}">${j.info}</option>`;
+          const isFull = j.terisi >= j.kuota;
+          const statusKuota = isFull ? '(PENUH)' : `[${j.terisi}/${j.kuota}]`;
+          const teksOpsi = `${j.info} | ${statusKuota}`;
+          
+          selectJadwal.innerHTML += `
+            <option value="${j.info}" data-htm="${j.htm}" data-jam="${j.jam}" ${isFull ? 'disabled' : ''}>
+              ${teksOpsi}
+            </option>`;
         });
 
         const list = document.getElementById('listPemain');
@@ -77,13 +87,18 @@
     function updateHTM() {
       const select = document.getElementById('pilihJadwal');
       const selectedOption = select.options[select.selectedIndex];
+      
       const htm = selectedOption.getAttribute('data-htm');
+      const jam = selectedOption.getAttribute('data-jam');
       const infoText = document.getElementById('infoTransfer');
 
       if (htm && htm !== "undefined" && htm !== "null") {
-        infoText.innerHTML = `*Silakan transfer HTM <strong>${htm}</strong> ke <strong>BCA 123456789 a.n Syifa Nur Aini</strong> sebelum submit.`;
+        infoText.innerHTML = `
+          ⏰ <strong>Jam Main:</strong> ${jam} <br>
+          💸 <strong>HTM:</strong> ${htm} <br>
+          *Silakan transfer ke <strong>BCA 123456789 a.n Syifa Nur Aini</strong> sebelum submit.`;
       } else {
-        infoText.innerHTML = '*Pilih jadwal terlebih dahulu untuk melihat info pembayaran.';
+        infoText.innerHTML = '*Pilih jadwal terlebih dahulu untuk melihat info pembayaran & jam main.';
       }
     }
 
@@ -106,7 +121,7 @@
         
         document.getElementById('pilihJadwal').value = '';
         document.getElementById('namaPemain').value = '';
-        updateHTM(); // Reset info transfer
+        updateHTM(); // Reset info transfer kembali ke awal
         alert('Berhasil daftar! Status kamu sekarang Menunggu Konfirmasi.');
         await loadData();
       } catch (error) {
