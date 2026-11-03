@@ -91,11 +91,9 @@
         
         const result = await response.json();
         
-        // Cek apakah server merespons sukses (menerima status updated atau success)
         if(result.status === 'updated' || result.status === 'success') {
           await loadDataAdmin(); 
         } else {
-          // Jika respons tidak sesuai, cetak detailnya ke console agar terlihat jelas
           console.error("Respon server:", result);
           throw new Error(result.message || "Gagal mengupdate di server");
         }
