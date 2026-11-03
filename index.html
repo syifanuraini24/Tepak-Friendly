@@ -12,7 +12,7 @@
     
     <!-- Logo di Sebelah Kiri & Judul -->
     <div class="flex items-center justify-center gap-3 mb-6">
-      <img src="logo.png" alt="Logo Tepak Friendly" class="w-20 h-20 object-contain rounded-lg shadow-sm">
+      <img src="logo.png" alt="Logo Tepak Friendly" class="w-12 h-12 object-contain rounded-lg shadow-sm">
       <h1 class="text-2xl font-bold">Tepak Friendly</h1>
     </div>
     
@@ -40,7 +40,7 @@
       </button>
     </div>
 
-    <!-- Area Pembayaran dengan Kode Unik -->
+    <!-- Area Pembayaran dengan Tombol Download QRIS & Salin Rekening -->
     <div id="paymentArea" class="hidden mb-6 p-5 border-2 border-green-400 rounded-lg bg-green-50 text-center shadow-inner max-w-md mx-auto">
       <h2 class="font-bold text-green-800 text-lg mb-1">🎉 Pendaftaran Berhasil!</h2>
       <p class="text-xs text-gray-600 mb-3">Silakan transfer persis hingga digit terakhir agar otomatis terverifikasi.</p>
@@ -48,19 +48,30 @@
       <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Total yang Harus Dibayar:</div>
       <div class="text-3xl font-extrabold text-blue-700 mb-4 tracking-wider bg-white p-2 border border-blue-200 rounded shadow-sm" id="txtTagihan">Rp 0</div>
       
-      <div class="bg-white p-3 rounded-lg border shadow-sm inline-block mb-4">
-        <img src="qris.png" alt="QRIS Tepak Friendly" class="mx-auto w-56 h-56 object-contain">
+      <!-- QRIS & Tombol Download -->
+      <div class="bg-white p-3 rounded-lg border shadow-sm inline-block mb-3">
+        <img src="qris.png" alt="QRIS Tepak Friendly" class="mx-auto w-56 h-56 object-contain mb-2">
+        <a href="qris.png" download="QRIS-Tepak-Friendly.png" class="inline-block w-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-1.5 px-3 rounded border border-blue-200 transition">
+          📥 Download QRIS
+        </a>
       </div>
       
       <p class="text-sm font-semibold mb-1">Atau Transfer Bank:</p>
-      <p class="text-sm text-gray-600 mb-4 font-mono bg-white p-2 border rounded">BCA 123456789 a.n Syifa Nur Aini</p>
+      
+      <!-- Rekening & Tombol Salin -->
+      <div class="flex items-center justify-between bg-white p-2.5 border rounded-lg mb-4 shadow-sm">
+        <span id="txtRekening" class="text-sm text-gray-700 font-mono font-medium">BCA 0083677071 a.n Andi Gunawan</span>
+        <button onclick="salinRekening()" id="btnSalin" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-3 py-1.5 rounded transition border">
+          📋 Salin
+        </button>
+      </div>
       
       <button onclick="selesaiBayar()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition">
         Tutup & Cek Status di List
       </button>
     </div>
 
-    <!-- Bagian Live Player List Berkelompok (Grid 2 Kolom: Kiri & Kanan) -->
+    <!-- Live Player List Berkelompok (Grid 2 Kolom: Kiri & Kanan) -->
     <h2 class="font-bold mb-4 border-b pb-2 text-lg">Live Player List per Kegiatan</h2>
     <div id="containerListKegiatan" class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div class="text-center text-gray-500 text-sm col-span-2">Memuat data kegiatan...</div>
@@ -173,6 +184,23 @@
         💸 <strong>HTM:</strong> Rp ${parseInt(htm).toLocaleString('id-ID')} <br>
         🎟️ <strong>Sisa Kuota:</strong> <span class="${warnaKuota}">${sisaKuota} slot tersisa</span> (dari total ${kuotaTotal} kuota)<br>
         <span class="text-blue-600 font-semibold mt-1 block">*Kode unik (1-99 perak) akan ditambahkan otomatis di total tagihan.</span>`;
+    }
+
+    function salinRekening() {
+      const teksRekening = "123456789"; // Sesuaikan nomor rekening
+      navigator.clipboard.writeText(teksRekening).then(() => {
+        const btnSalin = document.getElementById('btnSalin');
+        btnSalin.innerText = '✅ Tersalin!';
+        btnSalin.classList.add('bg-green-100', 'text-green-700');
+        
+        setTimeout(() => {
+          btnSalin.innerText = '📋 Salin';
+          btnSalin.classList.remove('bg-green-100', 'text-green-700');
+        }, 2000);
+      }).catch(err => {
+        console.error('Gagal menyalin teks: ', err);
+        alert('Gagal menyalin nomor rekening.');
+      });
     }
 
     async function daftar() {
