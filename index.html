@@ -9,7 +9,12 @@
 <body class="bg-gray-100 p-4 font-sans text-gray-800">
 
   <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 mb-6">
-    <h1 class="text-2xl font-bold text-center mb-6">TEPAK FRIENDLY 🏸✨</h1>
+    
+    <!-- Logo di Tengah & Judul -->
+    <div class="flex flex-col items-center justify-center mb-6 text-center">
+      <img src="logo.png" alt="Logo Tepak Friendly" class="w-14 h-14 object-contain rounded-lg shadow-sm mb-2">
+      <h1 class="text-2xl font-bold">Tepak Friendly</h1>
+    </div>
     
     <!-- Area Form Pendaftaran -->
     <div id="formArea" class="mb-6 p-4 border border-blue-100 rounded bg-blue-50 max-w-md mx-auto">
@@ -102,7 +107,6 @@
         }
 
         data.jadwal.forEach(j => {
-          // Filter pemain yang mendaftar sesuai nama jadwal / kegiatan ini
           const pemainJadwal = data.pemain.filter(p => p.jadwal === j.info);
 
           let listPemainHtml = '';
@@ -119,7 +123,6 @@
             });
           }
 
-          // Buat kotak card untuk masing-masing jadwal (tersusun 2 kolom kiri-kanan otomatis)
           container.innerHTML += `
             <div class="border rounded-lg p-4 bg-gray-50 shadow-sm flex flex-col justify-between">
               <div>
