@@ -107,6 +107,7 @@
               ${isFull ? 'disabled' : ''}>
               [${j.id}] ${j.info}${statusTeks}
             </option>`;
+        });
 
         // Render Live Player List Berdasarkan ID Jadwal (Grid Kiri & Kanan)
         const container = document.getElementById('containerListKegiatan');
@@ -187,7 +188,7 @@
     }
 
     function salinRekening() {
-      const teksRekening = "123456789"; // Sesuaikan nomor rekening
+      const teksRekening = "123456789"; 
       navigator.clipboard.writeText(teksRekening).then(() => {
         const btnSalin = document.getElementById('btnSalin');
         btnSalin.innerText = '✅ Tersalin!';
