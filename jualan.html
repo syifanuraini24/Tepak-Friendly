@@ -165,7 +165,12 @@
         const data = await response.json();
         const container = document.getElementById('containerLapakPublik');
         container.innerHTML = '';
-        const lapakDisetujui = (data.jualan || []).filter(l => l.status && l.status.includes('Disetujui'));
+        
+        // Filter fleksibel mendeteksi kata 'disetujui' tanpa peduli spasi atau huruf besar/kecil
+        const lapakDisetujui = (data.jualan || []).filter(l => {
+          if (!l.status) return false;
+          return l.status.toString().trim().toLowerCase().includes('disetujui');
+        });
 
         if(lapakDisetujui.length === 0) {
           container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada lapak UMKM yang aktif saat ini.</div>';
@@ -239,7 +244,7 @@
 
       if (menuList.length === 0) return alert('Minimal masukkan 1 menu beserta harganya!');
 
-      try {
+    try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'register_jualan', namaPenjual, menuJualan: menuList.join('\n'), whatsapp })
