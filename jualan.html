@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Lapak UMKM - Tepak Friendly</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="config.js"></script>
+</head>
+<body class="bg-gray-100 p-4 font-sans text-gray-800">
+
+  <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 mb-6">
+    
+    <!-- Header & Tombol Kembali -->
+    <div class="flex justify-between items-center mb-6 border-b pb-4">
+      <div class="flex items-center gap-3">
+        <img src="logo.png" alt="Logo" class="w-12 h-12 object-contain rounded-lg shadow-sm">
+        <h1 class="text-xl md:text-2xl font-bold">Lapak UMKM Mabar</h1>
+      </div>
+      <a href="index.html" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold py-2 px-3 rounded-lg transition">
+        ← Kembali ke Mabar
+      </a>
+    </div>
+    
+    <!-- Form Pendaftaran Jualan -->
+    <div id="formJualanArea" class="mb-6 p-4 border border-orange-100 rounded bg-orange-50 max-w-md mx-auto shadow-sm">
+      <h2 class="font-bold mb-3 text-orange-900">Daftar Buka Lapak di Lokasi Mabar</h2>
+      
+      <label for="pilihJadwalJualan" class="block text-sm font-medium text-gray-700 mb-1">Pilih Jadwal Mabar</label>
+      <select id="pilihJadwalJualan" class="w-full p-2.5 border rounded-lg mb-3 bg-white text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+        <option value="">-- Memuat Jadwal... --</option>
+      </select>
+      
+      <label for="namaPenjual" class="block text-sm font-medium text-gray-700 mb-1">Nama Brand / Penjual</label>
+      <input type="text" id="namaPenjual" placeholder="Cth: Es Teh Mantul / Dimsum Mama" class="w-full p-2.5 border rounded-lg mb-3 bg-white text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+      
+      <label for="menuJualan" class="block text-sm font-medium text-gray-700 mb-1">Menu / Barang yang Dijual</label>
+      <input type="text" id="menuJualan" placeholder="Cth: Es Teh Manis, Aneka Gorengan" class="w-full p-2.5 border rounded-lg mb-3 bg-white text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+      
+      <label for="whatsappPenjual" class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp</label>
+      <input type="text" id="whatsappPenjual" placeholder="Cth: 081234567890" class="w-full p-2.5 border rounded-lg mb-3 bg-white text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none">
+      
+      <div class="text-xs text-gray-600 mb-3 p-2 bg-white border rounded">
+        ℹ️ Lapak kamu akan diverifikasi oleh Admin terlebih dahulu sebelum tampil di halaman publik.
+      </div>
+
+      <button onclick="daftarJualan()" id="btnSubmitJualan" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 px-4 rounded-lg transition shadow">
+        Kirim Pendaftaran Lapak
+      </button>
+    </div>
+
+    <!-- List Lapak Publik yang Sudah Disetujui -->
+    <h2 class="font-bold mb-4 border-b pb-2 text-lg">Daftar Lapak UMKM yang Buka</h2>
+    <div id="containerLapakPublik" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="text-center text-gray-500 text-sm col-span-2 py-4">Memuat data lapak...</div>
+    </div>
+  </div>
+
+  <script>
+    const GAS_URL = CONFIG.GAS_URL;
+
+    async function loadDataJualan() {
+      try {
+        const response = await fetch(GAS_URL);
+        const data = await response.json();
+        
+        const selectJadwal = document.getElementById('pilihJadwalJualan');
+        selectJadwal.innerHTML = '<option value="">-- Pilih Jadwal Mabar --</option>';
+        data.jadwal.forEach(j => {
+          selectJadwal.innerHTML += `<option value="${j.id}" data-info="${j.info}">[${j.id}] ${j.info} (${j.jam})</option>`;
+        });
+
+        const container = document.getElementById('containerLapakPublik');
+        container.innerHTML = '';
+
+        const lapakDisetujui = (data.jualan || []).filter(l => l.status && l.status.includes('Disetujui'));
+
+        if(lapakDisetujui.length === 0) {
+          container.innerHTML = '<div class="text-center text-sm text-gray-400 col-span-2 py-4">Belum ada lapak UMKM yang terkonfirmasi di jadwal mendatang.</div>';
+          return;
+        }
+
+        lapakDisetujui.forEach(l => {
+          const waFormatted = l.whatsapp.replace(/^0/, '62');
+          container.innerHTML += `
+            <div class="border border-orange-200 rounded-lg p-4 bg-orange-50 shadow-sm flex flex-col justify-between">
+              <div>
+                <span class="text-xs bg-orange-200 text-orange-900 font-bold px-2 py-0.5 rounded">📍 ${l.jadwalId} - ${l.jadwalInfo}</span>
+                <h3 class="font-bold text-base text-gray-900 mt-2">🛍️ ${l.namaPenjual}</h3>
+                <p class="text-xs text-gray-700 mt-1"><strong>Menu:</strong> ${l.menuJualan}</p>
+              </div>
+              <div class="mt-3 pt-2 border-t flex justify-between items-center">
+                <span class="text-xs text-gray-500">📞 WhatsApp: ${l.whatsapp}</span>
+                <a href="https://wa.me/${waFormatted}?text=Halo%20${encodeURIComponent(l.namaPenjual)},%20saya%20mau%20pesan%20jualan%20di%20mabar" target="_blank" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded transition">
+                  Chat WA
+                </a>
+              </div>
+            </div>`;
+        });
+      } catch (error) {
+        console.error("Gagal memuat jualan:", error);
+      }
+    }
+
+    async function daftarJualan() {
+      const select = document.getElementById('pilihJadwalJualan');
+      const option = select.options[select.selectedIndex];
+      
+      const jadwalId = option.value;
+      const jadwalInfo = option.getAttribute('data-info');
+      const namaPenjual = document.getElementById('namaPenjual').value.trim();
+      const menuJualan = document.getElementById('menuJualan').value.trim();
+      const whatsapp = document.getElementById('whatsappPenjual').value.trim();
+      const btn = document.getElementById('btnSubmitJualan');
+
+      if(!jadwalId) return alert('Pilih jadwal mabar terlebih dahulu!');
+      if(!namaPenjual) return alert('Nama brand/penjual harus diisi!');
+      if(!menuJualan) return alert('Menu jualan harus diisi!');
+      if(!whatsapp) return alert('Nomor WhatsApp harus diisi!');
+
+      btn.innerText = 'Mengirim...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'register_jualan', jadwalId, jadwalInfo, namaPenjual, menuJualan, whatsapp })
+        });
+        const result = await response.json();
+
+        if(result.status === 'success') {
+          alert('Pendaftaran lapak berhasil dikirim! Menunggu approval admin.');
+          document.getElementById('namaPenjual').value = '';
+          document.getElementById('menuJualan').value = '';
+          document.getElementById('whatsappPenjual').value = '';
+          select.selectedIndex = 0;
+          loadDataJualan();
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (error) {
+        alert('Gagal mendaftarkan lapak: ' + error.message);
+      } finally {
+        btn.innerText = 'Kirim Pendaftaran Lapak';
+        btn.disabled = false;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDataJualan();
+    });
+  </script>
+</body>
+</html>
