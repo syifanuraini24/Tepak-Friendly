@@ -10,13 +10,13 @@
 </head>
 <body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
 
-  <header class="bg-white sticky top-0 z-40 border-b border-slate-200 px-4 py-3 shadow-xs">
+  <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
-        <img src="logo.png" alt="Logo Tepak Friendly" class="w-10 h-10 object-contain rounded-xl shadow-xs border border-slate-100 bg-white">
+        <img src="logo.png" alt="Logo Tepak Friendly" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
         <div>
-          <h1 class="text-base font-extrabold tracking-tight text-slate-900 leading-tight">Lapak UMKM</h1>
-          <p class="text-[10px] text-slate-500 font-medium">Tepak Friendly Jajanan</p>
+          <h1 class="text-sm font-extrabold tracking-tight text-slate-900 leading-tight">Lapak UMKM</h1>
+          <p class="text-[9px] text-slate-500 font-medium">Tepak Friendly Jajanan</p>
         </div>
       </div>
       <a href="index.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1">
@@ -31,13 +31,21 @@
       <button onclick="gantiTab('daftar')" id="tabDaftar" class="flex-1 bg-transparent text-slate-600 font-bold text-xs py-2.5 rounded-xl transition">➕ Daftar Mitra</button>
     </div>
     
+    <!-- SECTION LIHAT LAPAK & LIVE PESANAN -->
     <div id="sectionPesan" class="space-y-3">
-      <h2 class="font-bold text-sm text-slate-900 uppercase tracking-wide px-1">Daftar Lapak UMKM Aktif</h2>
-      <div id="containerLapakPublik" class="space-y-3">
+      <div class="flex justify-between items-center px-1">
+        <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">Daftar Lapak UMKM Aktif</h2>
+        <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          LIVE ORDER
+        </span>
+      </div>
+      <div id="containerLapakPublik" class="space-y-3.5">
         <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat data lapak...</div>
       </div>
     </div>
 
+    <!-- SECTION PENDAFTARAN MITRA -->
     <div id="sectionDaftar" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
       <h2 class="font-bold text-sm text-slate-900 mb-1">Form Pendaftaran Mitra UMKM</h2>
       <p class="text-[11px] text-slate-500 mb-4">Daftar sekali saja. Jadwal buka lapak akan diatur oleh Admin.</p>
@@ -192,17 +200,54 @@
           return;
         }
 
+        const semuaPesanan = data.pesanan || [];
+
         lapakDisetujui.forEach(l => {
+          // Filter pesanan yang masuk ke lapak ini
+          const pesananLapak = semuaPesanan.filter(p => p.namaLapak && p.namaLapak.trim().toLowerCase() === l.namaPenjual.trim().toLowerCase());
+
+          let listPesananHtml = '';
+          if (pesananLapak.length === 0) {
+            listPesananHtml = '<div class="text-[11px] text-slate-400 italic py-1 text-center">Belum ada pesanan di lapak ini.</div>';
+          } else {
+            pesananLapak.forEach((p, idx) => {
+              const statusBadge = p.status && p.status.includes('Lunas') 
+                ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>' 
+                : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
+              
+              listPesananHtml += `
+                <li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
+                  <div>
+                    <span class="font-bold text-slate-800">${idx + 1}. ${p.namaPemesan}</span>
+                    <span class="block text-[10px] text-slate-500 font-mono">${p.detailPesanan}</span>
+                  </div>
+                  <div>${statusBadge}</div>
+                </li>`;
+            });
+          }
+
           container.innerHTML += `
             <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
               <div>
                 <div class="flex justify-between items-start">
                   <h3 class="font-bold text-sm text-slate-900">🛍️ ${l.namaPenjual}</h3>
-                  <span class="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full border border-blue-100">📍 ${l.jadwalId || 'Umum'}</span>
+                  <span class="text-[10px] bg-blue-50 text-blue-700 font-bold px-2.5 py-0.5 rounded-full border border-blue-100">📍 ${l.jadwalId || 'Umum'}</span>
                 </div>
                 <p class="text-[11px] text-slate-500 mt-0.5">Jadwal: ${l.jadwalInfo || 'Menunggu Penugasan Admin'}</p>
-                <div class="mt-2 text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100 whitespace-pre-line"><strong>Menu:</strong><br>${l.menuJualan}</div>
+                <div class="mt-2 text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100 whitespace-pre-line"><strong>Menu Tersedia:</strong><br>${l.menuJualan}</div>
               </div>
+
+              <!-- LIVE LIST PEMESAN DI LAPAK INI -->
+              <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center">
+                  <span>📋 Daftar Pesanan Masuk</span>
+                  <span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">${pesananLapak.length} Pesanan</span>
+                </div>
+                <ul class="divide-y divide-slate-100 max-h-36 overflow-y-auto p-1.5 space-y-1">
+                  ${listPesananHtml}
+                </ul>
+              </div>
+
               <div class="pt-2 border-t border-slate-100 flex justify-between items-center">
                 <span class="text-[11px] text-slate-400">WA: ${l.whatsapp}</span>
                 <button onclick="bukaModalPesan('${l.namaPenjual}', '${l.jadwalId || 'UMUM'}', '${l.jadwalInfo || 'Mitra UMKM'}', \`${encodeURIComponent(l.menuJualan)}\`)" class="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-xs">
@@ -306,12 +351,10 @@
         if (result.status === 'success') {
           tutupModalPesan();
 
-          // Kirim Notifikasi via telegram-jualan.js
           if (typeof kirimTelegramJualan === 'function') {
             await kirimTelegramJualan(nama, lapakDipilih, infoJadwalDipilih, detailString, result.totalTagihan);
           }
 
-          // Tampilkan Invoice Modal
           document.getElementById('invNamaLapak').innerText = `Lapak: ${lapakDipilih}`;
           document.getElementById('invNamaPemesan').innerText = nama;
           document.getElementById('invJadwal').innerText = infoJadwalDipilih;
