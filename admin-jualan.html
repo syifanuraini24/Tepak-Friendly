@@ -15,7 +15,7 @@
     <div id="loginSection" class="max-w-sm mx-auto space-y-3 py-6">
       <div>
         <label class="block text-xs font-bold text-slate-600 mb-1">Password Admin Jualan</label>
-        <input type="password" id="passInput" placeholder="Masukkan password..." class="w-full p-3 border border-slate-200 rounded-xl text-xs bg-slate-55">
+        <input type="password" id="passInput" placeholder="Masukkan password..." class="w-full p-3 border border-slate-200 rounded-xl text-xs bg-slate-50">
       </div>
       <button onclick="login()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Masuk Panel Jualan</button>
     </div>
@@ -56,6 +56,18 @@
     </div>
   </div>
 
+  <!-- MODAL KONFIRMASI Kustom yang Smooth & Elegan di Tengah Layar -->
+  <div id="customModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-all duration-300">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 transform scale-95 transition-transform duration-300" id="modalBox">
+      <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Konfirmasi Tindakan</h3>
+      <p id="modalDesc" class="text-xs text-slate-600">Apakah kamu yakin ingin melanjutkan tindakan ini?</p>
+      <div class="flex gap-2 pt-2">
+        <button id="modalBtnCancel" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition">Batal</button>
+        <button id="modalBtnConfirm" class="flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white">Ya, Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
   <script src="config.js"></script>
   <script>
     const GAS_URL = CONFIG.GAS_URL;
@@ -71,17 +83,51 @@
 
     async function login() {
       const pass = document.getElementById('passInput').value;
-      const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'login_admin_jualan', password: pass }) });
-      const result = await res.json();
-      if (result.status === 'success') {
-        localStorage.setItem('tepak_jualan_login_time', new Date().getTime().toString());
-        document.getElementById('loginSection').classList.add('hidden');
-        document.getElementById('adminPanel').classList.remove('hidden');
-        loadDataAdminJualan();
-      } else { alert(result.message); }
+      if (!pass) return alert('Masukkan password terlebih dahulu!');
+      try {
+        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'login_admin_jualan', password: pass }) });
+        const result = await res.json();
+        if (result.status === 'success') {
+          localStorage.setItem('tepak_jualan_login_time', new Date().getTime().toString());
+          document.getElementById('loginSection').classList.add('hidden');
+          document.getElementById('adminPanel').classList.remove('hidden');
+          loadDataAdminJualan();
+        } else { alert(result.message); }
+      } catch (e) { alert('Gagal terhubung ke server.'); }
     }
 
     function logout() { localStorage.removeItem('tepak_jualan_login_time'); window.location.reload(); }
+
+    // Fungsi Modal Konfirmasi Kustom yang Smooth
+    function showConfirmModal(title, desc, confirmText, confirmClass, onConfirm) {
+      const modal = document.getElementById('customModal');
+      const modalBox = document.getElementById('modalBox');
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalDesc').innerText = desc;
+      const btnConfirm = document.getElementById('modalBtnConfirm');
+      btnConfirm.innerText = confirmText;
+      btnConfirm.className = `flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white ${confirmClass}`;
+
+      modal.classList.remove('hidden');
+      setTimeout(() => modalBox.classList.remove('scale-95'), 10);
+
+      const newConfirm = btnConfirm.cloneNode(true);
+      const btnCancel = document.getElementById('modalBtnCancel');
+      const newCancel = btnCancel.cloneNode(true);
+      btnConfirm.parentNode.replaceChild(newConfirm, btnConfirm);
+      btnCancel.parentNode.replaceChild(newCancel, btnCancel);
+
+      document.getElementById('modalBtnConfirm').addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modalBox.classList.add('scale-95');
+        onConfirm();
+      });
+
+      document.getElementById('modalBtnCancel').addEventListener('click', () => {
+        modal.classList.add('hidden');
+        modalBox.classList.add('scale-95');
+      });
+    }
 
     async function loadDataAdminJualan() {
       const listLapakAktif = document.getElementById('listLapakAktif');
@@ -102,12 +148,12 @@
         } else {
           aktifLapak.forEach(item => {
             listLapakAktif.innerHTML += `
-              <li class="p-3 border border-emerald-200 bg-emerald-50/40 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
+              <li class="p-3 border border-emerald-200 bg-emerald-50/40 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs transition-all duration-300" id="row_jualan_${item.rowIndex}">
                 <div>
                   <strong class="text-slate-900 text-sm">🛍️ ${item.namaPenjual}</strong> (WA: ${item.whatsapp})<br>
                   <span class="text-emerald-700 font-bold">📍 Jadwal Tersedia: ${item.jadwalInfo}</span>
                 </div>
-                <button onclick="hapusLapak(${item.rowIndex})" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-3 py-1.5 rounded-lg transition">Hapus / Nonaktifkan</button>
+                <button onclick="hapusLapak(${item.rowIndex}, this)" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-3 py-1.5 rounded-lg transition">Hapus / Nonaktifkan</button>
               </li>`;
           });
         }
@@ -129,7 +175,7 @@
             });
 
             listLapak.innerHTML += `
-              <li class="p-3.5 border border-orange-200 bg-orange-50/50 rounded-xl space-y-2.5 text-xs">
+              <li class="p-3.5 border border-orange-200 bg-orange-50/50 rounded-xl space-y-2.5 text-xs transition-all duration-300" id="row_jualan_${item.rowIndex}">
                 <div>
                   <strong class="text-sm text-slate-900">${item.namaPenjual}</strong> (WA: ${item.whatsapp})<br>
                   <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border mt-1 whitespace-pre-line"><strong>Menu:</strong><br>${item.menuJualan}</div>
@@ -141,14 +187,14 @@
                   </div>
                 </div>
                 <div class="flex gap-2 pt-1">
-                  <button onclick="accLapak(${item.rowIndex})" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow-xs">ACC & Assign Jadwal</button>
-                  <button onclick="hapusLapak(${item.rowIndex})" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-lg shadow-xs">Tolak</button>
+                  <button onclick="accLapak(${item.rowIndex}, this)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow-xs transition">ACC & Assign Jadwal</button>
+                  <button onclick="hapusLapak(${item.rowIndex}, this)" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-lg shadow-xs transition">Tolak</button>
                 </div>
               </li>`;
           });
         }
 
-        // 3. RENDER PESANAN PENDING (DIPERBAIKI AGAR TOMBOL ACC & HAPUS BERFUNGSI)
+        // 3. RENDER PESANAN PENDING (DENGAN ANIMASI HAPUS/ACC HALUS TANPA RELOAD)
         const pendingPesanan = (data.pesanan || []).filter(item => item.status && item.status.toString().toLowerCase().includes('menunggu'));
         listPesanan.innerHTML = '';
         if (pendingPesanan.length === 0) {
@@ -156,15 +202,15 @@
         } else {
           pendingPesanan.forEach(item => {
             listPesanan.innerHTML += `
-              <li class="p-3.5 border border-blue-200 bg-blue-50/50 rounded-xl flex justify-between items-center text-xs">
+              <li class="p-3.5 border border-blue-200 bg-blue-50/50 rounded-xl flex justify-between items-center text-xs transition-all duration-300" id="row_pesanan_${item.rowIndex}">
                 <div>
                   <strong>Pemesan: ${item.namaPemesan}</strong> ➔ Lapak: ${item.namaLapak}<br>
                   <span class="text-slate-700">Pesanan: ${item.detailPesanan}</span><br>
                   <span class="font-mono font-bold text-blue-700">Tagihan: ${formatRp.format(item.totalTagihan || 0)}</span> | 📍 ${item.jadwalInfo}
                 </div>
                 <div class="flex flex-col gap-1.5">
-                  <button onclick="accPesanan(${item.rowIndex}, this)" class="bg-emerald-600 text-white font-bold px-3 py-1.5 rounded-lg shadow-xs">ACC Lunas</button>
-                  <button onclick="hapusPesanan(${item.rowIndex}, this)" class="bg-rose-600 text-white font-bold px-3 py-1.5 rounded-lg shadow-xs">Hapus</button>
+                  <button onclick="accPesanan(${item.rowIndex}, this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg shadow-xs transition">ACC Lunas</button>
+                  <button onclick="hapusPesanan(${item.rowIndex}, this)" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg shadow-xs transition">Hapus</button>
                 </div>
               </li>`;
           });
@@ -172,7 +218,7 @@
       } catch (e) { console.error(e); }
     }
 
-    async function accLapak(rowIndex) {
+    async function accLapak(rowIndex, btn) {
       const checkboxes = document.querySelectorAll(`input[name="chk_jadwal_${rowIndex}"]:checked`);
       if (checkboxes.length === 0) return alert('Pilih minimal 1 jadwal mabar untuk lapak ini!');
 
@@ -182,38 +228,95 @@
         infos.push(chk.getAttribute('data-info'));
       });
 
-      if (!confirm(`Setujui lapak ini untuk jadwal: ${infos.join(' | ')}?`)) return;
-
-      await fetch(GAS_URL, { 
-        method: 'POST', 
-        body: JSON.stringify({ 
-          action: 'update_jualan_status_with_jadwal', 
-          rowIndex, 
-          jadwalId: ids.join(', '), 
-          jadwalInfo: infos.join(' | ') 
-        }) 
-      });
-      loadDataAdminJualan();
+      showConfirmModal(
+        "Setujui Lapak",
+        `Setujui lapak ini untuk jadwal: ${infos.join(' | ')}?`,
+        "Ya, ACC",
+        "bg-emerald-600 hover:bg-emerald-700",
+        async () => {
+          btn.innerText = 'Memproses...';
+          btn.disabled = true;
+          await fetch(GAS_URL, { 
+            method: 'POST', 
+            body: JSON.stringify({ 
+              action: 'update_jualan_status_with_jadwal', 
+              rowIndex, 
+              jadwalId: ids.join(', '), 
+              jadwalInfo: infos.join(' | ') 
+            }) 
+          });
+          const el = document.getElementById(`row_jualan_${rowIndex}`);
+          if (el) {
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 300);
+          } else {
+            loadDataAdminJualan();
+          }
+        }
+      );
     }
 
-    async function hapusLapak(rowIndex) {
-      if (!confirm('Hapus atau nonaktifkan lapak ini?')) return;
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_jualan', rowIndex }) });
-      loadDataAdminJualan();
+    async function hapusLapak(rowIndex, btn) {
+      showConfirmModal(
+        "Hapus / Tolak Lapak",
+        "Yakin ingin menghapus atau menolak lapak ini?",
+        "Ya, Hapus",
+        "bg-rose-600 hover:bg-rose-700",
+        async () => {
+          btn.innerText = 'Menghapus...';
+          btn.disabled = true;
+          await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_jualan', rowIndex }) });
+          const el = document.getElementById(`row_jualan_${rowIndex}`);
+          if (el) {
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 300);
+          } else {
+            loadDataAdminJualan();
+          }
+        }
+      );
     }
 
     async function accPesanan(rowIndex, btn) {
-      if (!confirm('Konfirmasi pembayaran pesanan ini sudah lunas?')) return;
-      btn.disabled = true;
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_pesanan_status', rowIndex }) });
-      loadDataAdminJualan();
+      showConfirmModal(
+        "Konfirmasi Pembayaran",
+        "Konfirmasi pembayaran pesanan ini sudah lunas?",
+        "Ya, ACC Lunas",
+        "bg-emerald-600 hover:bg-emerald-700",
+        async () => {
+          btn.innerText = 'Memproses...';
+          btn.disabled = true;
+          await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_pesanan_status', rowIndex }) });
+          const el = document.getElementById(`row_pesanan_${rowIndex}`);
+          if (el) {
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 300);
+          } else {
+            loadDataAdminJualan();
+          }
+        }
+      );
     }
 
     async function hapusPesanan(rowIndex, btn) {
-      if (!confirm('Hapus pesanan ini?')) return;
-      btn.disabled = true;
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_pesanan', rowIndex }) });
-      loadDataAdminJualan();
+      showConfirmModal(
+        "Hapus Pesanan",
+        "Yakin ingin menghapus pesanan ini?",
+        "Ya, Hapus",
+        "bg-rose-600 hover:bg-rose-700",
+        async () => {
+          btn.innerText = 'Menghapus...';
+          btn.disabled = true;
+          await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_pesanan', rowIndex }) });
+          const el = document.getElementById(`row_pesanan_${rowIndex}`);
+          if (el) {
+            el.style.opacity = '0';
+            setTimeout(() => el.remove(), 300);
+          } else {
+            loadDataAdminJualan();
+          }
+        }
+      );
     }
   </script>
 </body>
