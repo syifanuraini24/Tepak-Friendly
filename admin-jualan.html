@@ -8,9 +8,10 @@
 </head>
 <body class="bg-slate-100 min-h-screen p-4 font-sans text-slate-800 antialiased">
 
-  <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
-    <h1 class="text-base font-extrabold text-center mb-5 text-orange-800">🛍️ Panel Admin Khusus Jualan & UMKM</h1>
+  <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-6">
+    <h1 class="text-base font-extrabold text-center text-orange-800">🛍️ Panel Admin Khusus Jualan & UMKM</h1>
     
+    <!-- Login Section -->
     <div id="loginSection" class="max-w-sm mx-auto space-y-3 py-6">
       <div>
         <label class="block text-xs font-bold text-slate-600 mb-1">Password Admin Jualan</label>
@@ -19,6 +20,7 @@
       <button onclick="login()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Masuk Panel Jualan</button>
     </div>
 
+    <!-- Panel Utama -->
     <div id="adminPanel" class="hidden space-y-6">
       <div class="flex justify-between items-center border-b border-slate-100 pb-3">
         <span class="text-xs font-semibold text-slate-600">Status: <span class="text-emerald-600 font-bold">Online 🟢</span></span>
@@ -28,17 +30,27 @@
         </div>
       </div>
 
+      <!-- 1. BAGIAN: LAPAK AKTIF YANG SUDAH DI-ASSIGN -->
       <div>
-        <h2 class="font-bold text-xs text-slate-700 uppercase tracking-wide mb-2">🏪 Approval Lapak & Penugasan Jadwal</h2>
-        <ul id="listLapakPending" class="space-y-3">
-          <li class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-xl border">Memuat data lapak...</li>
+        <h2 class="font-bold text-xs text-emerald-800 uppercase tracking-wide mb-2">🟢 Lapak Aktif & Penugasan Jadwal</h2>
+        <ul id="listLapakAktif" class="space-y-2.5">
+          <li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Memuat lapak aktif...</li>
         </ul>
       </div>
 
+      <!-- 2. BAGIAN: APPROVAL LAPAK BARU (PENDING) -->
       <div class="pt-3 border-t border-slate-100">
-        <h2 class="font-bold text-xs text-slate-700 uppercase tracking-wide mb-2">⏳ Konfirmasi Pembayaran Pesanan</h2>
+        <h2 class="font-bold text-xs text-orange-800 uppercase tracking-wide mb-2">⏳ Pendaftaran Lapak Baru (Menunggu Assign)</h2>
+        <ul id="listLapakPending" class="space-y-3">
+          <li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Memuat data pendaftaran...</li>
+        </ul>
+      </div>
+
+      <!-- 3. BAGIAN: KONFIRMASI PEMBAYARAN PESANAN -->
+      <div class="pt-3 border-t border-slate-100">
+        <h2 class="font-bold text-xs text-blue-800 uppercase tracking-wide mb-2">💳 Konfirmasi Pembayaran Pesanan Jajanan</h2>
         <ul id="listPesananPending" class="space-y-3">
-          <li class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-xl border">Memuat data pesanan...</li>
+          <li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Memuat data pesanan...</li>
         </ul>
       </div>
     </div>
@@ -72,6 +84,7 @@
     function logout() { localStorage.removeItem('tepak_jualan_login_time'); window.location.reload(); }
 
     async function loadDataAdminJualan() {
+      const listLapakAktif = document.getElementById('listLapakAktif');
       const listLapak = document.getElementById('listLapakPending');
       const listPesanan = document.getElementById('listPesananPending');
       const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
@@ -81,17 +94,37 @@
         const data = await response.json();
         listJadwalGlobal = data.jadwal || [];
         
+        // Opsi Dropdown Jadwal untuk Assign
+        let opsiJadwalHtml = '<option value="">-- Pilih Jadwal Mabar --</option>';
+        listJadwalGlobal.forEach(j => {
+          opsiJadwalHtml += `<option value="${j.id}" data-info="${j.info}">[${j.id}] ${j.info}</option>`;
+        });
+
+        // 1. RENDER LAPAK AKTIF / DISETUJUI
+        const aktifLapak = (data.jualan || []).filter(item => item.status && item.status.includes('Disetujui'));
+        listLapakAktif.innerHTML = '';
+        if (aktifLapak.length === 0) {
+          listLapakAktif.innerHTML = '<li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Belum ada lapak yang di-assign ke jadwal.</li>';
+        } else {
+          aktifLapak.forEach(item => {
+            listLapakAktif.innerHTML += `
+              <li class="p-3 border border-emerald-200 bg-emerald-50/40 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs">
+                <div>
+                  <strong class="text-slate-900 text-sm">🛍️ ${item.namaPenjual}</strong> (WA: ${item.whatsapp})<br>
+                  <span class="text-emerald-700 font-bold">📍 Jadwal: [${item.jadwalId}] ${item.jadwalInfo}</span>
+                </div>
+                <button onclick="hapusLapak(${item.rowIndex})" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-3 py-1.5 rounded-lg transition">Hapus / Nonaktifkan</button>
+              </li>`;
+          });
+        }
+
+        // 2. RENDER PENDING LAPAK (MENUNGGU)
         const pendingLapak = (data.jualan || []).filter(item => item.status && item.status.includes('Menunggu'));
         listLapak.innerHTML = '';
         if (pendingLapak.length === 0) {
-          listLapak.innerHTML = '<li class="text-center text-slate-400 text-xs py-3 bg-slate-50 rounded-xl border">Tidak ada pendaftaran lapak baru.</li>';
+          listLapak.innerHTML = '<li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Tidak ada pendaftaran lapak baru.</li>';
         } else {
           pendingLapak.forEach(item => {
-            let opsiJadwalHtml = '<option value="">-- Pilih Jadwal Mabar --</option>';
-            listJadwalGlobal.forEach(j => {
-              opsiJadwalHtml += `<option value="${j.id}" data-info="${j.info}">[${j.id}] ${j.info}</option>`;
-            });
-
             listLapak.innerHTML += `
               <li class="p-3.5 border border-orange-200 bg-orange-50/50 rounded-xl space-y-2.5 text-xs">
                 <div>
@@ -105,17 +138,18 @@
                   </select>
                 </div>
                 <div class="flex gap-2 pt-1">
-                  <button onclick="accLapak(${item.rowIndex})" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow-xs">ACC & Assign</button>
+                  <button onclick="accLapak(${item.rowIndex})" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow-xs">ACC & Assign Jadwal</button>
                   <button onclick="hapusLapak(${item.rowIndex})" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-lg shadow-xs">Tolak</button>
                 </div>
               </li>`;
           });
         }
 
+        // 3. RENDER PESANAN PENDING
         const pendingPesanan = (data.pesanan || []).filter(item => item.status && item.status.includes('Menunggu'));
         listPesanan.innerHTML = '';
         if (pendingPesanan.length === 0) {
-          listPesanan.innerHTML = '<li class="text-center text-slate-400 text-xs py-3 bg-slate-50 rounded-xl border">Tidak ada pesanan makanan baru.</li>';
+          listPesanan.innerHTML = '<li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Tidak ada pesanan makanan baru.</li>';
         } else {
           pendingPesanan.forEach(item => {
             listPesanan.innerHTML += `
@@ -146,7 +180,7 @@
     }
 
     async function hapusLapak(rowIndex) {
-      if (!confirm('Tolak / hapus pendaftaran lapak ini?')) return;
+      if (!confirm('Hapus atau nonaktifkan lapak ini?')) return;
       await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_jualan', rowIndex }) });
       loadDataAdminJualan();
     }
