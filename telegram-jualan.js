@@ -1,5 +1,5 @@
 // Konfigurasi Bot Telegram Khusus Jualan
-const TELEGRAM_JUALAN_CONFIG = {
+  var TELEGRAM_JUALAN_CONFIG = {
   BOT_TOKEN: "8997385135:AAE2EbhKjEA31midSWg_KosLkbs0N7gdXXA", // Ganti dengan Token Bot Telegram
   CHAT_ID: "-5317879702"       // Ganti dengan Chat ID Telegram/Grup
 };
