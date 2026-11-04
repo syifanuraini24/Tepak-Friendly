@@ -10,7 +10,7 @@
 </head>
 <body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
 
-  <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
+  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
         <img src="logo.png" alt="Logo Tepak Friendly" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
@@ -129,7 +129,7 @@
             <div id="invDetailMenu" class="font-mono text-[11px] text-slate-700 whitespace-pre-line bg-white p-2 rounded-lg border"></div>
           </div>
           <div class="border-t border-slate-200 pt-2 flex justify-between items-center text-sm">
-            <span class="font-bold text-slate-700">Total Tagihan:</span>
+            <span class="font-bold text-slate-700">Total Tagihan (+Kode Unik):</span>
             <span id="invTotalTagihan" class="font-extrabold text-blue-600">Rp 0</span>
           </div>
         </div>
@@ -203,7 +203,6 @@
         const semuaPesanan = data.pesanan || [];
 
         lapakDisetujui.forEach(l => {
-          // Filter pesanan yang masuk ke lapak ini
           const pesananLapak = semuaPesanan.filter(p => p.namaLapak && p.namaLapak.trim().toLowerCase() === l.namaPenjual.trim().toLowerCase());
 
           let listPesananHtml = '';
@@ -237,7 +236,6 @@
                 <div class="mt-2 text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100 whitespace-pre-line"><strong>Menu Tersedia:</strong><br>${l.menuJualan}</div>
               </div>
 
-              <!-- LIVE LIST PEMESAN DI LAPAK INI -->
               <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
                 <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center">
                   <span>📋 Daftar Pesanan Masuk</span>
@@ -339,20 +337,35 @@
       const detailString = detailRincian.join(', ');
 
       const btn = document.getElementById('btnKirimPesan');
+      const oldText = btn.innerText;
       btn.innerText = 'Memproses...';
       btn.disabled = true;
 
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'register_pesanan', namaPemesan: nama, namaLapak: lapakDipilih, detailPesanan: detailString, totalHarga: totalHargaRaw, jadwalId: jadwalDipilih, jadwalInfo: infoJadwalDipilih })
+          body: JSON.stringify({ 
+            action: 'register_pesanan', 
+            namaPemesan: nama, 
+            namaLapak: lapakDipilih, 
+            detailPesanan: detailString, 
+            totalHarga: totalHargaRaw, 
+            jadwalId: jadwalDipilih, 
+            jadwalInfo: infoJadwalDipilih 
+          })
         });
+        
         const result = await response.json();
-        if (result.status === 'success') {
+        
+        if (result && result.status === 'success') {
           tutupModalPesan();
 
-          if (typeof kirimTelegramJualan === 'function') {
-            await kirimTelegramJualan(nama, lapakDipilih, infoJadwalDipilih, detailString, result.totalTagihan);
+          try {
+            if (typeof kirimTelegramJualan === 'function') {
+              await kirimTelegramJualan(nama, lapakDipilih, infoJadwalDipilih, detailString, result.totalTagihan);
+            }
+          } catch (errTelegram) {
+            console.warn("Notifikasi Telegram gagal terkirim, tapi pesanan aman:", errTelegram);
           }
 
           document.getElementById('invNamaLapak').innerText = `Lapak: ${lapakDipilih}`;
@@ -362,10 +375,14 @@
           document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(result.totalTagihan);
           
           document.getElementById('modalInvoicePesanan').classList.remove('hidden');
+        } else {
+          alert('Gagal dari server: ' + (result.message || 'Terjadi kesalahan.'));
         }
-      } catch (e) { alert('Gagal mengirim pesanan.'); }
-      finally {
-        btn.innerText = 'Pesan & Bayar';
+      } catch (e) { 
+        console.error("Error kirimPesanan:", e);
+        alert('Gagal mengirim pesanan. Periksa koneksi internet atau URL Apps Script.'); 
+      } finally {
+        btn.innerText = oldText;
         btn.disabled = false;
       }
     }
