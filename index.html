@@ -78,8 +78,9 @@
     </div>
   </div>
 
+  <script src="config.js"></script>
   <script>
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1L8QX-I2xH_joKIK4ihQMGLNlkeBzQ2XtNfW2Bs66dfvhlpnTQJ212j32MARIX1TnPw/exec'; // Ganti dengan URL Web App Apps Script kamu
+    const GAS_URL = CONFIG.GAS_URL;
 
     async function loadData() {
       try {
@@ -109,7 +110,6 @@
             </option>`;
         });
 
-        // Render Live Player List Berdasarkan ID Jadwal (Grid Kiri & Kanan)
         const container = document.getElementById('containerListKegiatan');
         container.innerHTML = '';
 

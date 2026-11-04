@@ -6,66 +6,164 @@
   <title>Admin - Tepak Friendly</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-4 font-sans">
+<body class="bg-gray-100 p-4 font-sans text-gray-800">
 
-  <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-    <h1 class="text-xl font-bold text-center mb-6">Panel Admin Tepak Friendly</h1>
+  <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+    <h1 class="text-xl font-bold text-center mb-6 text-blue-800">🛠️ Panel Admin Tepak Friendly</h1>
     
     <!-- Bagian Login -->
-    <div id="loginSection" class="mb-4">
+    <div id="loginSection" class="max-w-md mx-auto mb-4">
       <label for="passInput" class="block text-sm font-medium text-gray-700 mb-1">Password Admin</label>
       <input type="password" id="passInput" placeholder="Masukkan password..." class="w-full p-2 border rounded mb-3">
       <button onclick="login()" class="w-full bg-gray-800 hover:bg-gray-900 text-white font-bold p-2 rounded transition">Masuk</button>
     </div>
 
     <!-- Panel Utama Admin -->
-    <div id="adminPanel" class="hidden">
-      <div class="flex justify-between items-center mb-3 border-b pb-2">
-        <h2 class="font-bold text-sm">Menunggu Konfirmasi Pembayaran</h2>
-        <button onclick="loadDataAdmin()" class="text-xs text-blue-600 underline font-semibold">Refresh Data</button>
+    <div id="adminPanel" class="hidden space-y-6">
+      
+      <div class="flex justify-between items-center border-b pb-3">
+        <span class="text-sm font-semibold text-gray-600">Status: <span class="text-green-600 font-bold">Online</span></span>
+        <button onclick="loadDataAdmin()" class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded border border-blue-200 transition">🔄 Refresh Data</button>
       </div>
-      <ul id="listMenunggu" class="space-y-3"></ul>
+
+      <!-- Ringkasan & Keuangan -->
+      <div>
+        <h2 class="font-bold text-sm text-gray-700 mb-2">📊 Ringkasan & Total Pembayaran</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="summaryCardContainer">
+          <div class="bg-blue-50 border border-blue-200 rounded p-3 text-center">
+            <span class="text-xs text-gray-500 block">Total Dana Masuk (Lunas)</span>
+            <span class="text-lg font-extrabold text-blue-700" id="totalDanaLunas">Rp 0</span>
+          </div>
+          <div class="bg-orange-50 border border-orange-200 rounded p-3 text-center">
+            <span class="text-xs text-gray-500 block">Potensi Pending (Menunggu)</span>
+            <span class="text-lg font-extrabold text-orange-600" id="totalDanaPending">Rp 0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tambah Jadwal Baru -->
+      <div class="bg-gray-50 p-4 rounded-lg border">
+        <h2 class="font-bold text-sm text-gray-700 mb-3">➕ Tambah Jadwal Mabar Baru</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+          <input type="text" id="addId" placeholder="ID Jadwal (Cth: Fun-03)" class="p-2 border rounded text-xs bg-white">
+          <input type="text" id="addInfo" placeholder="Info Jadwal/Lokasi (Cth: Gor...)" class="p-2 border rounded text-xs bg-white">
+          <input type="text" id="addJam" placeholder="Jam Main (Cth: 19:00 - 21:00)" class="p-2 border rounded text-xs bg-white">
+          <input type="number" id="addHtm" placeholder="HTM (Cth: 35000)" class="p-2 border rounded text-xs bg-white">
+          <input type="number" id="addKuota" placeholder="Kuota (Cth: 16)" class="p-2 border rounded text-xs bg-white">
+        </div>
+        <button onclick="tambahJadwalBaru(this)" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded transition">
+          Simpan Jadwal Baru ke Master
+        </button>
+      </div>
+
+      <!-- Summary Kuota per ID Jadwal -->
+      <div>
+        <h2 class="font-bold text-sm text-gray-700 mb-2">📋 Summary Kuota per ID Jadwal</h2>
+        <div id="summaryJadwalList" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs"></div>
+      </div>
+
+      <!-- Konfirmasi Pembayaran Menunggu -->
+      <div>
+        <h2 class="font-bold text-sm text-gray-700 mb-2">⏳ Konfirmasi Pembayaran Peserta</h2>
+        <ul id="listMenunggu" class="space-y-3">
+          <li class="text-center text-sm text-gray-500 py-4">Memuat data...</li>
+        </ul>
+      </div>
+
     </div>
   </div>
 
+  <script src="config.js"></script>
   <script>
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbz1L8QX-I2xH_joKIK4ihQMGLNlkeBzQ2XtNfW2Bs66dfvhlpnTQJ212j32MARIX1TnPw/exec'; // Ganti dengan URL Web App Apps Script kamu
+    const GAS_URL = CONFIG.GAS_URL;
 
-    function login() {
+    async function login() {
       const pass = document.getElementById('passInput').value;
-      if (pass === 'asdfgh') { 
-        document.getElementById('loginSection').classList.add('hidden');
-        document.getElementById('adminPanel').classList.remove('hidden');
-        loadDataAdmin();
-      } else {
-        alert('Password salah!');
+      if (!pass) return alert('Masukkan password terlebih dahulu!');
+
+      const btnLogin = document.querySelector('#loginSection button');
+      btnLogin.innerText = 'Memeriksa...';
+      btnLogin.disabled = true;
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'login_admin', password: pass })
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          document.getElementById('loginSection').classList.add('hidden');
+          document.getElementById('adminPanel').classList.remove('hidden');
+          loadDataAdmin();
+        } else {
+          alert('Password salah!');
+          btnLogin.innerText = 'Masuk';
+          btnLogin.disabled = false;
+        }
+      } catch (error) {
+        console.error("Gagal login:", error);
+        alert('Terjadi kesalahan koneksi.');
+        btnLogin.innerText = 'Masuk';
+        btnLogin.disabled = false;
       }
     }
 
     async function loadDataAdmin() {
       const list = document.getElementById('listMenunggu');
+      const summaryJadwalDiv = document.getElementById('summaryJadwalList');
       list.innerHTML = '<li class="text-center text-sm text-gray-500 py-4">Memuat data...</li>';
       
       try {
         const response = await fetch(GAS_URL);
         const data = await response.json();
         list.innerHTML = '';
+        summaryJadwalDiv.innerHTML = '';
         
+        const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+        
+        let totalLunasNum = 0;
+        let totalPendingNum = 0;
+
+        data.pemain.forEach(item => {
+          const nominal = parseInt(item.tagihan || 0);
+          if (item.status && item.status.includes('Lunas')) {
+            totalLunasNum += nominal;
+          } else if (item.status && item.status.includes('Menunggu')) {
+            totalPendingNum += nominal;
+          }
+        });
+
+        document.getElementById('totalDanaLunas').innerText = formatRp.format(totalLunasNum);
+        document.getElementById('totalDanaPending').innerText = formatRp.format(totalPendingNum);
+
+        data.jadwal.forEach(j => {
+          const pesertaJadwal = data.pemain.filter(p => p.jadwalId === j.id);
+          const lunasCount = pesertaJadwal.filter(p => p.status.includes('Lunas')).length;
+          const pendingCount = pesertaJadwal.filter(p => p.status.includes('Menunggu')).length;
+
+          summaryJadwalDiv.innerHTML += `
+            <div class="border rounded p-3 bg-gray-50 shadow-sm flex flex-col justify-between">
+              <div class="font-bold text-blue-800 mb-1">📌 [${j.id}] ${j.info}</div>
+              <div class="text-gray-600 flex justify-between mt-1 border-t pt-1">
+                <span>Total Terisi: <strong>${pesertaJadwal.length}/${j.kuota}</strong></span>
+                <span>🟢 Lunas: ${lunasCount} | 🟡 Pending: ${pendingCount}</span>
+              </div>
+            </div>`;
+        });
+
         const pendingList = data.pemain.filter(item => item.status && item.status.includes('Menunggu'));
         
         if(pendingList.length === 0) {
-          list.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
+          list.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded border">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
           return;
         }
 
-        const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
         const waktuSekarang = new Date().getTime();
-        const batasWaktuMs = 2 * 60 * 60 * 1000; // Batas 2 jam
+        const batasWaktuMs = 2 * 60 * 60 * 1000;
 
         pendingList.forEach(item => {
           const tagihanRp = formatRp.format(item.tagihan || 0);
-          
-          // Hitung waktu pendaftaran & sisa waktu kedaluwarsa 2 jam
           const waktuDaftar = new Date(item.timestamp || new Date());
           const jamDaftarString = waktuDaftar.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
           
@@ -79,15 +177,10 @@
             const totalMenit = Math.floor(sisaMs / (1000 * 60));
             const jamSisa = Math.floor(totalMenit / 60);
             const menitSisa = totalMenit % 60;
-            
-            if (jamSisa > 0) {
-              sisaWaktuTeks = `Sisa waktu: ${jamSisa} jam ${menitSisa} menit lagi`;
-            } else {
-              sisaWaktuTeks = `Sisa waktu: ${menitSisa} menit lagi`;
-            }
-            if (totalMenit < 30) warnaSisa = 'text-red-600 font-bold animate-pulse'; // Peringatan jika < 30 menit
+            sisaWaktuTeks = jamSisa > 0 ? `Sisa waktu: ${jamSisa} jam ${menitSisa} mdt` : `Sisa waktu: ${menitSisa} mdt lagi`;
+            if (totalMenit < 30) warnaSisa = 'text-red-600 font-bold animate-pulse';
           } else {
-            sisaWaktuTeks = '⚠️ Sudah lewat 2 jam (Segera hapus)';
+            sisaWaktuTeks = '⚠️ Sudah lewat 2 jam (Kedaluwarsa)';
             warnaSisa = 'text-red-600 font-bold';
           }
 
@@ -109,7 +202,7 @@
                 </div>
               </div>
               <div class="text-xs text-gray-600 mt-1 border-t pt-1.5 flex flex-col gap-0.5">
-                <span>📍 ${item.jadwal}</span>
+                <span>📍 [${item.jadwalId}] ${item.jadwalInfo}</span>
                 <span>⏰ Daftar pukul: <strong>${jamDaftarString}</strong> | <span class="${warnaSisa}">${sisaWaktuTeks}</span></span>
               </div>
             </li>`;
@@ -120,9 +213,49 @@
       }
     }
 
+    async function tambahJadwalBaru(btn) {
+      const id = document.getElementById('addId').value.trim();
+      const info = document.getElementById('addInfo').value.trim();
+      const jam = document.getElementById('addJam').value.trim();
+      const htm = document.getElementById('addHtm').value.trim();
+      const kuota = document.getElementById('addKuota').value.trim();
+
+      if(!id || !info || !jam || !htm || !kuota) {
+        return alert('Semua kolom form tambah jadwal harus diisi!');
+      }
+
+      btn.innerText = 'Menyimpan...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'add_jadwal', id: id, info: info, jam: jam, htm: htm, kuota: kuota })
+        });
+        const result = await response.json();
+
+        if(result.status === 'success') {
+          alert('Jadwal baru berhasil ditambahkan!');
+          document.getElementById('addId').value = '';
+          document.getElementById('addInfo').value = '';
+          document.getElementById('addJam').value = '';
+          document.getElementById('addHtm').value = '';
+          document.getElementById('addKuota').value = '';
+          await loadDataAdmin();
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (error) {
+        console.error("Gagal tambah jadwal:", error);
+        alert('Gagal menambahkan jadwal: ' + error.message);
+      } finally {
+        btn.innerText = 'Simpan Jadwal Baru ke Master';
+        btn.disabled = false;
+      }
+    }
+
     async function accPemain(rowIndex, btnElement) {
       if(!confirm('Konfirmasi pemain ini sudah bayar dan kirim email lunas?')) return;
-      
       btnElement.innerText = 'Proses...';
       btnElement.disabled = true;
       
@@ -131,16 +264,14 @@
           method: 'POST',
           body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex })
         });
-        
         const result = await response.json();
         if(result.status === 'updated' || result.status === 'success') {
           await loadDataAdmin(); 
         } else {
-          throw new Error(result.message || "Gagal mengupdate di server");
+          throw new Error(result.message);
         }
       } catch (error) {
-        console.error("Gagal melakukan ACC:", error);
-        alert('Gagal mengupdate status. Error: ' + error.message);
+        alert('Gagal mengupdate status: ' + error.message);
         btnElement.innerText = 'ACC LUNAS';
         btnElement.disabled = false;
       }
@@ -148,7 +279,6 @@
 
     async function hapusPemain(rowIndex, btnElement) {
       if(!confirm('Yakin ingin menghapus peserta ini? Slot kuota akan langsung terbuka kembali.')) return;
-      
       btnElement.innerText = 'Hapus...';
       btnElement.disabled = true;
       
@@ -157,16 +287,14 @@
           method: 'POST',
           body: JSON.stringify({ action: 'delete_row', rowIndex: rowIndex })
         });
-        
         const result = await response.json();
         if(result.status === 'deleted' || result.status === 'success') {
           await loadDataAdmin(); 
         } else {
-          throw new Error(result.message || "Gagal menghapus data");
+          throw new Error(result.message);
         }
       } catch (error) {
-        console.error("Gagal menghapus pemain:", error);
-        alert('Gagal menghapus data. Error: ' + error.message);
+        alert('Gagal menghapus data: ' + error.message);
         btnElement.innerText = 'HAPUS';
         btnElement.disabled = false;
       }

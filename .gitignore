@@ -1,0 +1,9 @@
+# Sembunyikan file konfigurasi rahasia
+config.js
+
+# Sembunyikan folder dependencies (jika ada)
+node_modules/
+
+# Sembunyikan file sistem operasi
+.DS_Store
+Thumbs.db
