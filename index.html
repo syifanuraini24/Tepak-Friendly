@@ -10,7 +10,7 @@
 </head>
 <body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
 
-  <header class="bg-white sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
+  <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
     <div class="max-w-2xl mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2">
         <img src="logo.png" alt="Logo Tepak Friendly" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
@@ -19,26 +19,49 @@
           <p class="text-[9px] text-slate-500 font-medium">Komunitas Mabar & Sehat</p>
         </div>
       </div>
-      <a href="jualan.html" class="bg-orange-50 hover:bg-orange-100 text-orange-700 font-bold text-xs py-1 px-2.5 rounded-lg transition flex items-center gap-1 border border-orange-200">
+      <a href="jualan.html" class="bg-orange-50 hover:bg-orange-100 text-orange-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1.5 border border-orange-200 shadow-xs">
         <span>🛍️ Jajanan</span>
       </a>
     </div>
   </header>
 
   <main class="max-w-2xl mx-auto px-4 mt-3 space-y-4">
-    <!-- JADWAL MABAR SECTION -->
-    <div class="space-y-2.5">
-      <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide px-1">Pilih Jadwal Mabar</h2>
-      <div id="containerJadwal" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <div class="text-center text-slate-400 text-xs py-6 bg-white rounded-xl border col-span-full">Memuat jadwal...</div>
+    
+    <!-- BANNER HERO / INFO ATAS -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-4 text-white shadow-sm flex justify-between items-center">
+      <div>
+        <h2 class="text-xs font-bold uppercase tracking-wider text-blue-200">Jadwal Minggu Ini</h2>
+        <p class="text-sm font-extrabold mt-0.5">Amankan Slot Mabar-mu Sekarang!</p>
+      </div>
+      <div class="bg-white/15 backdrop-blur-xs px-3 py-1.5 rounded-xl border border-white/20 text-[11px] font-semibold text-center">
+        ⚡ Cepat & Mudah
       </div>
     </div>
 
-    <!-- LIST PLAYER / DAFTAR PEMAIN TERDAFTAR (TANPA NOMINAL ANGKA) -->
+    <!-- JADWAL MABAR SECTION -->
+    <div class="space-y-2.5">
+      <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide px-1 flex items-center gap-1.5">
+        <span>📅</span> Pilih Jadwal Mabar
+      </h2>
+      <div id="containerJadwal" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border col-span-full shadow-xs">Memuat jadwal...</div>
+      </div>
+    </div>
+
+    <!-- LIST PLAYER / DAFTAR PEMAIN TERDAFTAR (DENGAN LABEL LIVE & PULSE) -->
     <div class="space-y-2.5 pt-1">
-      <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide px-1">Daftar Pemain Terdaftar</h2>
+      <div class="flex justify-between items-center px-1">
+        <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide flex items-center gap-1.5">
+          <span>👥</span> Live Player Terdaftar
+        </h2>
+        <!-- Badge LIVE dengan animasi titik hijau berdenyut -->
+        <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200 shadow-2xs">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          LIVE UPDATE
+        </span>
+      </div>
       <div id="containerListPemain" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <div class="text-center text-slate-400 text-xs py-4 bg-white rounded-xl border col-span-full">Memuat daftar pemain...</div>
+        <div class="text-center text-slate-400 text-xs py-6 bg-white rounded-2xl border col-span-full shadow-xs">Memuat daftar pemain...</div>
       </div>
     </div>
 
@@ -51,17 +74,17 @@
         <div class="space-y-2.5">
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemain (Pisahkan koma jika banyak)</label>
-            <textarea id="regNama" placeholder="Cth: Budi, Andi, Siska" class="w-full p-2 border border-slate-200 rounded-xl text-xs bg-slate-50 h-16"></textarea>
+            <textarea id="regNama" placeholder="Cth: Budi, Andi, Siska" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 h-16 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
           </div>
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Email / Kontak Aktif</label>
-            <input type="email" id="regEmail" placeholder="Cth: email@gmail.com" class="w-full p-2 border border-slate-200 rounded-xl text-xs bg-slate-50">
+            <input type="email" id="regEmail" placeholder="Cth: email@gmail.com" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
         </div>
         
         <div class="flex gap-2 pt-1">
-          <button onclick="tutupModalDaftar()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 rounded-xl">Batal</button>
-          <button onclick="submitPendaftaran()" id="btnSubmitReg" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 rounded-xl shadow-xs">Daftar Sekarang</button>
+          <button onclick="tutupModalDaftar()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
+          <button onclick="submitPendaftaran()" id="btnSubmitReg" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">Daftar Sekarang</button>
         </div>
       </div>
     </div>
@@ -73,14 +96,14 @@
         <p class="text-[11px] text-slate-500">Transfer persis hingga digit terakhir agar otomatis terverifikasi.</p>
         
         <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Tagihan</span>
-        <div class="text-xl font-extrabold text-blue-600 tracking-tight bg-slate-50 p-2 border border-slate-200 rounded-xl" id="txtTagihan">Rp 0</div>
+        <div class="text-xl font-extrabold text-blue-600 tracking-tight bg-slate-50 p-2.5 border border-slate-200 rounded-xl" id="txtTagihan">Rp 0</div>
         
-        <div class="bg-slate-50 p-2 rounded-xl border border-slate-200 inline-block">
+        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 inline-block">
           <img src="qris.png" alt="QRIS" class="mx-auto w-32 h-32 object-contain rounded-lg bg-white p-1 border">
           <span class="text-[9px] text-slate-500 block mt-1">BCA 0083677071 a.n Andi</span>
         </div>
 
-        <button onclick="selesaiBayar()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl">Tutup & Selesai</button>
+        <button onclick="selesaiBayar()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup & Selesai</button>
       </div>
     </div>
   </main>
@@ -94,7 +117,7 @@
         const response = await fetch(GAS_URL);
         const data = await response.json();
         
-        // 1. Render Jadwal (Hanya tampilkan yang statusnya AKTIF / selain nonaktif)
+        // 1. Render Jadwal
         const containerJadwal = document.getElementById('containerJadwal');
         containerJadwal.innerHTML = '';
         const allJadwal = data.jadwal || [];
@@ -105,42 +128,42 @@
         });
 
         if (jadwalList.length === 0) {
-          containerJadwal.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-white rounded-xl border col-span-full">Belum ada jadwal mabar aktif.</div>';
+          containerJadwal.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-white rounded-2xl border col-span-full shadow-xs">Belum ada jadwal mabar aktif.</div>';
         } else {
           jadwalList.forEach(j => {
             const sisaKuota = (j.kuota || 0) - (j.terisi || 0);
             const isFull = sisaKuota <= 0;
             containerJadwal.innerHTML += `
-              <div class="border border-slate-200 rounded-2xl p-3 bg-white shadow-xs flex flex-col justify-between space-y-2">
+              <div class="border border-slate-200/80 rounded-2xl p-3.5 bg-white shadow-xs flex flex-col justify-between space-y-2.5 transition hover:shadow-md">
                 <div>
-                  <div class="flex justify-between items-start mb-1">
-                    <span class="text-[9px] bg-slate-100 text-slate-700 font-bold px-1.5 py-0.5 rounded border">${j.id}</span>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isFull ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'}">
+                  <div class="flex justify-between items-start mb-1.5">
+                    <span class="text-[9px] bg-blue-50 text-blue-700 font-extrabold px-2 py-0.5 rounded-md border border-blue-100">${j.id}</span>
+                    <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full ${isFull ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'}">
                       ${isFull ? 'Full 🔴' : `Sisa: ${sisaKuota}`}
                     </span>
                   </div>
                   <h3 class="font-bold text-xs text-slate-900 leading-snug">${j.info}</h3>
                 </div>
                 
-                <div class="text-[11px] text-slate-600 flex justify-between items-center bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-100">
+                <div class="text-[11px] text-slate-600 flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
                   <span>⏰ ${j.jam}</span>
                   <strong class="text-slate-900">Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</strong>
                 </div>
 
-                <button onclick="bukaModalDaftar('${j.id}', \`${j.info}\`, ${j.htm})" ${isFull ? 'disabled class="w-full bg-slate-200 text-slate-400 font-bold text-[11px] py-2 rounded-xl cursor-not-allowed"' : 'class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] py-2 rounded-xl transition shadow-xs"'}>
-                  ${isFull ? 'Kuota Penuh' : 'Daftar Mabar'}
+                <button onclick="bukaModalDaftar('${j.id}', \`${j.info}\`, ${j.htm})" ${isFull ? 'disabled class="w-full bg-slate-200 text-slate-400 font-bold text-[11px] py-2.5 rounded-xl cursor-not-allowed"' : 'class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] py-2.5 rounded-xl transition shadow-xs"'}>
+                  ${isFull ? 'Kuota Penuh' : 'Daftar Mabar ⚡'}
                 </button>
               </div>`;
           });
         }
 
-        // 2. Render List Pemain Terdaftar (Tanpa Nominal Angka)
+        // 2. Render List Pemain (Tampilan Live Update yang Bersih & Tanpa Nominal)
         const containerListPemain = document.getElementById('containerListPemain');
         containerListPemain.innerHTML = '';
         const pemainList = data.pemain || [];
 
         if (pemainList.length === 0) {
-          containerListPemain.innerHTML = '<div class="text-center text-xs text-slate-400 py-3 bg-white rounded-xl border col-span-full">Belum ada pemain yang terdaftar.</div>';
+          containerListPemain.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-white rounded-2xl border col-span-full shadow-xs">Belum ada pemain yang terdaftar. Yuk jadi yang pertama!</div>';
         } else {
           let htmlPemain = '';
           jadwalList.forEach(j => {
@@ -148,19 +171,28 @@
             if (pemainDiJadwal.length > 0) {
               let listNamaLi = '';
               pemainDiJadwal.forEach((p, idx) => {
-                listNamaLi += `<li class="text-[11px] text-slate-700 py-0.5 flex justify-between"><span>${idx + 1}. ${p.nama}</span><span class="text-[9px] text-slate-400">${p.status || ''}</span></li>`;
+                const statusBadge = p.status.includes('Lunas') ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>' : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
+                listNamaLi += `
+                  <li class="text-[11px] text-slate-700 py-1 px-2 rounded-lg bg-slate-50/60 border border-slate-100 flex justify-between items-center">
+                    <span class="font-medium"><strong>${idx + 1}.</strong> ${p.nama}</span>
+                    ${statusBadge}
+                  </li>`;
               });
 
               htmlPemain += `
-                <div class="border border-slate-200 rounded-2xl p-3 bg-white shadow-xs space-y-2">
-                  <div class="font-bold text-[11px] text-blue-900 border-b border-slate-100 pb-1.5">📍 [${j.id}] ${j.info} (${pemainDiJadwal.length} Pemain)</div>
-                  <ul class="space-y-0.5 pl-1 max-h-32 overflow-y-auto">
+                <div class="border border-slate-200/80 rounded-2xl p-3.5 bg-white shadow-xs space-y-2.5 relative overflow-hidden">
+                  <div class="absolute top-0 right-0 w-2 h-full bg-emerald-500"></div>
+                  <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                    <span class="font-bold text-[11px] text-slate-900">📍 [${j.id}] ${j.info}</span>
+                    <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">${pemainDiJadwal.length} Pemain</span>
+                  </div>
+                  <ul class="space-y-1 max-h-36 overflow-y-auto pr-1">
                     ${listNamaLi}
                   </ul>
                 </div>`;
             }
           });
-          containerListPemain.innerHTML = htmlPemain || '<div class="text-center text-xs text-slate-400 py-3 bg-white rounded-xl border col-span-full">Belum ada pemain terdaftar.</div>';
+          containerListPemain.innerHTML = htmlPemain || '<div class="text-center text-xs text-slate-400 py-6 bg-white rounded-2xl border col-span-full shadow-xs">Belum ada pemain terdaftar.</div>';
         }
       } catch (e) { console.error(e); }
     }
