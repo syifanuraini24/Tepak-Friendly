@@ -76,24 +76,30 @@
       </button>
     </div>
 
-    <!-- MODAL PESAN -->
+    <!-- MODAL PESAN INTERAKTIF (DENGAN TOMBOL + / -) -->
     <div id="modalPesan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
-      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5">
+      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto">
         <h3 id="modalLapakTitle" class="font-bold text-sm text-slate-900 mb-1">Pesan Makanan</h3>
-        <p id="infoMenuLapak" class="text-[11px] text-slate-600 bg-slate-50 p-2.5 rounded-xl mb-3 border border-slate-200 max-h-28 overflow-y-auto whitespace-pre-line"></p>
+        <p class="text-[11px] text-slate-500 mb-3">Klik tombol (+) (-) untuk memilih jumlah pesanan.</p>
         
         <div class="space-y-3">
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemesan</label>
             <input type="text" id="pesanNama" placeholder="Nama kamu..." class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50">
           </div>
+
+          <!-- DAFTAR MENU DENGAN COUNTER + / - -->
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Detail Pesanan & Catatan</label>
-            <textarea id="pesanDetail" placeholder="Cth: Es Teh Manis 2 cup" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 h-16"></textarea>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Pilih Menu & Jumlah</label>
+            <div id="containerMenuInteraktif" class="space-y-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 max-h-48 overflow-y-auto">
+              <!-- Render otomatis lewat JavaScript -->
+            </div>
           </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Total Harga Makanan (Rp)</label>
-            <input type="number" id="pesanTotalHarga" placeholder="Cth: 15000" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50">
+
+          <!-- TOTAL HARGA OTOMATIS -->
+          <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex justify-between items-center">
+            <span class="text-xs font-bold text-blue-900">Total Harga:</span>
+            <span id="labelTotalHarga" class="text-sm font-extrabold text-blue-700">Rp 0</span>
           </div>
         </div>
         
@@ -126,6 +132,7 @@
   <script>
     const GAS_URL = CONFIG.GAS_URL;
     let lapakDipilih = null, jadwalDipilih = null, infoJadwalDipilih = null;
+    let menuParsedGlobal = [];
 
     function gantiTab(tab) {
       if (tab === 'pesan') {
@@ -166,7 +173,6 @@
         const container = document.getElementById('containerLapakPublik');
         container.innerHTML = '';
         
-        // Filter fleksibel mendeteksi kata 'disetujui' tanpa peduli spasi atau huruf besar/kecil
         const lapakDisetujui = (data.jualan || []).filter(l => {
           if (!l.status) return false;
           return l.status.toString().trim().toLowerCase().includes('disetujui');
@@ -199,25 +205,114 @@
       } catch (e) { console.error(e); }
     }
 
+    // PARSING TEKS MENU MENJADI OBJEK INTERAKTIF DENGAN TOMBOL + / -
+    function parseMenuText(rawMenuText) {
+      const lines = rawMenuText.split('\n');
+      let menus = [];
+      lines.forEach((line, idx) => {
+        let cleanLine = line.replace(/^[•\-\*]\s*/, '').trim();
+        if (!cleanLine) return;
+
+        // Coba ekstrak harga di dalam kurung cth: "Es Teh (Rp 5.000)" atau "Es Teh - 5000"
+        let harga = 0;
+        let namaMenu = cleanLine;
+
+        const matchRp = cleanLine.match(/\(Rp\s*([\d\.]+)\)/i) || cleanLine.match(/Rp\.?\s*([\d\.]+)/i);
+        if (matchRp) {
+          harga = parseInt(matchRp[1].replace(/\./g, '')) || 0;
+          namaMenu = cleanLine.replace(matchRp[0], '').trim();
+        }
+
+        menus.push({ id: idx, nama: namaMenu, harga: harga, qty: 0 });
+      });
+      return menus;
+    }
+
     function bukaModalPesan(namaLapak, jId, jInfo, menuEncoded) {
       lapakDipilih = namaLapak; jadwalDipilih = jId; infoJadwalDipilih = jInfo;
       document.getElementById('modalLapakTitle').innerText = `Pesan ke: ${namaLapak}`;
-      document.getElementById('infoMenuLapak').innerText = decodeURIComponent(menuEncoded);
+      document.getElementById('pesanNama').value = '';
+
+      const rawText = decodeURIComponent(menuEncoded);
+      menuParsedGlobal = parseMenuText(rawText);
+      renderListMenuInteraktif();
+
       document.getElementById('modalPesan').classList.remove('hidden');
+    }
+
+    function renderListMenuInteraktif() {
+      const container = document.getElementById('containerMenuInteraktif');
+      container.innerHTML = '';
+
+      if (menuParsedGlobal.length === 0) {
+        container.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">Tidak ada menu tersedia.</div>';
+        return;
+      }
+
+      menuParsedGlobal.forEach((m, index) => {
+        const formatHrg = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(m.harga);
+        container.innerHTML += `
+          <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 text-xs">
+            <div class="pr-2">
+              <div class="font-bold text-slate-800">${m.nama}</div>
+              <div class="text-[10px] text-slate-500">${formatHrg}</div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="ubahQty(${index}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 rounded-md font-bold text-slate-700 flex items-center justify-center">-</button>
+              <span id="qty_${index}" class="font-bold w-4 text-center">${m.qty}</span>
+              <button type="button" onclick="ubahQty(${index}, 1)" class="w-6 h-6 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-md font-bold flex items-center justify-center">+</button>
+            </div>
+          </div>`;
+      });
+      hitungTotalOtomatis();
+    }
+
+    function ubahQty(index, delta) {
+      menuParsedGlobal[index].qty = Math.max(0, menuParsedGlobal[index].qty + delta);
+      document.getElementById(`qty_${index}`).innerText = menuParsedGlobal[index].qty;
+      hitungTotalOtomatis();
+    }
+
+    function hitungTotalOtomatis() {
+      let total = 0;
+      menuParsedGlobal.forEach(m => {
+        total += (m.harga * m.qty);
+      });
+      const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(total);
+      document.getElementById('labelTotalHarga').innerText = formatRp;
+      document.getElementById('labelTotalHarga').setAttribute('data-raw', total);
     }
 
     function tutupModalPesan() { document.getElementById('modalPesan').classList.add('hidden'); }
 
     async function kirimPesanan() {
       const nama = document.getElementById('pesanNama').value.trim();
-      const detail = document.getElementById('pesanDetail').value.trim();
-      const totalHarga = document.getElementById('pesanTotalHarga').value.trim();
-      if (!nama || !detail || !totalHarga) return alert('Semua kolom pesanan harus diisi!');
+      const totalHargaRaw = parseInt(document.getElementById('labelTotalHarga').getAttribute('data-raw')) || 0;
+
+      if (!nama) return alert('Nama pemesan harus diisi!');
+      if (totalHargaRaw <= 0) return alert('Pilih minimal 1 menu menggunakan tombol (+) terlebih dahulu!');
+
+      // Susun detail pesanan otomatis berdasarkan item yang dipilih
+      let detailRincian = [];
+      menuParsedGlobal.forEach(m => {
+        if (m.qty > 0) {
+          detailRincian.push(`${m.nama} (${m.qty}x)`);
+        }
+      });
+      const detailString = detailRincian.join(', ');
 
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'register_pesanan', namaPemesan: nama, namaLapak: lapakDipilih, detailPesanan: detail, totalHarga, jadwalId: jadwalDipilih, jadwalInfo: infoJadwalDipilih })
+          body: JSON.stringify({ 
+            action: 'register_pesanan', 
+            namaPemesan: nama, 
+            namaLapak: lapakDipilih, 
+            detailPesanan: detailString, 
+            totalHarga: totalHargaRaw, 
+            jadwalId: jadwalDipilih, 
+            jadwalInfo: infoJadwalDipilih 
+          })
         });
         const result = await response.json();
         if (result.status === 'success') {
@@ -244,7 +339,7 @@
 
       if (menuList.length === 0) return alert('Minimal masukkan 1 menu beserta harganya!');
 
-    try {
+      try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'register_jualan', namaPenjual, menuJualan: menuList.join('\n'), whatsapp })
