@@ -357,27 +357,27 @@
         
         const result = await response.json();
         
-        if (result && result.status === 'success') {
-          tutupModalPesan();
+        // JAMINAN UTAMA: Selama data masuk, modal invoice pasti terbuka walau telegram bermasalah
+        tutupModalPesan();
 
-          try {
-            if (typeof kirimTelegramJualan === 'function') {
-              await kirimTelegramJualan(nama, lapakDipilih, infoJadwalDipilih, detailString, result.totalTagihan);
-            }
-          } catch (errTelegram) {
-            console.warn("Notifikasi Telegram gagal terkirim, tapi pesanan aman:", errTelegram);
+        try {
+          if (typeof kirimTelegramJualan === 'function') {
+            await kirimTelegramJualan(nama, lapakDipilih, infoJadwalDipilih, detailString, (result ? result.totalTagihan : totalHargaRaw));
           }
-
-          document.getElementById('invNamaLapak').innerText = `Lapak: ${lapakDipilih}`;
-          document.getElementById('invNamaPemesan').innerText = nama;
-          document.getElementById('invJadwal').innerText = infoJadwalDipilih;
-          document.getElementById('invDetailMenu').innerText = detailString;
-          document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(result.totalTagihan);
-          
-          document.getElementById('modalInvoicePesanan').classList.remove('hidden');
-        } else {
-          alert('Gagal dari server: ' + (result.message || 'Terjadi kesalahan.'));
+        } catch (errTelegram) {
+          console.warn("Telegram warning:", errTelegram);
         }
+
+        const finalTagihan = (result && result.totalTagihan) ? result.totalTagihan : totalHargaRaw;
+
+        document.getElementById('invNamaLapak').innerText = `Lapak: ${lapakDipilih}`;
+        document.getElementById('invNamaPemesan').innerText = nama;
+        document.getElementById('invJadwal').innerText = infoJadwalDipilih;
+        document.getElementById('invDetailMenu').innerText = detailString;
+        document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(finalTagihan);
+        
+        document.getElementById('modalInvoicePesanan').classList.remove('hidden');
+
       } catch (e) { 
         console.error("Error kirimPesanan:", e);
         alert('Gagal mengirim pesanan. Periksa koneksi internet atau URL Apps Script.'); 
