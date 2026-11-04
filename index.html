@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tepak Friendly - Pendaftaran Mabar</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Panggil file konfigurasi & telegram handler -->
+  <script src="config.js"></script>
+  <script src="telegram.js"></script>
 </head>
 <body class="bg-gray-100 p-4 font-sans text-gray-800">
 
@@ -78,7 +82,6 @@
     </div>
   </div>
 
-  <script src="config.js"></script>
   <script>
     const GAS_URL = CONFIG.GAS_URL;
 
@@ -188,7 +191,7 @@
     }
 
     function salinRekening() {
-      const teksRekening = "123456789"; 
+      const teksRekening = "0083677071"; 
       navigator.clipboard.writeText(teksRekening).then(() => {
         const btnSalin = document.getElementById('btnSalin');
         btnSalin.innerText = '✅ Tersalin!';
@@ -223,6 +226,7 @@
       btn.disabled = true;
 
       try {
+        // 1. Simpan ke Backend Google Apps Script (Spreadsheet)
         const response = await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ 
@@ -236,11 +240,22 @@
         });
         const result = await response.json();
         
-        localStorage.setItem('tepak_active_tagihan', result.totalTagihan);
-        localStorage.setItem('tepak_is_pending', 'true');
+        if (result.status === 'success') {
+          // 2. Kirim Notifikasi Telegram secara instan lewat file telegram.js
+          if (typeof kirimNotifTelegram === 'function') {
+            kirimNotifTelegram(nama, email, jadwalId, jadwalInfo, result.totalTagihan);
+          }
 
-        tampilkanHalamanPembayaran(result.totalTagihan);
-        await loadData();
+          localStorage.setItem('tepak_active_tagihan', result.totalTagihan);
+          localStorage.setItem('tepak_is_pending', 'true');
+
+          tampilkanHalamanPembayaran(result.totalTagihan);
+          await loadData();
+        } else {
+          alert('Gagal mendaftar: ' + (result.message || 'Coba lagi.'));
+          btn.innerText = 'Dapatkan Tagihan & Join List';
+          btn.disabled = false;
+        }
       } catch (error) {
         console.error("Gagal mengirim data pendaftaran:", error);
         alert('Terjadi kesalahan saat mendaftar.');
