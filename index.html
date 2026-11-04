@@ -10,77 +10,77 @@
 </head>
 <body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
 
-  <header class="bg-white sticky top-0 z-40 border-b border-slate-200 px-4 py-3 shadow-xs">
-    <div class="max-w-md mx-auto flex justify-between items-center">
-      <div class="flex items-center gap-2.5">
-        <img src="logo.png" alt="Logo Tepak Friendly" class="w-10 h-10 object-contain rounded-xl shadow-xs border border-slate-100 bg-white">
+  <header class="bg-white sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
+    <div class="max-w-2xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <img src="logo.png" alt="Logo Tepak Friendly" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
         <div>
-          <h1 class="text-base font-extrabold tracking-tight text-slate-900 leading-tight">Tepak Friendly</h1>
-          <p class="text-[10px] text-slate-500 font-medium">Komunitas Mabar & Sehat</p>
+          <h1 class="text-sm font-extrabold tracking-tight text-slate-900 leading-tight">Tepak Friendly</h1>
+          <p class="text-[9px] text-slate-500 font-medium">Komunitas Mabar & Sehat</p>
         </div>
       </div>
-      <a href="jualan.html" class="bg-orange-50 hover:bg-orange-100 text-orange-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1 border border-orange-200">
+      <a href="jualan.html" class="bg-orange-50 hover:bg-orange-100 text-orange-700 font-bold text-xs py-1 px-2.5 rounded-lg transition flex items-center gap-1 border border-orange-200">
         <span>🛍️ Jajanan</span>
       </a>
     </div>
   </header>
 
-  <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
+  <main class="max-w-2xl mx-auto px-4 mt-3 space-y-4">
     <!-- JADWAL MABAR SECTION -->
-    <div class="space-y-3">
-      <h2 class="font-bold text-sm text-slate-900 uppercase tracking-wide px-1">Pilih Jadwal Mabar</h2>
-      <div id="containerJadwal" class="space-y-3">
-        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat jadwal...</div>
+    <div class="space-y-2.5">
+      <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide px-1">Pilih Jadwal Mabar</h2>
+      <div id="containerJadwal" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div class="text-center text-slate-400 text-xs py-6 bg-white rounded-xl border col-span-full">Memuat jadwal...</div>
       </div>
     </div>
 
-    <!-- LIST PLAYER / DAFTAR PEMAIN TERDAFTAR (TANPA NOMINAL PEMBAYARAN) -->
-    <div class="space-y-3 pt-2">
-      <h2 class="font-bold text-sm text-slate-900 uppercase tracking-wide px-1">Daftar Pemain Terdaftar</h2>
-      <div id="containerListPemain" class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
-        <div class="text-center text-slate-400 text-xs py-4">Memuat daftar pemain...</div>
+    <!-- LIST PLAYER / DAFTAR PEMAIN TERDAFTAR (TANPA NOMINAL ANGKA) -->
+    <div class="space-y-2.5 pt-1">
+      <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide px-1">Daftar Pemain Terdaftar</h2>
+      <div id="containerListPemain" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div class="text-center text-slate-400 text-xs py-4 bg-white rounded-xl border col-span-full">Memuat daftar pemain...</div>
       </div>
     </div>
 
     <!-- MODAL PENDAFTARAN MABAR -->
     <div id="modalDaftar" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
-      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-4 space-y-3">
         <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Form Pendaftaran Mabar</h3>
-        <p class="text-[11px] text-slate-500" id="modalSubTitle">Isi data di bawah ini.</p>
+        <p class="text-[11px] text-slate-500">Isi data di bawah ini.</p>
         
-        <div class="space-y-3">
+        <div class="space-y-2.5">
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemain (Pisahkan koma jika banyak)</label>
-            <textarea id="regNama" placeholder="Cth: Budi, Andi, Siska" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 h-20"></textarea>
+            <textarea id="regNama" placeholder="Cth: Budi, Andi, Siska" class="w-full p-2 border border-slate-200 rounded-xl text-xs bg-slate-50 h-16"></textarea>
           </div>
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Email / Kontak Aktif</label>
-            <input type="email" id="regEmail" placeholder="Cth: email@gmail.com" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50">
+            <input type="email" id="regEmail" placeholder="Cth: email@gmail.com" class="w-full p-2 border border-slate-200 rounded-xl text-xs bg-slate-50">
           </div>
         </div>
         
-        <div class="flex gap-2 pt-2">
-          <button onclick="tutupModalDaftar()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-          <button onclick="submitPendaftaran()" id="btnSubmitReg" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Daftar Sekarang</button>
+        <div class="flex gap-2 pt-1">
+          <button onclick="tutupModalDaftar()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 rounded-xl">Batal</button>
+          <button onclick="submitPendaftaran()" id="btnSubmitReg" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 rounded-xl shadow-xs">Daftar Sekarang</button>
         </div>
       </div>
     </div>
 
     <!-- MODAL PEMBAYARAN MABAR -->
     <div id="modalBayar" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
-      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-3">
-        <h3 class="font-bold text-emerald-800 text-base mb-1">🎉 Pendaftaran Berhasil!</h3>
-        <p class="text-xs text-slate-500">Transfer persis hingga digit terakhir agar otomatis terverifikasi.</p>
+      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-4 text-center space-y-2.5">
+        <h3 class="font-bold text-emerald-800 text-sm">🎉 Pendaftaran Berhasil!</h3>
+        <p class="text-[11px] text-slate-500">Transfer persis hingga digit terakhir agar otomatis terverifikasi.</p>
         
-        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Total Tagihan (Termasuk Kode Unik)</span>
-        <div class="text-2xl font-extrabold text-blue-600 mb-3 tracking-tight bg-slate-50 p-2.5 border border-slate-200 rounded-xl" id="txtTagihan">Rp 0</div>
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Total Tagihan</span>
+        <div class="text-xl font-extrabold text-blue-600 tracking-tight bg-slate-50 p-2 border border-slate-200 rounded-xl" id="txtTagihan">Rp 0</div>
         
-        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 inline-block mb-2">
-          <img src="qris.png" alt="QRIS" class="mx-auto w-36 h-36 object-contain mb-1 rounded-lg bg-white p-1 border">
-          <span class="text-[10px] text-slate-500 block">BCA 0083677071 a.n Andi</span>
+        <div class="bg-slate-50 p-2 rounded-xl border border-slate-200 inline-block">
+          <img src="qris.png" alt="QRIS" class="mx-auto w-32 h-32 object-contain rounded-lg bg-white p-1 border">
+          <span class="text-[9px] text-slate-500 block mt-1">BCA 0083677071 a.n Andi</span>
         </div>
 
-        <button onclick="selesaiBayar()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl">Tutup & Selesai</button>
+        <button onclick="selesaiBayar()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl">Tutup & Selesai</button>
       </div>
     </div>
   </main>
@@ -94,62 +94,73 @@
         const response = await fetch(GAS_URL);
         const data = await response.json();
         
-        // 1. Render Jadwal
+        // 1. Render Jadwal (Hanya tampilkan yang statusnya AKTIF / selain nonaktif)
         const containerJadwal = document.getElementById('containerJadwal');
         containerJadwal.innerHTML = '';
-        const jadwalList = data.jadwal || [];
+        const allJadwal = data.jadwal || [];
+        
+        const jadwalList = allJadwal.filter(j => {
+          if (!j.status) return true;
+          return !j.status.toString().toLowerCase().includes('nonaktif');
+        });
 
         if (jadwalList.length === 0) {
-          containerJadwal.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-white rounded-2xl border">Belum ada jadwal mabar.</div>';
+          containerJadwal.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-white rounded-xl border col-span-full">Belum ada jadwal mabar aktif.</div>';
         } else {
           jadwalList.forEach(j => {
             const sisaKuota = (j.kuota || 0) - (j.terisi || 0);
             const isFull = sisaKuota <= 0;
             containerJadwal.innerHTML += `
-              <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <span class="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-md border">${j.id}</span>
-                    <h3 class="font-bold text-sm text-slate-900 mt-1">${j.info}</h3>
+              <div class="border border-slate-200 rounded-2xl p-3 bg-white shadow-xs flex flex-col justify-between space-y-2">
+                <div>
+                  <div class="flex justify-between items-start mb-1">
+                    <span class="text-[9px] bg-slate-100 text-slate-700 font-bold px-1.5 py-0.5 rounded border">${j.id}</span>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isFull ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'}">
+                      ${isFull ? 'Full 🔴' : `Sisa: ${sisaKuota}`}
+                    </span>
                   </div>
-                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${isFull ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'}">
-                    ${isFull ? 'Full 🔴' : `Sisa: ${sisaKuota}`}
-                  </span>
+                  <h3 class="font-bold text-xs text-slate-900 leading-snug">${j.info}</h3>
                 </div>
-                <div class="text-xs text-slate-600 flex justify-between bg-slate-50 p-2.5 rounded-xl border">
+                
+                <div class="text-[11px] text-slate-600 flex justify-between items-center bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-100">
                   <span>⏰ ${j.jam}</span>
-                  <strong class="text-slate-900">HTM: Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</strong>
+                  <strong class="text-slate-900">Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</strong>
                 </div>
-                <button onclick="bukaModalDaftar('${j.id}', \`${j.info}\`, ${j.htm})" ${isFull ? 'disabled class="w-full bg-slate-200 text-slate-400 font-bold text-xs py-2.5 rounded-xl cursor-not-allowed"' : 'class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs"'}>
+
+                <button onclick="bukaModalDaftar('${j.id}', \`${j.info}\`, ${j.htm})" ${isFull ? 'disabled class="w-full bg-slate-200 text-slate-400 font-bold text-[11px] py-2 rounded-xl cursor-not-allowed"' : 'class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] py-2 rounded-xl transition shadow-xs"'}>
                   ${isFull ? 'Kuota Penuh' : 'Daftar Mabar'}
                 </button>
               </div>`;
           });
         }
 
-        // 2. Render List Pemain Terdaftar (Tanpa Nominal Bayar/Tagihan di tampilan)
+        // 2. Render List Pemain Terdaftar (Tanpa Nominal Angka)
         const containerListPemain = document.getElementById('containerListPemain');
         containerListPemain.innerHTML = '';
         const pemainList = data.pemain || [];
 
         if (pemainList.length === 0) {
-          containerListPemain.innerHTML = '<div class="text-center text-xs text-slate-400 py-3">Belum ada pemain yang terdaftar.</div>';
+          containerListPemain.innerHTML = '<div class="text-center text-xs text-slate-400 py-3 bg-white rounded-xl border col-span-full">Belum ada pemain yang terdaftar.</div>';
         } else {
           let htmlPemain = '';
           jadwalList.forEach(j => {
-            const pemainDiJadwal = pemainList.filter(p => p.jadwalId === j.id);
+            const pemainDiJadwal = pemainList.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
             if (pemainDiJadwal.length > 0) {
-              htmlPemain += `
-                <div class="border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
-                  <div class="font-bold text-xs text-blue-900 mb-1.5">📍 [${j.id}] ${j.info} (${pemainDiJadwal.length} Pemain)</div>
-                  <ul class="space-y-1 pl-2">`;
+              let listNamaLi = '';
               pemainDiJadwal.forEach((p, idx) => {
-                htmlPemain += `<li class="text-xs text-slate-700 flex justify-between items-center"><span>${idx + 1}. ${p.nama}</span><span class="text-[10px] text-slate-400">${p.status || ''}</span></li>`;
+                listNamaLi += `<li class="text-[11px] text-slate-700 py-0.5 flex justify-between"><span>${idx + 1}. ${p.nama}</span><span class="text-[9px] text-slate-400">${p.status || ''}</span></li>`;
               });
-              htmlPemain += `</ul></div>`;
+
+              htmlPemain += `
+                <div class="border border-slate-200 rounded-2xl p-3 bg-white shadow-xs space-y-2">
+                  <div class="font-bold text-[11px] text-blue-900 border-b border-slate-100 pb-1.5">📍 [${j.id}] ${j.info} (${pemainDiJadwal.length} Pemain)</div>
+                  <ul class="space-y-0.5 pl-1 max-h-32 overflow-y-auto">
+                    ${listNamaLi}
+                  </ul>
+                </div>`;
             }
           });
-          containerListPemain.innerHTML = htmlPemain || '<div class="text-center text-xs text-slate-400 py-3">Belum ada pemain terdaftar.</div>';
+          containerListPemain.innerHTML = htmlPemain || '<div class="text-center text-xs text-slate-400 py-3 bg-white rounded-xl border col-span-full">Belum ada pemain terdaftar.</div>';
         }
       } catch (e) { console.error(e); }
     }
