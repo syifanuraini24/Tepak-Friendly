@@ -3,73 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Titik Rotasi - Jadwal & Pendaftaran Mabar</title>
+  <title>Tepak Friendly - Jadwal & Pendaftaran Mabar</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="config.js"></script>
   <script src="telegram.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-24">
 
-  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
+  <!-- Header Minimalis -->
+  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-3 shadow-2xs">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
-        <img src="logo.png" alt="Logo Titik Rotasi" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
+        <img src="logo.png" alt="Logo Tepak Friendly" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
         <div>
-          <h1 class="text-sm font-extrabold tracking-tight text-slate-900 leading-tight">Titik Rotasi</h1>
+          <h1 class="text-xs font-extrabold tracking-tight text-slate-900 leading-tight">Tepak Friendly</h1>
           <p class="text-[9px] text-slate-500 font-medium">Jadwal & Mabar Badminton</p>
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <a href="jualan.html" class="bg-orange-50 hover:bg-orange-100 text-orange-700 font-bold text-xs py-1.5 px-3 rounded-xl transition border border-orange-200 flex items-center gap-1 shadow-2xs">
-          🛍️ Jajanan
-        </a>
-        <a href="admin.html" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-1.5 px-2.5 rounded-xl transition">
-          ⚙️ Admin
-        </a>
-      </div>
+      <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        Live Sync
+      </span>
     </div>
   </header>
 
   <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
     <!-- JADWAL MABAR CONTAINER -->
     <div class="space-y-3">
-      <div class="flex justify-between items-center px-1">
-        <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">Pilih Jadwal Mabar</h2>
-        <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live Sync
-        </span>
-      </div>
+      <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide px-1">Pilih Jadwal Mabar</h2>
       <div id="containerJadwal" class="space-y-3">
-        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat jadwal...</div>
+        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200 shadow-2xs">Memuat jadwal...</div>
       </div>
     </div>
 
     <!-- MODAL PENDAFTARAN MABAR -->
-    <div id="modalDaftar" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+    <div id="modalDaftar" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
       <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto">
         <h3 id="modalJadwalTitle" class="font-bold text-sm text-slate-900 mb-1">Daftar Mabar</h3>
         <p class="text-[11px] text-slate-500 mb-3" id="modalJadwalSub">-</p>
         
         <div class="space-y-3">
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemain (Pisahkan dengan koma jika banyak)</label>
-            <textarea id="namaPemain" rows="2" placeholder="Cth: Budi, Andi, Siti" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50"></textarea>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemain (Pisahkan dengan koma)</label>
+            <textarea id="namaPemain" rows="2" placeholder="Cth: Budi, Andi, Siti" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition"></textarea>
           </div>
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Email / Kontak WA</label>
-            <input type="text" id="emailPemain" placeholder="Email atau nomor HP..." class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50">
+            <input type="text" id="emailPemain" placeholder="Email atau nomor HP..." class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
           </div>
         </div>
         
         <div class="flex gap-2 mt-4">
-          <button onclick="tutupModalDaftar()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-          <button onclick="kirimDaftarMabar()" id="btnKirimDaftar" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Daftar Sekarang</button>
+          <button onclick="tutupModalDaftar()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
+          <button onclick="kirimDaftarMabar()" id="btnKirimDaftar" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition">Daftar Sekarang</button>
         </div>
       </div>
     </div>
 
     <!-- MODAL INVOICE PEMBAYARAN MABAR -->
-    <div id="modalInvoice" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+    <div id="modalInvoice" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
       <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-3">
         <div class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Pendaftaran Berhasil</div>
         <h3 class="font-extrabold text-slate-900 text-base" id="invJudwalMabar">Jadwal Mabar</h3>
@@ -89,6 +81,23 @@
       </div>
     </div>
   </main>
+
+  <!-- FLOATING BOTTOM NAVIGATION BAR (Navigasi Melayang) -->
+  <nav aria-label="Navigasi Utama" class="fixed bottom-4 left-0 right-0 z-40 px-4">
+    <div class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
+      <!-- Menu Mabar (Aktif) -->
+      <a href="index" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-blue-600 text-white font-bold text-[10px] shadow-xs transition">
+        <span class="text-base leading-none mb-0.5">🏸</span>
+        <span>Mabar</span>
+      </a>
+      
+      <!-- Menu Jajanan UMKM -->
+      <a href="jualan" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
+        <span class="text-base leading-none mb-0.5">🛍️</span>
+        <span>Jajanan</span>
+      </a>
+    </div>
+  </nav>
 
   <script>
     const GAS_URL = CONFIG.GAS_URL;
