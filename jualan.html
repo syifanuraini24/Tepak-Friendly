@@ -22,7 +22,7 @@
       </a>
     </div>
 
-    <!-- Tombol Beralih Mode (Daftar Lapak / Lihat Lapak & Pesan) -->
+    <!-- Tombol Beralih Mode -->
     <div class="flex gap-2 mb-6">
       <button onclick="gantiTab('pesan')" id="tabPesan" class="flex-1 bg-orange-600 text-white font-bold text-xs py-2.5 rounded-lg shadow transition">🛍️ Lihat Lapak & Pesan Makanan</button>
       <button onclick="gantiTab('daftar')" id="tabDaftar" class="flex-1 bg-gray-200 text-gray-700 font-bold text-xs py-2.5 rounded-lg shadow transition">➕ Saya Mau Daftar Jualan</button>
@@ -36,8 +36,8 @@
       </div>
     </div>
 
-    <!-- TAB 2: DAFTAR JADI PENJUAL -->
-    <div id="sectionDaftar" class="hidden max-w-md mx-auto p-4 border border-orange-100 rounded bg-orange-50 shadow-sm">
+    <!-- TAB 2: DAFTAR JADI PENJUAL (DENGAN INPUT MENU DINAMIS) -->
+    <div id="sectionDaftar" class="hidden max-w-lg mx-auto p-4 border border-orange-100 rounded bg-orange-50 shadow-sm">
       <h2 class="font-bold mb-3 text-orange-900">Form Pendaftaran Lapak UMKM Baru</h2>
       
       <label class="block text-sm font-medium text-gray-700 mb-1">Pilih Jadwal Mabar</label>
@@ -48,12 +48,33 @@
       <label class="block text-sm font-medium text-gray-700 mb-1">Nama Brand / Penjual</label>
       <input type="text" id="namaPenjual" placeholder="Cth: Es Teh Mantul" class="w-full p-2.5 border rounded-lg mb-3 bg-white text-sm">
       
-      <label class="block text-sm font-medium text-gray-700 mb-1">Menu & Perkiraan Harga</label>
-      <input type="text" id="menuJualan" placeholder="Cth: Es Teh Manis (5000), Gorengan (2000)" class="w-full p-2.5 border rounded-lg mb-3 bg-white text-sm">
-      
       <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp</label>
       <input type="text" id="whatsappPenjual" placeholder="Cth: 081234567890" class="w-full p-2.5 border rounded-lg mb-3 bg-white text-sm">
       
+      <!-- Bagian Input Menu Dinamis (Maksimal 10) -->
+      <div class="mb-3">
+        <div class="flex justify-between items-center mb-1">
+          <label class="block text-sm font-medium text-gray-700">Daftar Menu & Harga (Maks. 10 Menu)</label>
+          <span id="counterMenu" class="text-xs text-gray-500 font-semibold">1/10 Menu</span>
+        </div>
+        
+        <div id="containerListMenu" class="space-y-2 mb-2">
+          <!-- Baris Menu Pertama (Default) -->
+          <div class="flex gap-2 menu-row">
+            <input type="text" placeholder="Nama Menu (Cth: Es Teh Manis)" class="flex-2 w-3/5 p-2 border rounded bg-white text-xs menu-nama">
+            <input type="number" placeholder="Harga (Rp)" class="flex-1 w-2/5 p-2 border rounded bg-white text-xs menu-harga">
+          </div>
+        </div>
+
+        <button type="button" onclick="tambahBarisMenu()" id="btnTambahMenu" class="bg-gray-200 hover:bg-gray-300 text-gray-800 text-xs font-bold py-1.5 px-3 rounded transition w-full border">
+          + Tambah Menu Lain
+        </button>
+      </div>
+
+      <div class="text-xs text-gray-600 mb-3 p-2 bg-white border rounded">
+        ℹ️ Lapak kamu akan diverifikasi oleh Admin terlebih dahulu sebelum tampil di halaman publik.
+      </div>
+
       <button onclick="daftarJualan()" id="btnSubmitJualan" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2.5 px-4 rounded-lg transition shadow">
         Kirim Pendaftaran Lapak ke Admin
       </button>
@@ -62,15 +83,16 @@
     <!-- MODAL POPUP FORM PEMESANAN MAKANAN -->
     <div id="modalPesan" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
       <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-5">
-        <h3 id="modalLapakTitle" class="font-bold text-base text-orange-800 mb-3">Pesan Makanan</h3>
+        <h3 id="modalLapakTitle" class="font-bold text-base text-orange-800 mb-2">Pesan Makanan</h3>
+        <p id="infoMenuLapak" class="text-xs text-gray-600 bg-gray-50 p-2 rounded mb-3 border max-h-24 overflow-y-auto"></p>
         
         <label class="block text-xs font-medium text-gray-700 mb-1">Nama Pemesan</label>
         <input type="text" id="pesanNama" placeholder="Nama kamu..." class="w-full p-2 border rounded text-xs mb-2 bg-white">
         
-        <label class="block text-xs font-medium text-gray-700 mb-1">Detail Pesanan (Menu & Jumlah)</label>
-        <textarea id="pesanDetail" placeholder="Cth: Es Teh Manis 2 cup, Dimsum 1 porsi" class="w-full p-2 border rounded text-xs mb-2 bg-white h-20"></textarea>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Detail Pesanan (Menu & Catatan)</label>
+        <textarea id="pesanDetail" placeholder="Cth: Es Teh Manis 2 cup (tidak terlalu manis)" class="w-full p-2 border rounded text-xs mb-2 bg-white h-16"></textarea>
         
-        <label class="block text-xs font-medium text-gray-700 mb-1">Total Harga Makanan (Rp)</label>
+        <label class="block text-xs font-medium text-gray-700 mb-1">Total Harga Sesuai Menu (Rp)</label>
         <input type="number" id="pesanTotalHarga" placeholder="Cth: 15000" class="w-full p-2 border rounded text-xs mb-3 bg-white">
         
         <div class="flex gap-2">
@@ -120,19 +142,54 @@
       }
     }
 
+    // Fungsi Tambah Baris Menu Dinamis (Maksimal 10)
+    function tambahBarisMenu() {
+      const container = document.getElementById('containerListMenu');
+      const totalBaris = container.getElementsByClassName('menu-row').length;
+
+      if (totalBaris >= 10) {
+        alert('Maksimal hanya dapat menambahkan 10 menu!');
+        return;
+      }
+
+      const div = document.createElement('div');
+      div.className = 'flex gap-2 menu-row items-center';
+      div.innerHTML = `
+        <input type="text" placeholder="Nama Menu" class="flex-2 w-3/5 p-2 border rounded bg-white text-xs menu-nama">
+        <input type="number" placeholder="Harga (Rp)" class="flex-1 w-2/5 p-2 border rounded bg-white text-xs menu-harga">
+        <button type="button" onclick="hapusBarisMenu(this)" class="bg-red-100 hover:bg-red-200 text-red-600 font-bold text-xs px-2 py-2 rounded">✕</button>
+      `;
+      container.appendChild(div);
+      updateCounterMenu();
+    }
+
+    function hapusBarisMenu(btn) {
+      btn.closest('.menu-row').remove();
+      updateCounterMenu();
+    }
+
+    function updateCounterMenu() {
+      const totalBaris = document.getElementById('containerListMenu').getElementsByClassName('menu-row').length;
+      document.getElementById('counterMenu').innerText = `${totalBaris}/10 Menu`;
+      const btnTambah = document.getElementById('btnTambahMenu');
+      if (totalBaris >= 10) {
+        btnTambah.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        btnTambah.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    }
+
     async function loadDataJualanPage() {
       try {
         const response = await fetch(GAS_URL);
         const data = await response.json();
         
-        // Dropdown jadwal
         const selectJadwal = document.getElementById('pilihJadwalJualan');
         selectJadwal.innerHTML = '<option value="">-- Pilih Jadwal Mabar --</option>';
         data.jadwal.forEach(j => {
           selectJadwal.innerHTML += `<option value="${j.id}" data-info="${j.info}">[${j.id}] ${j.info} (${j.jam})</option>`;
         });
 
-        // List Lapak Publik
         const container = document.getElementById('containerLapakPublik');
         container.innerHTML = '';
         const lapakDisetujui = (data.jualan || []).filter(l => l.status && l.status.includes('Disetujui'));
@@ -148,11 +205,11 @@
               <div>
                 <span class="text-xs bg-orange-200 text-orange-900 font-bold px-2 py-0.5 rounded">📍 ${l.jadwalId} - ${l.jadwalInfo}</span>
                 <h3 class="font-bold text-base text-gray-900 mt-2">🛍️ ${l.namaPenjual}</h3>
-                <p class="text-xs text-gray-700 mt-1"><strong>Menu & Harga:</strong> ${l.menuJualan}</p>
+                <p class="text-xs text-gray-700 mt-1 whitespace-pre-line"><strong>Menu & Harga:</strong><br>${l.menuJualan}</p>
               </div>
               <div class="mt-4 pt-2 border-t flex justify-between items-center">
                 <span class="text-xs text-gray-500">WA: ${l.whatsapp}</span>
-                <button onclick="bukaModalPesan('${l.namaPenjual}', '${l.jadwalId}', '${l.jadwalInfo}')" class="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3 py-1.5 rounded transition shadow">
+                <button onclick="bukaModalPesan('${l.namaPenjual}', '${l.jadwalId}', '${l.jadwalInfo}', \`${encodeURIComponent(l.menuJualan)}\`)" class="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3 py-1.5 rounded transition shadow">
                   🛍️ Pesan Menu
                 </button>
               </div>
@@ -163,11 +220,12 @@
       }
     }
 
-    function bukaModalPesan(namaLapak, jId, jInfo) {
+    function bukaModalPesan(namaLapak, jId, jInfo, menuEncoded) {
       lapakDipilih = namaLapak;
       jadwalDipilih = jId;
       infoJadwalDipilih = jInfo;
       document.getElementById('modalLapakTitle').innerText = `Pesan ke: ${namaLapak}`;
+      document.getElementById('infoMenuLapak').innerText = decodeURIComponent(menuEncoded);
       document.getElementById('modalPesan').classList.remove('hidden');
     }
 
@@ -207,7 +265,6 @@
           document.getElementById('pesanDetail').value = '';
           document.getElementById('pesanTotalHarga').value = '';
           
-          // Tampilkan modal QRIS tagihan pesanan
           const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(result.totalTagihan);
           document.getElementById('txtTagihanPesanan').innerText = formatRp;
           document.getElementById('modalBayarPesanan').classList.remove('hidden');
@@ -231,11 +288,28 @@
       const select = document.getElementById('pilihJadwalJualan');
       const opt = select.options[select.selectedIndex];
       const namaPenjual = document.getElementById('namaPenjual').value.trim();
-      const menuJualan = document.getElementById('menuJualan').value.trim();
       const whatsapp = document.getElementById('whatsappPenjual').value.trim();
       const btn = document.getElementById('btnSubmitJualan');
 
-      if(!opt.value || !namaPenjual || !menuJualan || !whatsapp) return alert('Semua form pendaftaran lapak harus diisi!');
+      if(!opt.value || !namaPenjual || !whatsapp) return alert('Pilih jadwal, nama brand, dan nomor WhatsApp!');
+
+      // Kumpulkan data menu dari baris input dinamis
+      const rowMenus = document.querySelectorAll('.menu-row');
+      let menuListFormatted = [];
+
+      rowMenus.forEach(row => {
+        const namaMenu = row.querySelector('.menu-nama').value.trim();
+        const hargaMenu = row.querySelector('.menu-harga').value.trim();
+        if (namaMenu && hargaMenu) {
+          menuListFormatted.push(`• ${namaMenu} (Rp ${parseInt(hargaMenu).toLocaleString('id-ID')})`);
+        }
+      });
+
+      if (menuListFormatted.length === 0) {
+        return alert('Minimal masukkan 1 menu beserta harganya!');
+      }
+
+      const menuJualanString = menuListFormatted.join('\n');
 
       btn.innerText = 'Mengirim...';
       btn.disabled = true;
@@ -243,14 +317,28 @@
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'register_jualan', jadwalId: opt.value, jadwalInfo: opt.getAttribute('data-info'), namaPenjual, menuJualan, whatsapp })
+          body: JSON.stringify({ 
+            action: 'register_jualan', 
+            jadwalId: opt.value, 
+            jadwalInfo: opt.getAttribute('data-info'), 
+            namaPenjual, 
+            menuJualan: menuJualanString, 
+            whatsapp 
+          })
         });
         const res = await response.json();
         if (res.status === 'success') {
           alert('Pendaftaran lapak berhasil! Menunggu approval Admin Jualan.');
           document.getElementById('namaPenjual').value = '';
-          document.getElementById('menuJualan').value = '';
           document.getElementById('whatsappPenjual').value = '';
+          select.selectedIndex = 0;
+          // Reset baris menu
+          document.getElementById('containerListMenu').innerHTML = `
+            <div class="flex gap-2 menu-row items-center">
+              <input type="text" placeholder="Nama Menu (Cth: Es Teh Manis)" class="flex-2 w-3/5 p-2 border rounded bg-white text-xs menu-nama">
+              <input type="number" placeholder="Harga (Rp)" class="flex-1 w-2/5 p-2 border rounded bg-white text-xs menu-harga">
+            </div>`;
+          updateCounterMenu();
           gantiTab('pesan');
           loadDataJualanPage();
         }
