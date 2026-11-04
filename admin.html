@@ -76,6 +76,18 @@
     </div>
   </div>
 
+  <!-- Modal Konfirmasi Custom (Di Tengah Layar) -->
+  <div id="customModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-sm w-full p-5 transform transition-all">
+      <h3 id="modalTitle" class="font-bold text-base text-gray-800 mb-2">Konfirmasi Tindakan</h3>
+      <p id="modalDesc" class="text-xs text-gray-600 mb-4">Apakah kamu yakin ingin melanjutkan tindakan ini?</p>
+      <div class="flex gap-2">
+        <button id="modalBtnCancel" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold text-xs py-2 px-3 rounded-lg transition">Batal</button>
+        <button id="modalBtnConfirm" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold text-xs py-2 px-3 rounded-lg transition">Ya, Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
   <script src="config.js"></script>
   <script>
     const GAS_URL = CONFIG.GAS_URL;
@@ -141,6 +153,37 @@
       btnLogin.innerText = 'Masuk';
       btnLogin.disabled = false;
       if (pesanAlert) alert('Berhasil logout.');
+    }
+
+    // Fungsi Kustom Pengganti confirm() bawaan browser
+    function showConfirmModal(title, desc, confirmButtonText, confirmButtonClass, onConfirm) {
+      const modal = document.getElementById('customModal');
+      const titleEl = document.getElementById('modalTitle');
+      const descEl = document.getElementById('modalDesc');
+      const btnConfirm = document.getElementById('modalBtnConfirm');
+      const btnCancel = document.getElementById('modalBtnCancel');
+
+      titleEl.innerText = title;
+      descEl.innerText = desc;
+      btnConfirm.innerText = confirmButtonText;
+      btnConfirm.className = `flex-1 font-bold text-xs py-2 px-3 rounded-lg transition text-white ${confirmButtonClass}`;
+
+      modal.classList.remove('hidden');
+
+      // Hapus event listener lama dengan cara clone node agar tidak menumpuk
+      const newBtnConfirm = btnConfirm.cloneNode(true);
+      const newBtnCancel = btnCancel.cloneNode(true);
+      btnConfirm.parentNode.replaceChild(newBtnConfirm, btnConfirm);
+      btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+
+      document.getElementById('modalBtnConfirm').addEventListener('click', () => {
+        modal.classList.add('hidden');
+        onConfirm();
+      });
+
+      document.getElementById('modalBtnCancel').addEventListener('click', () => {
+        modal.classList.add('hidden');
+      });
     }
 
     async function loadDataAdmin() {
@@ -321,112 +364,115 @@
       }
     }
 
-    // ACC LUNAS TANPA REFRESH
+    // ACC LUNAS DENGAN MODAL KUSTOM & TANPA REFRESH
     async function accPemain(rowIndex, btnElement) {
-      if(!confirm('Konfirmasi pemain ini sudah bayar dan kirim email lunas?')) return;
-      
-      const liElement = btnElement.closest('li');
-      const nominal = parseInt(liElement.getAttribute('data-nominal') || 0);
-      
-      btnElement.innerText = 'Memproses...';
-      btnElement.disabled = true;
-      
-      try {
-        const response = await fetch(GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex })
-        });
-        const result = await response.json();
-        
-        if(result.status === 'updated' || result.status === 'success') {
-          // 1. Hilangkan elemen dari list pending secara mulus
-          liElement.style.transition = 'opacity 0.3s ease';
-          liElement.style.opacity = '0';
-          setTimeout(() => {
-            liElement.remove();
+      showConfirmModal(
+        "Konfirmasi Pembayaran",
+        "Konfirmasi pemain ini sudah bayar dan kirim email e-ticket lunas?",
+        "Ya, ACC Lunas",
+        "bg-green-600 hover:bg-green-700",
+        async () => {
+          const liElement = btnElement.closest('li');
+          const nominal = parseInt(liElement.getAttribute('data-nominal') || 0);
+          
+          btnElement.innerText = 'Memproses...';
+          btnElement.disabled = true;
+          
+          try {
+            const response = await fetch(GAS_URL, {
+              method: 'POST',
+              body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex })
+            });
+            const result = await response.json();
             
-            // Cek jika list pending kosong
-            const listMenunggu = document.getElementById('listMenunggu');
-            if (listMenunggu.children.length === 0) {
-              listMenunggu.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded border">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
+            if(result.status === 'updated' || result.status === 'success') {
+              liElement.style.transition = 'opacity 0.3s ease';
+              liElement.style.opacity = '0';
+              setTimeout(() => {
+                liElement.remove();
+                const listMenunggu = document.getElementById('listMenunggu');
+                if (listMenunggu.children.length === 0) {
+                  listMenunggu.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded border">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
+                }
+              }, 300);
+
+              const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+              const elLunas = document.getElementById('totalDanaLunas');
+              const elPending = document.getElementById('totalDanaPending');
+              
+              let currentLunas = parseInt(elLunas.innerText.replace(/[^0-9]/g, '')) || 0;
+              let currentPending = parseInt(elPending.innerText.replace(/[^0-9]/g, '')) || 0;
+              
+              currentLunas += nominal;
+              currentPending = Math.max(0, currentPending - nominal);
+              
+              elLunas.innerText = formatRp.format(currentLunas);
+              elPending.innerText = formatRp.format(currentPending);
+
+              loadDataAdminSilent();
+            } else {
+              throw new Error(result.message);
             }
-          }, 300);
-
-          // 2. Update nominal dana masuk & pending secara instan di layar
-          const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
-          
-          const elLunas = document.getElementById('totalDanaLunas');
-          const elPending = document.getElementById('totalDanaPending');
-          
-          // Ambil angka saat ini dari teks
-          let currentLunas = parseInt(elLunas.innerText.replace(/[^0-9]/g, '')) || 0;
-          let currentPending = parseInt(elPending.innerText.replace(/[^0-9]/g, '')) || 0;
-          
-          currentLunas += nominal;
-          currentPending = Math.max(0, currentPending - nominal);
-          
-          elLunas.innerText = formatRp.format(currentLunas);
-          elPending.innerText = formatRp.format(currentPending);
-
-          // Sinkronisasi data di latar belakang untuk memperbarui summary kuota
-          loadDataAdminSilent();
-        } else {
-          throw new Error(result.message);
+          } catch (error) {
+            alert('Gagal mengupdate status: ' + error.message);
+            btnElement.innerText = 'ACC LUNAS';
+            btnElement.disabled = false;
+            liElement.style.opacity = '1';
+          }
         }
-      } catch (error) {
-        alert('Gagal mengupdate status: ' + error.message);
-        btnElement.innerText = 'ACC LUNAS';
-        btnElement.disabled = false;
-        liElement.style.opacity = '1';
-      }
+      );
     }
 
-    // HAPUS PESERTA TANPA REFRESH
+    // HAPUS PESERTA DENGAN MODAL KUSTOM & TANPA REFRESH
     async function hapusPemain(rowIndex, btnElement) {
-      if(!confirm('Yakin ingin menghapus peserta ini? Slot kuota akan langsung terbuka kembali.')) return;
-      
-      const liElement = btnElement.closest('li');
-      const nominal = parseInt(liElement.getAttribute('data-nominal') || 0);
-      
-      btnElement.innerText = 'Menghapus...';
-      btnElement.disabled = true;
+      showConfirmModal(
+        "Hapus Peserta",
+        "Yakin ingin menghapus peserta ini? Slot kuota akan langsung terbuka kembali.",
+        "Ya, Hapus",
+        "bg-red-600 hover:bg-red-700",
+        async () => {
+          const liElement = btnElement.closest('li');
+          const nominal = parseInt(liElement.getAttribute('data-nominal') || 0);
+          
+          btnElement.innerText = 'Menghapus...';
+          btnElement.disabled = true;
 
-      try {
-        const response = await fetch(GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'delete_row', rowIndex: rowIndex })
-        });
-        const result = await response.json();
-        
-        if(result.status === 'deleted' || result.status === 'success') {
-          liElement.style.transition = 'opacity 0.3s ease';
-          liElement.style.opacity = '0';
-          setTimeout(() => {
-            liElement.remove();
+          try {
+            const response = await fetch(GAS_URL, {
+              method: 'POST',
+              body: JSON.stringify({ action: 'delete_row', rowIndex: rowIndex })
+            });
+            const result = await response.json();
             
-            const listMenunggu = document.getElementById('listMenunggu');
-            if (listMenunggu.children.length === 0) {
-              listMenunggu.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded border">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
+            if(result.status === 'deleted' || result.status === 'success') {
+              liElement.style.transition = 'opacity 0.3s ease';
+              liElement.style.opacity = '0';
+              setTimeout(() => {
+                liElement.remove();
+                const listMenunggu = document.getElementById('listMenunggu');
+                if (listMenunggu.children.length === 0) {
+                  listMenunggu.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded border">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
+                }
+              }, 300);
+
+              const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+              const elPending = document.getElementById('totalDanaPending');
+              let currentPending = parseInt(elPending.innerText.replace(/[^0-9]/g, '')) || 0;
+              currentPending = Math.max(0, currentPending - nominal);
+              elPending.innerText = formatRp.format(currentPending);
+
+              loadDataAdminSilent();
+            } else {
+              throw new Error(result.message);
             }
-          }, 300);
-
-          // Kurangi potensi pending secara instan
-          const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
-          const elPending = document.getElementById('totalDanaPending');
-          let currentPending = parseInt(elPending.innerText.replace(/[^0-9]/g, '')) || 0;
-          currentPending = Math.max(0, currentPending - nominal);
-          elPending.innerText = formatRp.format(currentPending);
-
-          loadDataAdminSilent();
-        } else {
-          throw new Error(result.message);
+          } catch (error) {
+            alert('Gagal menghapus data: ' + error.message);
+            btnElement.innerText = 'HAPUS';
+            btnElement.disabled = false;
+            liElement.style.opacity = '1';
+          }
         }
-      } catch (error) {
-        alert('Gagal menghapus data: ' + error.message);
-        btnElement.innerText = 'HAPUS';
-        btnElement.disabled = false;
-        liElement.style.opacity = '1';
-      }
+      );
     }
 
     // Sinkronisasi senyap untuk memperbarui summary kuota di latar belakang
