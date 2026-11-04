@@ -30,7 +30,7 @@
         </div>
       </div>
 
-      <!-- 1. BAGIAN: LAPAK AKTIF & MULTI-JADWAL -->
+      <!-- 1. BAGIAN: LAPAK AKTIF & EDIT -->
       <div>
         <h2 class="font-bold text-xs text-emerald-800 uppercase tracking-wide mb-2">🟢 Lapak Aktif & Penugasan Jadwal</h2>
         <ul id="listLapakAktif" class="space-y-2.5">
@@ -56,7 +56,35 @@
     </div>
   </div>
 
-  <!-- MODAL KONFIRMASI KUSTOM (Fixed di Tengah Layar & Smooth) -->
+  <!-- MODAL EDIT LAPAK AKTIF -->
+  <div id="modalEditLapak" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 transform scale-95 transition-transform duration-300" id="modalEditBox">
+      <h3 class="font-bold text-sm text-slate-900">✏️ Edit Lapak Aktif</h3>
+      <input type="hidden" id="editRowIndex">
+      
+      <div class="space-y-2.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Nama Brand / Penjual</label>
+          <input type="text" id="editNamaPenjual" class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Nomor WhatsApp</label>
+          <input type="text" id="editWhatsapp" class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Daftar Menu & Harga</label>
+          <textarea id="editMenuJualan" rows="4" class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50 font-mono text-[11px]"></textarea>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button onclick="tutupModalEdit()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition">Batal</button>
+        <button onclick="simpanEditLapak()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition shadow-xs">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL KONFIRMASI KUSTOM -->
   <div id="customModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
     <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 transform scale-95 transition-transform duration-300" id="modalBox">
       <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Konfirmasi Tindakan</h3>
@@ -72,6 +100,7 @@
   <script>
     const GAS_URL = CONFIG.GAS_URL;
     let listJadwalGlobal = [];
+    let cacheDataJualan = [];
 
     document.addEventListener('DOMContentLoaded', () => {
       if (localStorage.getItem('tepak_jualan_login_time')) {
@@ -98,7 +127,6 @@
 
     function logout() { localStorage.removeItem('tepak_jualan_login_time'); window.location.reload(); }
 
-    // Modal Konfirmasi Persis di Tengah Layar dengan Animasi Halus
     function showConfirmModal(title, desc, confirmText, confirmClass, onConfirm) {
       const modal = document.getElementById('customModal');
       const modalBox = document.getElementById('modalBox');
@@ -144,27 +172,31 @@
         const response = await fetch(GAS_URL);
         const data = await response.json();
         listJadwalGlobal = data.jadwal || [];
+        cacheDataJualan = data.jualan || [];
 
-        // 1. RENDER LAPAK AKTIF
-        const aktifLapak = (data.jualan || []).filter(item => item.status && item.status.toString().toLowerCase().includes('disetujui'));
+        // 1. RENDER LAPAK AKTIF (DENGAN TOMBOL EDIT)
+        const aktifLapak = cacheDataJualan.filter(item => item.status && item.status.toString().toLowerCase().includes('disetujui'));
         listLapakAktif.innerHTML = '';
         if (aktifLapak.length === 0) {
           listLapakAktif.innerHTML = '<li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Belum ada lapak yang aktif.</li>';
         } else {
           aktifLapak.forEach(item => {
             listLapakAktif.innerHTML += `
-              <li class="p-3 border border-emerald-200 bg-emerald-50/40 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs transition-all duration-300" id="row_jualan_${item.rowIndex}">
+              <li class="p-3.5 border border-emerald-200 bg-emerald-50/40 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs transition-all duration-300" id="row_jualan_${item.rowIndex}">
                 <div>
                   <strong class="text-slate-900 text-sm">🛍️ ${item.namaPenjual}</strong> (WA: ${item.whatsapp})<br>
-                  <span class="text-emerald-700 font-bold">📍 Jadwal Tersedia: ${item.jadwalInfo}</span>
+                  <span class="text-emerald-700 font-bold">📍 Jadwal: ${item.jadwalInfo}</span>
                 </div>
-                <button onclick="hapusLapak(${item.rowIndex}, this)" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-3 py-1.5 rounded-lg transition">Hapus / Nonaktifkan</button>
+                <div class="flex gap-1.5">
+                  <button onclick="bukaModalEdit(${item.rowIndex})" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-2xs">✏️ Edit</button>
+                  <button onclick="hapusLapak(${item.rowIndex}, this)" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-3 py-1.5 rounded-lg transition">Hapus</button>
+                </div>
               </li>`;
           });
         }
 
         // 2. RENDER PENDING LAPAK
-        const pendingLapak = (data.jualan || []).filter(item => item.status && item.status.toString().toLowerCase().includes('menunggu'));
+        const pendingLapak = cacheDataJualan.filter(item => item.status && item.status.toString().toLowerCase().includes('menunggu'));
         listLapak.innerHTML = '';
         if (pendingLapak.length === 0) {
           listLapak.innerHTML = '<li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Tidak ada pendaftaran lapak baru.</li>';
@@ -199,7 +231,7 @@
           });
         }
 
-        // 3. RENDER PESANAN PENDING (DENGAN ANIMASI HAPUS/ACC HALUS TANPA RELOAD)
+        // 3. RENDER PESANAN PENDING
         const pendingPesanan = (data.pesanan || []).filter(item => item.status && item.status.toString().toLowerCase().includes('menunggu'));
         listPesanan.innerHTML = '';
         if (pendingPesanan.length === 0) {
@@ -221,6 +253,58 @@
           });
         }
       } catch (e) { console.error(e); }
+    }
+
+    // FUNGSI EDIT LAPAK
+    function bukaModalEdit(rowIndex) {
+      const item = cacheDataJualan.find(l => l.rowIndex === rowIndex);
+      if (!item) return alert('Data lapak tidak ditemukan!');
+
+      document.getElementById('editRowIndex').value = rowIndex;
+      document.getElementById('editNamaPenjual').value = item.namaPenjual;
+      document.getElementById('editWhatsapp').value = item.whatsapp;
+      document.getElementById('editMenuJualan').value = item.menuJualan;
+
+      const modal = document.getElementById('modalEditLapak');
+      const box = document.getElementById('modalEditBox');
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        box.classList.remove('scale-95');
+        box.classList.add('scale-100');
+      });
+    }
+
+    function tutupModalEdit() {
+      const modal = document.getElementById('modalEditLapak');
+      const box = document.getElementById('modalEditBox');
+      box.classList.remove('scale-100');
+      box.classList.add('scale-95');
+      setTimeout(() => modal.classList.add('hidden'), 200);
+    }
+
+    async function simpanEditLapak() {
+      const rowIndex = document.getElementById('editRowIndex').value;
+      const namaPenjual = document.getElementById('editNamaPenjual').value.trim();
+      const whatsapp = document.getElementById('editWhatsapp').value.trim();
+      const menuJualan = document.getElementById('editMenuJualan').value.trim();
+
+      if (!namaPenjual || !whatsapp || !menuJualan) return alert('Semua kolom wajib diisi!');
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'edit_jualan', rowIndex, namaPenjual, whatsapp, menuJualan })
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+          tutupModalEdit();
+          loadDataAdminJualan();
+        } else {
+          alert('Gagal mengupdate lapak.');
+        }
+      } catch (e) {
+        alert('Terjadi kesalahan koneksi.');
+      }
     }
 
     async function accLapak(rowIndex, btn) {
