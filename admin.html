@@ -51,7 +51,7 @@
           <input type="text" id="addId" placeholder="ID Jadwal (Cth: Fun-03)" class="p-2 border rounded text-xs bg-white">
           <input type="text" id="addInfo" placeholder="Info Jadwal/Lokasi (Cth: Gor...)" class="p-2 border rounded text-xs bg-white">
           <input type="text" id="addJam" placeholder="Jam Main (Cth: 19:00 - 21:00)" class="p-2 border rounded text-xs bg-white">
-          <input type="number" id="addHtm" placeholder="HTM (Cth: 35000)" class="p-2 border rounded text-xs bg-white">
+          <input type="number" id="addHtm" placeholder="HTM (Cth: 35000 / 0 untuk gratis)" class="p-2 border rounded text-xs bg-white">
           <input type="number" id="addKuota" placeholder="Kuota (Cth: 16)" class="p-2 border rounded text-xs bg-white">
         </div>
         <button onclick="tambahJadwalBaru(this)" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded transition">
@@ -59,7 +59,7 @@
         </button>
       </div>
 
-      <!-- Summary Kuota per ID Jadwal (Dilengkapi List Nama & Pembayaran) -->
+      <!-- Summary Kuota per ID Jadwal -->
       <div>
         <h2 class="font-bold text-sm text-gray-700 mb-2">📋 Summary Kuota & List Peserta per Jadwal</h2>
         <div id="summaryJadwalList" class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs"></div>
@@ -79,7 +79,7 @@
   <script src="config.js"></script>
   <script>
     const GAS_URL = CONFIG.GAS_URL;
-    const SESSION_DURATION = 6 * 60 * 60 * 1000; // Durasi kedaluwarsa 6 Jam
+    const SESSION_DURATION = 6 * 60 * 60 * 1000; // Durasi sesi 6 Jam
 
     document.addEventListener('DOMContentLoaded', () => {
       cekSesiLogin();
@@ -252,7 +252,7 @@
           }
 
           list.innerHTML += `
-            <li class="p-3 border border-orange-200 bg-orange-50 rounded flex flex-col shadow-sm">
+            <li class="p-3 border border-orange-200 bg-orange-50 rounded flex flex-col shadow-sm" data-row="${item.rowIndex}" data-nominal="${item.tagihan || 0}">
               <div class="flex justify-between items-start mb-2">
                 <div>
                   <span class="font-bold text-sm block">${item.nama}</span>
@@ -287,7 +287,7 @@
       const htm = document.getElementById('addHtm').value.trim();
       const kuota = document.getElementById('addKuota').value.trim();
 
-      if(!id || !info || !jam || !htm || !kuota) {
+      if(!id || !info || !jam || htm === '' || !kuota) {
         return alert('Semua kolom form tambah jadwal harus diisi!');
       }
 
@@ -321,9 +321,14 @@
       }
     }
 
+    // ACC LUNAS TANPA REFRESH
     async function accPemain(rowIndex, btnElement) {
       if(!confirm('Konfirmasi pemain ini sudah bayar dan kirim email lunas?')) return;
-      btnElement.innerText = 'Proses...';
+      
+      const liElement = btnElement.closest('li');
+      const nominal = parseInt(liElement.getAttribute('data-nominal') || 0);
+      
+      btnElement.innerText = 'Memproses...';
       btnElement.disabled = true;
       
       try {
@@ -332,8 +337,39 @@
           body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex })
         });
         const result = await response.json();
+        
         if(result.status === 'updated' || result.status === 'success') {
-          await loadDataAdmin(); 
+          // 1. Hilangkan elemen dari list pending secara mulus
+          liElement.style.transition = 'opacity 0.3s ease';
+          liElement.style.opacity = '0';
+          setTimeout(() => {
+            liElement.remove();
+            
+            // Cek jika list pending kosong
+            const listMenunggu = document.getElementById('listMenunggu');
+            if (listMenunggu.children.length === 0) {
+              listMenunggu.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded border">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
+            }
+          }, 300);
+
+          // 2. Update nominal dana masuk & pending secara instan di layar
+          const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+          
+          const elLunas = document.getElementById('totalDanaLunas');
+          const elPending = document.getElementById('totalDanaPending');
+          
+          // Ambil angka saat ini dari teks
+          let currentLunas = parseInt(elLunas.innerText.replace(/[^0-9]/g, '')) || 0;
+          let currentPending = parseInt(elPending.innerText.replace(/[^0-9]/g, '')) || 0;
+          
+          currentLunas += nominal;
+          currentPending = Math.max(0, currentPending - nominal);
+          
+          elLunas.innerText = formatRp.format(currentLunas);
+          elPending.innerText = formatRp.format(currentPending);
+
+          // Sinkronisasi data di latar belakang untuk memperbarui summary kuota
+          loadDataAdminSilent();
         } else {
           throw new Error(result.message);
         }
@@ -341,22 +377,47 @@
         alert('Gagal mengupdate status: ' + error.message);
         btnElement.innerText = 'ACC LUNAS';
         btnElement.disabled = false;
+        liElement.style.opacity = '1';
       }
     }
 
+    // HAPUS PESERTA TANPA REFRESH
     async function hapusPemain(rowIndex, btnElement) {
       if(!confirm('Yakin ingin menghapus peserta ini? Slot kuota akan langsung terbuka kembali.')) return;
-      btnElement.innerText = 'Hapus...';
-      btnElement.disabled = true;
       
+      const liElement = btnElement.closest('li');
+      const nominal = parseInt(liElement.getAttribute('data-nominal') || 0);
+      
+      btnElement.innerText = 'Menghapus...';
+      btnElement.disabled = true;
+
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'delete_row', rowIndex: rowIndex })
         });
         const result = await response.json();
+        
         if(result.status === 'deleted' || result.status === 'success') {
-          await loadDataAdmin(); 
+          liElement.style.transition = 'opacity 0.3s ease';
+          liElement.style.opacity = '0';
+          setTimeout(() => {
+            liElement.remove();
+            
+            const listMenunggu = document.getElementById('listMenunggu');
+            if (listMenunggu.children.length === 0) {
+              listMenunggu.innerHTML = '<li class="text-center text-green-600 text-sm font-bold p-4 bg-green-50 rounded border">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
+            }
+          }, 300);
+
+          // Kurangi potensi pending secara instan
+          const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+          const elPending = document.getElementById('totalDanaPending');
+          let currentPending = parseInt(elPending.innerText.replace(/[^0-9]/g, '')) || 0;
+          currentPending = Math.max(0, currentPending - nominal);
+          elPending.innerText = formatRp.format(currentPending);
+
+          loadDataAdminSilent();
         } else {
           throw new Error(result.message);
         }
@@ -364,6 +425,67 @@
         alert('Gagal menghapus data: ' + error.message);
         btnElement.innerText = 'HAPUS';
         btnElement.disabled = false;
+        liElement.style.opacity = '1';
+      }
+    }
+
+    // Sinkronisasi senyap untuk memperbarui summary kuota di latar belakang
+    async function loadDataAdminSilent() {
+      try {
+        const response = await fetch(GAS_URL);
+        const data = await response.json();
+        const summaryJadwalDiv = document.getElementById('summaryJadwalList');
+        summaryJadwalDiv.innerHTML = '';
+        
+        const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
+
+        data.jadwal.forEach(j => {
+          const pesertaJadwal = data.pemain.filter(p => p.jadwalId === j.id);
+          const lunasCount = pesertaJadwal.filter(p => p.status.includes('Lunas')).length;
+          const pendingCount = pesertaJadwal.filter(p => p.status.includes('Menunggu')).length;
+
+          let listNamaHtml = '';
+          if (pesertaJadwal.length === 0) {
+            listNamaHtml = '<li class="text-gray-400 italic text-[11px] py-1 text-center">Belum ada peserta terdaftar.</li>';
+          } else {
+            pesertaJadwal.forEach((p, idx) => {
+              const isLunas = p.status.includes('Lunas');
+              const nominalTagihan = formatRp.format(p.tagihan || 0);
+              listNamaHtml += `
+                <li class="py-1 px-2 border-b last:border-b-0 flex justify-between items-center">
+                  <span>${idx + 1}. <strong>${p.nama}</strong></span>
+                  <div class="text-right">
+                    <span class="block text-[10px] text-gray-500 font-mono">${nominalTagihan}</span>
+                    <span class="font-semibold ${isLunas ? 'text-green-600' : 'text-orange-500'}">${p.status}</span>
+                  </div>
+                </li>`;
+            });
+          }
+
+          summaryJadwalDiv.innerHTML += `
+            <div class="border rounded-lg p-3 bg-gray-50 shadow-sm flex flex-col justify-between">
+              <div>
+                <div class="flex justify-between items-center mb-1 border-b pb-1.5">
+                  <span class="font-bold text-blue-800">📌 [${j.id}] ${j.info}</span>
+                  <span class="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded font-semibold">Kuota: ${pesertaJadwal.length}/${j.kuota}</span>
+                </div>
+                <div class="text-gray-500 mb-2">⏰ ${j.jam}</div>
+                
+                <div class="bg-white rounded border p-1.5">
+                  <div class="text-[11px] font-bold text-gray-700 mb-1 border-b pb-0.5">Daftar Peserta:</div>
+                  <ul class="divide-y max-h-36 overflow-y-auto">
+                    ${listNamaHtml}
+                  </ul>
+                </div>
+              </div>
+              <div class="text-gray-600 flex justify-between mt-2 pt-1 border-t text-[11px]">
+                <span>🟢 Lunas: <strong>${lunasCount}</strong></span>
+                <span>🟡 Pending: <strong>${pendingCount}</strong></span>
+              </div>
+            </div>`;
+        });
+      } catch (e) {
+        console.error("Gagal sinkronisasi senyap:", e);
       }
     }
   </script>
