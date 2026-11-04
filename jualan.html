@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lapak UMKM & Pesan Jajanan - Tepak Friendly</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Library jsPDF untuk unduh PDF otomatis -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="config.js"></script>
   <script src="telegram-jualan.js"></script>
 </head>
@@ -141,8 +143,8 @@
           <span class="text-[10px] text-slate-500 block">BCA 0083677071 a.n Andi</span>
         </div>
 
-        <!-- Tombol Download Resi -->
-        <button onclick="downloadResi()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-sm">📥 Download Resi Pesanan</button>
+        <!-- Tombol Unduh PDF Otomatis -->
+        <button onclick="downloadResiPDF()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-sm">📥 Download Resi (PDF)</button>
         
         <button onclick="selesaiBayarPesanan()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-sm">Tutup & Selesai</button>
       </div>
@@ -389,35 +391,86 @@
       }
     }
 
-    function downloadResi() {
+    // Fungsi Generate & Download PDF Otomatis via jsPDF
+    function downloadResiPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: [80, 150] }); // Format kertas gulung / struk kasir
+
       const lapak = document.getElementById('invNamaLapak').innerText;
       const pemesan = document.getElementById('invNamaPemesan').innerText;
       const jadwal = document.getElementById('invJadwal').innerText;
       const detail = document.getElementById('invDetailMenu').innerText;
       const total = document.getElementById('invTotalTagihan').innerText;
 
-      const kontenResi = `=================================\n` +
-                         `       RESI PEMBAYARAN RESMI     \n` +
-                         `       TEPAK FRIENDLY JAJANAN    \n` +
-                         `=================================\n\n` +
-                         `${lapak}\n` +
-                         `Pemesan : ${pemesan}\n` +
-                         `Jadwal  : ${jadwal}\n\n` +
-                         `Rincian Menu:\n${detail}\n\n` +
-                         `---------------------------------\n` +
-                         `Total Tagihan : ${total}\n` +
-                         `---------------------------------\n\n` +
-                         `Silakan transfer ke BCA 0083677071 a.n Andi\n` +
-                         `(Transfer persis hingga 3 digit terakhir)\n\n` +
-                         `Terima kasih sudah berbelanja! 🙏`;
+      let y = 10;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(11);
+      doc.text("TEPAK FRIENDLY JAJANAN", 40, y, { align: "center" });
+      
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.text("Resi Pembayaran Resmi", 40, y, { align: "center" });
 
-      const blob = new Blob([kontenResi], { type: 'text/plain;charset=utf-8' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `Resi-Pesanan-${pemesan.replace(/\s+/g, '_')}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      y += 4;
+      doc.setLineWidth(0.2);
+      doc.line(5, y, 75, y);
+
+      y += 6;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.text(lapak, 5, y);
+
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8);
+      doc.text(`Pemesan : ${pemesan}`, 5, y);
+
+      y += 5;
+      doc.text(`Jadwal  : ${jadwal}`, 5, y);
+
+      y += 3;
+      doc.line(5, y, 75, y);
+
+      y += 6;
+      doc.setFont("helvetica", "bold");
+      doc.text("Rincian Pesanan:", 5, y);
+
+      y += 5;
+      doc.setFont("helvetica", "normal");
+      const splitDetail = doc.splitTextToSize(detail, 70);
+      doc.text(splitDetail, 5, y);
+      y += (splitDetail.length * 4) + 2;
+
+      doc.line(5, y, 75, y);
+
+      y += 6;
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(9);
+      doc.text(`Total Tagihan: ${total}`, 5, y);
+
+      y += 5;
+      doc.line(5, y, 75, y);
+
+      y += 6;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.text("Silakan transfer ke:", 40, y, { align: "center" });
+      y += 4;
+      doc.setFont("helvetica", "bold");
+      doc.text("BCA 0083677071 a.n Andi", 40, y, { align: "center" });
+      y += 4;
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(6);
+      doc.text("(Transfer persis hingga 3 digit terakhir)", 40, y, { align: "center" });
+
+      y += 6;
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(7);
+      doc.text("Terima kasih sudah berbelanja! 🙏", 40, y, { align: "center" });
+
+      // Langsung unduh file PDF ke perangkat
+      doc.save(`Resi-Pesanan-${pemesan.replace(/\s+/g, '_')}.pdf`);
     }
 
     function selesaiBayarPesanan() { document.getElementById('modalInvoicePesanan').classList.add('hidden'); window.location.reload(); }
