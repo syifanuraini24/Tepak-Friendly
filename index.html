@@ -6,302 +6,208 @@
   <title>Tepak Friendly - Pendaftaran Mabar</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="config.js"></script>
+  <script src="telegram.js"></script>
 </head>
 <body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
 
-  <!-- HEADER / NAVBAR ATAS DENGAN LOGO.PNG -->
   <header class="bg-white sticky top-0 z-40 border-b border-slate-200 px-4 py-3 shadow-xs">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
         <img src="logo.png" alt="Logo Tepak Friendly" class="w-10 h-10 object-contain rounded-xl shadow-xs border border-slate-100 bg-white">
         <div>
           <h1 class="text-base font-extrabold tracking-tight text-slate-900 leading-tight">Tepak Friendly</h1>
-          <p class="text-[10px] text-slate-500 font-medium">Community Badminton & Padel</p>
+          <p class="text-[10px] text-slate-500 font-medium">Komunitas Mabar & Sehat</p>
         </div>
       </div>
-      
-      <a href="jualan.html" class="bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1.5 shadow-xs">
-        <span>🛍️</span> Jajanan
+      <a href="jualan.html" class="bg-orange-50 hover:bg-orange-100 text-orange-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1 border border-orange-200">
+        <span>🛍️ Jajanan</span>
       </a>
     </div>
   </header>
 
-  <!-- KONTEN UTAMA KHUSUS MOBILE-FIRST -->
   <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
-    
-    <!-- CARD FORM PENDAFTARAN -->
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 transition-all">
-      <div class="flex items-center gap-2 mb-4 pb-2.5 border-b border-slate-100">
-        <span class="text-base">🏸</span>
-        <h2 class="font-bold text-sm text-slate-900 uppercase tracking-wide">Pendaftaran Mabar</h2>
+    <!-- JADWAL MABAR SECTION -->
+    <div class="space-y-3">
+      <h2 class="font-bold text-sm text-slate-900 uppercase tracking-wide px-1">Pilih Jadwal Mabar</h2>
+      <div id="containerJadwal" class="space-y-3">
+        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat jadwal...</div>
       </div>
-      
-      <div class="space-y-4">
-        <div>
-          <label for="pilihJadwal" class="block text-xs font-bold text-slate-600 mb-1.5">Pilih Jadwal Mabar</label>
-          <select id="pilihJadwal" onchange="updateHTM()" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
-            <option value="">-- Memuat Jadwal... --</option>
-          </select>
-        </div>
-        
-        <div>
-          <label for="namaPemain" class="block text-xs font-bold text-slate-600 mb-1.5">Nama Lengkap (Bisa >1 orang)</label>
-          <input type="text" id="namaPemain" placeholder="Cth: Budi, Andi, Siska" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
-          <span class="text-[10px] text-slate-400 mt-1 block">*Pisahkan dengan koma (,) untuk daftar rombongan.</span>
-        </div>
-        
-        <div>
-          <label for="emailPemain" class="block text-xs font-bold text-slate-600 mb-1.5">Alamat Email Aktif</label>
-          <input type="email" id="emailPemain" placeholder="Untuk menerima E-Ticket..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
-        </div>
+    </div>
 
-        <!-- KOTAK INFO DETAIL JADWAL YANG DIPILIH -->
-        <div id="infoTransfer" class="text-xs text-slate-600 bg-blue-50/60 border border-blue-100 rounded-xl p-3.5 leading-relaxed">
-          💡 Pilih jadwal di atas untuk melihat detail lokasi, jam main, dan rincian HTM.
-        </div>
+    <!-- LIST PLAYER / DAFTAR PEMAIN TERDAFTAR -->
+    <div class="space-y-3 pt-2">
+      <h2 class="font-bold text-sm text-slate-900 uppercase tracking-wide px-1">Daftar Pemain Terdaftar</h2>
+      <div id="containerListPemain" class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3">
+        <div class="text-center text-slate-400 text-xs py-4">Memuat daftar pemain...</div>
       </div>
+    </div>
 
-      <div class="mt-5">
-        <button onclick="daftar()" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-xs sm:text-sm py-3.5 px-4 rounded-xl transition shadow-md shadow-blue-200 flex items-center justify-center gap-2">
-          <span>Dapatkan Tagihan & Join List</span>
-          <span>➔</span>
-        </button>
-      </div>
-    </section>
-
-    <!-- AREA PEMBAYARAN (MUNCUL HALUS SETELAH SUBMIT) -->
-    <section id="paymentArea" class="hidden bg-white rounded-2xl border-2 border-emerald-400 p-5 shadow-md transition-all duration-300">
-      <div class="text-center mb-4">
-        <h3 class="font-extrabold text-emerald-800 text-base mb-1" id="txtJudulSukses">🎉 Pendaftaran Berhasil!</h3>
-        <p class="text-xs text-slate-500" id="txtSubSukses">Transfer persis hingga digit terakhir agar otomatis terverifikasi.</p>
-      </div>
-      
-      <div id="containerTagihanBox" class="mb-4 text-center">
-        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Total Tagihan (Termasuk Kode Unik)</span>
-        <div class="text-2xl font-extrabold text-blue-600 tracking-tight bg-slate-50 py-3 px-4 rounded-xl border border-slate-200" id="txtTagihan">Rp 0</div>
-      </div>
-      
-      <div id="sectionPembayaranBank" class="space-y-3">
-        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
-          <img src="qris.png" alt="QRIS" class="mx-auto w-40 h-40 object-contain mb-2 rounded-lg bg-white p-1 border shadow-xs">
-          <a href="qris.png" download="QRIS-Tepak-Friendly.png" class="inline-block w-full bg-white hover:bg-slate-100 text-blue-600 text-xs font-bold py-2 px-3 rounded-lg border border-slate-200 transition shadow-xs">
-            📥 Download QRIS
-          </a>
-        </div>
+    <!-- MODAL PENDAFTARAN MABAR -->
+    <div id="modalDaftar" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+        <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Form Pendaftaran Mabar</h3>
+        <p class="text-[11px] text-slate-500" id="modalSubTitle">Isi data di bawah ini.</p>
         
-        <div>
-          <span class="text-xs font-bold text-slate-700 block mb-1">Transfer Bank:</span>
-          <div class="flex items-center justify-between bg-slate-50 p-2.5 border border-slate-200 rounded-xl">
-            <span id="txtRekening" class="text-xs text-slate-700 font-mono font-medium">BCA 0083677071 a.n Andi</span>
-            <button onclick="salinRekening()" id="btnSalin" class="bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg transition border shadow-xs">
-              📋 Salin
-            </button>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemain (Pisahkan koma jika banyak)</label>
+            <textarea id="regNama" placeholder="Cth: Budi, Andi, Siska" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 h-20"></textarea>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Email / Kontak Aktif</label>
+            <input type="email" id="regEmail" placeholder="Cth: email@gmail.com" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50">
           </div>
         </div>
+        
+        <div class="flex gap-2 pt-2">
+          <button onclick="tutupModalDaftar()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+          <button onclick="submitPendaftaran()" id="btnSubmitReg" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Daftar Sekarang</button>
+        </div>
       </div>
-      
-      <button onclick="selesaiBayar()" class="w-full mt-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 px-4 rounded-xl transition shadow-xs">
-        Tutup & Cek Status di List
-      </button>
-    </section>
+    </div>
 
-    <!-- LIVE PLAYER LIST (TAMPILAN CARD KE BAWAH YANG NYAMAN UNTUK HP) -->
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
-      <div class="flex items-center justify-between mb-3 pb-2.5 border-b border-slate-100">
-        <h2 class="font-bold text-sm text-slate-900 flex items-center gap-1.5 uppercase tracking-wide">
-          <span>📊</span> Live Player List
-        </h2>
-        <span class="text-[10px] bg-blue-50 text-blue-700 font-semibold px-2.5 py-1 rounded-full border border-blue-100">Real-time</span>
+    <!-- MODAL PEMBAYARAN MABAR -->
+    <div id="modalBayar" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-3">
+        <h3 class="font-bold text-emerald-800 text-base mb-1">🎉 Pendaftaran Berhasil!</h3>
+        <p class="text-xs text-slate-500">Transfer persis hingga digit terakhir agar otomatis terverifikasi.</p>
+        
+        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Total Tagihan (Termasuk Kode Unik)</span>
+        <div class="text-2xl font-extrabold text-blue-600 mb-3 tracking-tight bg-slate-50 p-2.5 border border-slate-200 rounded-xl" id="txtTagihan">Rp 0</div>
+        
+        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 inline-block mb-2">
+          <img src="qris.png" alt="QRIS" class="mx-auto w-36 h-36 object-contain mb-1 rounded-lg bg-white p-1 border">
+          <span class="text-[10px] text-slate-500 block">BCA 0083677071 a.n Andi</span>
+        </div>
+
+        <button onclick="selesaiBayar()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl">Tutup & Selesai</button>
       </div>
-
-      <div id="containerListKegiatan" class="space-y-3">
-        <div class="text-center text-slate-400 text-xs py-6">Memuat data kegiatan...</div>
-      </div>
-    </section>
-
+    </div>
   </main>
 
   <script>
     const GAS_URL = CONFIG.GAS_URL;
+    let selectedJadwal = null;
 
-    async function loadData() {
+    async function loadDataIndex() {
       try {
         const response = await fetch(GAS_URL);
         const data = await response.json();
         
-        const selectJadwal = document.getElementById('pilihJadwal');
-        selectJadwal.innerHTML = '<option value="">-- Pilih Jadwal Mabar --</option>';
-        
-        data.jadwal.forEach(j => {
-          const isFull = j.terisi >= j.kuota;
-          const sisaKuota = j.kuota - j.terisi;
-          const statusTeks = isFull ? ' (PENUH)' : '';
-          
-          selectJadwal.innerHTML += `
-            <option value="${j.id}" data-id="${j.id}" data-info="${j.info}" data-htm="${j.htm}" data-jam="${j.jam}" data-kuota="${j.kuota}" data-terisi="${j.terisi}" data-sisa="${sisaKuota}" data-full="${isFull}" ${isFull ? 'disabled' : ''}>
-              [${j.id}] ${j.info}${statusTeks}
-            </option>`;
-        });
+        // 1. Render Jadwal
+        const containerJadwal = document.getElementById('containerJadwal');
+        containerJadwal.innerHTML = '';
+        const jadwalList = data.jadwal || [];
 
-        const container = document.getElementById('containerListKegiatan');
-        container.innerHTML = '';
-
-        if(data.jadwal.length === 0) {
-          container.innerHTML = '<div class="text-center text-xs text-slate-400 py-6">Belum ada jadwal tersedia.</div>';
-          return;
+        if (jadwalList.length === 0) {
+          containerJadwal.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-white rounded-2xl border">Belum ada jadwal mabar.</div>';
+        } else {
+          jadwalList.forEach(j => {
+            const sisaKuota = (j.kuota || 0) - (j.terisi || 0);
+            const isFull = sisaKuota <= 0;
+            containerJadwal.innerHTML += `
+              <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <span class="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-md border">${j.id}</span>
+                    <h3 class="font-bold text-sm text-slate-900 mt-1">${j.info}</h3>
+                  </div>
+                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${isFull ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'}">
+                    ${isFull ? 'Full 🔴' : `Sisa: ${sisaKuota}`}
+                  </span>
+                </div>
+                <div class="text-xs text-slate-600 flex justify-between bg-slate-50 p-2.5 rounded-xl border">
+                  <span>⏰ ${j.jam}</span>
+                  <strong class="text-slate-900">HTM: Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</strong>
+                </div>
+                <button onclick="bukaModalDaftar('${j.id}', \`${j.info}\`, ${j.htm})" ${isFull ? 'disabled class="w-full bg-slate-200 text-slate-400 font-bold text-xs py-2.5 rounded-xl cursor-not-allowed"' : 'class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs"'}>
+                  ${isFull ? 'Kuota Penuh' : 'Daftar Mabar'}
+                </button>
+              </div>`;
+          });
         }
 
-        data.jadwal.forEach(j => {
-          const pemainJadwal = data.pemain.filter(p => p.jadwalId === j.id);
-          let listPemainHtml = '';
-          if (pemainJadwal.length === 0) {
-            listPemainHtml = '<li class="text-center text-slate-400 text-xs py-3">Belum ada peserta terdaftar.</li>';
-          } else {
-            pemainJadwal.forEach((p, idx) => {
-              const isLunas = p.status.includes('Lunas');
-              listPemainHtml += `
-                <li class="py-2 px-1 border-b border-slate-100 last:border-b-0 flex justify-between items-center text-xs">
-                  <span class="font-medium text-slate-700">${idx + 1}. ${p.nama}</span>
-                  <span class="font-semibold px-2 py-0.5 rounded-full text-[10px] ${isLunas ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">${p.status}</span>
-                </li>`;
-            });
-          }
+        // 2. Render List Pemain Terdaftar
+        const containerListPemain = document.getElementById('containerListPemain');
+        containerListPemain.innerHTML = '';
+        const pemainList = data.pemain || [];
 
-          container.innerHTML += `
-            <div class="border border-slate-200 rounded-xl p-3.5 bg-slate-50/50 shadow-xs">
-              <div class="flex justify-between items-center mb-2 pb-2 border-b border-slate-200/60">
-                <span class="font-bold text-[11px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">ID: ${j.id}</span>
-                <span class="text-[11px] bg-slate-200 text-slate-700 font-bold px-2 py-0.5 rounded-full">Kuota: ${pemainJadwal.length}/${j.kuota}</span>
-              </div>
-              <div class="text-xs font-bold text-slate-800 mb-0.5">📍 ${j.info}</div>
-              <div class="text-[11px] text-slate-500 mb-2.5">⏰ ${j.jam}</div>
-              
-              <div class="bg-white rounded-lg border border-slate-200 p-1 shadow-inner">
-                <ul class="divide-y divide-slate-100 max-h-36 overflow-y-auto">
-                  ${listPemainHtml}
-                </ul>
-              </div>
-            </div>`;
-        });
-      } catch (error) {
-        console.error("Gagal memuat data:", error);
-      }
+        if (pemainList.length === 0) {
+          containerListPemain.innerHTML = '<div class="text-center text-xs text-slate-400 py-3">Belum ada pemain yang terdaftar.</div>';
+        } else {
+          // Kelompokkan pemain berdasarkan jadwalId
+          let htmlPemain = '';
+          jadwalList.forEach(j => {
+            const pemainDiJadwal = pemainList.filter(p => p.jadwalId === j.id);
+            if (pemainDiJadwal.length > 0) {
+              htmlPemain += `
+                <div class="border-b border-slate-100 pb-3 last:border-b-0 last:pb-0">
+                  <div class="font-bold text-xs text-blue-900 mb-1.5">📍 [${j.id}] ${j.info} (${pemainDiJadwal.length} Pemain)</div>
+                  <ul class="space-y-1 pl-2">`;
+              pemainDiJadwal.forEach((p, idx) => {
+                htmlPemain += `<li class="text-xs text-slate-700 flex justify-between items-center"><span>${idx + 1}. ${p.nama}</span><span class="text-[10px] text-slate-400">${p.status || ''}</span></li>`;
+              });
+              htmlPemain += `</ul></div>`;
+            }
+          });
+          containerListPemain.innerHTML = htmlPemain || '<div class="text-center text-xs text-slate-400 py-3">Belum ada pemain terdaftar.</div>';
+        }
+      } catch (e) { console.error(e); }
     }
 
-    function updateHTM() {
-      const select = document.getElementById('pilihJadwal');
-      const option = select.options[select.selectedIndex];
-      const infoText = document.getElementById('infoTransfer');
-
-      if (!option.value) {
-        infoText.innerHTML = '💡 Pilih jadwal di atas untuk melihat detail lokasi, jam main, dan rincian HTM.';
-        return;
-      }
-
-      const infoJadwal = option.getAttribute('data-info');
-      const htm = parseInt(option.getAttribute('data-htm')) || 0;
-      const jam = option.getAttribute('data-jam');
-      const sisaKuota = option.getAttribute('data-sisa');
-      const kuotaTotal = option.getAttribute('data-kuota');
-      const isFull = option.getAttribute('data-full') === 'true';
-
-      const warnaKuota = isFull ? 'text-rose-600 font-bold' : 'text-emerald-700 font-bold';
-      const htmTeks = htm === 0 ? '<span class="text-emerald-600 font-bold">GRATIS 🆓</span>' : `Rp ${htm.toLocaleString('id-ID')}`;
-      const infoKodeUnik = htm === 0 ? '' : '<span class="text-blue-600 font-medium mt-1 block"></span>';
-
-      infoText.innerHTML = `
-        <div class="space-y-1">
-          <div><strong>📍 Lokasi:</strong> ${infoJadwal}</div>
-          <div><strong>⏰ Jam Main:</strong> ${jam}</div>
-          <div><strong>💸 HTM:</strong> ${htmTeks}</div>
-          <div><strong>🎟️ Sisa Kuota:</strong> <span class="${warnaKuota}">${sisaKuota} slot tersisa</span> (dari ${kuotaTotal})</div>
-          ${infoKodeUnik}
-        </div>`;
+    function bukaModalDaftar(id, info, htm) {
+      selectedJadwal = { id, info, htm };
+      document.getElementById('modalTitle').innerText = `Daftar: ${info}`;
+      document.getElementById('regNama').value = '';
+      document.getElementById('regEmail').value = '';
+      document.getElementById('modalDaftar').classList.remove('hidden');
     }
 
-    function salinRekening() {
-      navigator.clipboard.writeText("0083677071").then(() => {
-        const btnSalin = document.getElementById('btnSalin');
-        btnSalin.innerText = '✅ Tersalin!';
-        setTimeout(() => btnSalin.innerText = '📋 Salin', 2000);
-      });
-    }
+    function tutupModalDaftar() { document.getElementById('modalDaftar').classList.add('hidden'); }
 
-    async function daftar() {
-      const select = document.getElementById('pilihJadwal');
-      const option = select.options[select.selectedIndex];
-      
-      const jadwalId = option.getAttribute('data-id');
-      const jadwalInfo = option.getAttribute('data-info');
-      const htmString = option.getAttribute('data-htm');
-      const nama = document.getElementById('namaPemain').value.trim();
-      const email = document.getElementById('emailPemain').value.trim();
-      const btn = document.getElementById('btnSubmit');
-      
-      if(!jadwalId) return alert('Pilih jadwal terlebih dahulu!');
-      if(!nama) return alert('Isi nama lengkapmu!');
-      if(!email || !email.includes('@')) return alert('Alamat email tidak valid!');
+    async function submitPendaftaran() {
+      const nama = document.getElementById('regNama').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      if (!nama || !email) return alert('Nama dan email wajib diisi!');
 
+      const btn = document.getElementById('btnSubmitReg');
       btn.innerText = 'Memproses...';
       btn.disabled = true;
 
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'register', nama, email, jadwalId, jadwalInfo, htm: htmString })
+          body: JSON.stringify({
+            action: 'register',
+            jadwalId: selectedJadwal.id,
+            jadwalInfo: selectedJadwal.info,
+            nama: nama,
+            email: email,
+            htm: selectedJadwal.htm
+          })
         });
         const result = await response.json();
-        
         if (result.status === 'success') {
-          localStorage.setItem('tepak_active_tagihan', result.totalTagihan);
-          localStorage.setItem('tepak_is_pending', 'true');
+          tutupModalDaftar();
+          
+          // Kirim notifikasi Telegram mabar jika file telegram.js tersedia
+          if (typeof kirimTelegramMabar === 'function') {
+            await kirimTelegramMabar(nama, selectedJadwal.info, result.totalTagihan);
+          }
 
-          tampilkanHalamanPembayaran(result.totalTagihan, parseInt(htmString) || 0);
-          await loadData();
-        } else {
-          alert('Gagal mendaftar: ' + (result.message || 'Coba lagi.'));
-          btn.innerText = 'Dapatkan Tagihan & Join List';
-          btn.disabled = false;
+          document.getElementById('txtTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(result.totalTagihan);
+          document.getElementById('modalBayar').classList.remove('hidden');
         }
-      } catch (error) {
-        alert('Terjadi kesalahan saat mendaftar.');
-        btn.innerText = 'Dapatkan Tagihan & Join List';
+      } catch (e) { alert('Gagal memproses pendaftaran.'); }
+      finally {
+        btn.innerText = 'Daftar Sekarang';
         btn.disabled = false;
       }
     }
 
-    function tampilkanHalamanPembayaran(nominal, htmAsli) {
-      const paymentArea = document.getElementById('paymentArea');
-      paymentArea.classList.remove('hidden');
-      
-      if (htmAsli === 0) {
-        document.getElementById('txtJudulSukses').innerText = '🎉 Pendaftaran Mabar Gratis Berhasil!';
-        document.getElementById('txtSubSukses').innerText = 'Nama peserta sudah masuk ke list. Silakan tunggu verifikasi admin.';
-        document.getElementById('containerTagihanBox').classList.add('hidden');
-        document.getElementById('sectionPembayaranBank').classList.add('hidden');
-      } else {
-        document.getElementById('txtJudulSukses').innerText = '🎉 Pendaftaran Berhasil!';
-        document.getElementById('txtSubSukses').innerText = 'Transfer persis hingga digit terakhir agar otomatis terverifikasi.';
-        document.getElementById('containerTagihanBox').classList.remove('hidden');
-        document.getElementById('sectionPembayaranBank').classList.remove('hidden');
-        document.getElementById('txtTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(nominal);
-      }
-      
-      paymentArea.scrollIntoView({ behavior: 'smooth' });
-    }
+    function selesaiBayar() { document.getElementById('modalBayar').classList.add('hidden'); window.location.reload(); }
 
-    function selesaiBayar() {
-      localStorage.removeItem('tepak_active_tagihan');
-      localStorage.removeItem('tepak_is_pending');
-      window.location.reload();
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      loadData().catch(console.error);
-      if (localStorage.getItem('tepak_is_pending') === 'true' && localStorage.getItem('tepak_active_tagihan')) {
-        tampilkanHalamanPembayaran(localStorage.getItem('tepak_active_tagihan'), 35000);
-      }
-    });
+    document.addEventListener('DOMContentLoaded', loadDataIndex);
   </script>
 </body>
 </html>
