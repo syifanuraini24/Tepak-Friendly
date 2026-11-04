@@ -115,7 +115,7 @@
       </div>
     </div>
 
-    <!-- MODAL INVOICE & QRIS PEMBAYARAN -->
+    <!-- MODAL INVOICE & QRIS PEMBAYARAN (QRIS DIPERBESAR) -->
     <div id="modalInvoicePesanan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
       <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-3">
         <div class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Invoice Pesanan</div>
@@ -136,8 +136,9 @@
 
         <p class="text-[11px] text-slate-500">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.</p>
         
-        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 inline-block">
-          <img src="qris.png" alt="QRIS" class="mx-auto w-36 h-36 object-contain mb-1 rounded-lg bg-white p-1 border">
+        <!-- QRIS DIPERBESAR (w-48 h-48) -->
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 inline-block">
+          <img src="qris.png" alt="QRIS" class="mx-auto w-48 h-48 object-contain mb-1 rounded-lg bg-white p-1 border">
           <span class="text-[10px] text-slate-500 block">BCA 0083677071 a.n Andi</span>
         </div>
 
@@ -357,7 +358,6 @@
         
         const result = await response.json();
         
-        // JAMINAN UTAMA: Selama data masuk, modal invoice pasti terbuka walau telegram bermasalah
         tutupModalPesan();
 
         try {
