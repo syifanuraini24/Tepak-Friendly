@@ -14,71 +14,76 @@
 
   <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 mb-6">
     
-    <!-- Logo di Sebelah Kiri & Judul -->
+    <!-- Logo & Judul -->
     <div class="flex items-center justify-center gap-3 mb-6">
       <img src="logo.png" alt="Logo Tepak Friendly" class="w-12 h-12 object-contain rounded-lg shadow-sm">
       <h1 class="text-2xl font-bold">Tepak Friendly</h1>
     </div>
     
     <!-- Area Form Pendaftaran -->
-    <div id="formArea" class="mb-6 p-4 border border-blue-100 rounded bg-blue-50 max-w-md mx-auto">
-      <h2 class="font-bold mb-3">Daftar Mabar</h2>
+    <div id="formArea" class="mb-6 p-4 border border-blue-100 rounded bg-blue-50 max-w-md mx-auto shadow-sm">
+      <h2 class="font-bold mb-3 text-blue-900">Daftar Mabar</h2>
       
       <label for="pilihJadwal" class="block text-sm font-medium text-gray-700 mb-1">Jadwal Mabar</label>
-      <select id="pilihJadwal" onchange="updateHTM()" class="w-full p-2 border rounded mb-3 bg-white">
+      <select id="pilihJadwal" onchange="updateHTM()" class="w-full p-2.5 border rounded-lg mb-3 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
         <option value="">-- Memuat Jadwal... --</option>
       </select>
       
       <label for="namaPemain" class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-      <input type="text" id="namaPemain" placeholder="Masukkan nama..." class="w-full p-2 border rounded mb-3">
+      <input type="text" id="namaPemain" placeholder="Masukkan nama..." class="w-full p-2.5 border rounded-lg mb-3 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
       
       <label for="emailPemain" class="block text-sm font-medium text-gray-700 mb-1">Alamat Email</label>
-      <input type="email" id="emailPemain" placeholder="Untuk menerima e-ticket lunas..." class="w-full p-2 border rounded mb-3">
+      <input type="email" id="emailPemain" placeholder="Untuk menerima e-ticket..." class="w-full p-2.5 border rounded-lg mb-3 bg-white text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
       
-      <div id="infoTransfer" class="text-xs text-gray-700 mb-3 p-3 bg-white border border-blue-200 rounded leading-relaxed shadow-sm">
+      <div id="infoTransfer" class="text-xs text-gray-700 mb-3 p-3 bg-white border border-blue-200 rounded-lg leading-relaxed shadow-sm">
         *Pilih jadwal terlebih dahulu untuk melihat detail mabar & info pembayaran.
       </div>
       
-      <button onclick="daftar()" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+      <button onclick="daftar()" id="btnSubmit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-lg transition shadow">
         Dapatkan Tagihan & Join List
       </button>
     </div>
 
-    <!-- Area Pembayaran dengan Tombol Download QRIS & Salin Rekening -->
+    <!-- Area Pembayaran / Konfirmasi (Menyesuaikan Gratis atau Berbayar) -->
     <div id="paymentArea" class="hidden mb-6 p-5 border-2 border-green-400 rounded-lg bg-green-50 text-center shadow-inner max-w-md mx-auto">
-      <h2 class="font-bold text-green-800 text-lg mb-1">🎉 Pendaftaran Berhasil!</h2>
-      <p class="text-xs text-gray-600 mb-3">Silakan transfer persis hingga digit terakhir agar otomatis terverifikasi.</p>
+      <h2 class="font-bold text-green-800 text-lg mb-1" id="txtJudulSukses">🎉 Pendaftaran Berhasil!</h2>
+      <p class="text-xs text-gray-600 mb-3" id="txtSubSukses">Silakan transfer persis hingga digit terakhir agar otomatis terverifikasi.</p>
       
-      <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Total yang Harus Dibayar:</div>
-      <div class="text-3xl font-extrabold text-blue-700 mb-4 tracking-wider bg-white p-2 border border-blue-200 rounded shadow-sm" id="txtTagihan">Rp 0</div>
-      
-      <!-- QRIS & Tombol Download -->
-      <div class="bg-white p-3 rounded-lg border shadow-sm inline-block mb-3">
-        <img src="qris.png" alt="QRIS Tepak Friendly" class="mx-auto w-56 h-56 object-contain mb-2">
-        <a href="qris.png" download="QRIS-Tepak-Friendly.png" class="inline-block w-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-1.5 px-3 rounded border border-blue-200 transition">
-          📥 Download QRIS
-        </a>
+      <div id="containerTagihanBox">
+        <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold mb-1">Total yang Harus Dibayar:</div>
+        <div class="text-3xl font-extrabold text-blue-700 mb-4 tracking-wider bg-white p-3 border border-blue-200 rounded-lg shadow-sm" id="txtTagihan">Rp 0</div>
       </div>
       
-      <p class="text-sm font-semibold mb-1">Atau Transfer Bank:</p>
-      
-      <!-- Rekening & Tombol Salin -->
-      <div class="flex items-center justify-between bg-white p-2.5 border rounded-lg mb-4 shadow-sm">
-        <span id="txtRekening" class="text-sm text-gray-700 font-mono font-medium">BCA 0083677071 a.n Andi Gunawan</span>
-        <button onclick="salinRekening()" id="btnSalin" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-3 py-1.5 rounded transition border">
-          📋 Salin
-        </button>
+      <!-- Bagian QRIS & Rekening (Hanya tampil jika berbayar) -->
+      <div id="sectionPembayaranBank">
+        <!-- QRIS & Tombol Download -->
+        <div class="bg-white p-3 rounded-lg border shadow-sm inline-block mb-3">
+          <img src="qris.png" alt="QRIS Tepak Friendly" class="mx-auto w-56 h-56 object-contain mb-2">
+          <a href="qris.png" download="QRIS-Tepak-Friendly.png" class="inline-block w-full bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-2 px-3 rounded-lg border border-blue-200 transition">
+            📥 Download QRIS
+          </a>
+        </div>
+        
+        <p class="text-sm font-semibold mb-1">Atau Transfer Bank:</p>
+        
+        <!-- Rekening & Tombol Salin -->
+        <div class="flex items-center justify-between bg-white p-2.5 border rounded-lg mb-4 shadow-sm">
+          <span id="txtRekening" class="text-sm text-gray-700 font-mono font-medium">BCA 0083677071 a.n Andi Gunawan</span>
+          <button onclick="salinRekening()" id="btnSalin" class="bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold px-3 py-1.5 rounded-lg transition border">
+            📋 Salin
+          </button>
+        </div>
       </div>
       
-      <button onclick="selesaiBayar()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded transition">
+      <button onclick="selesaiBayar()" class="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2.5 px-4 rounded-lg transition">
         Tutup & Cek Status di List
       </button>
     </div>
 
-    <!-- Live Player List Berkelompok (Grid 2 Kolom: Kiri & Kanan berdasarkan ID) -->
+    <!-- Live Player List Berkelompok (Grid 2 Kolom) -->
     <h2 class="font-bold mb-4 border-b pb-2 text-lg">Live Player List per Kegiatan</h2>
     <div id="containerListKegiatan" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div class="text-center text-gray-500 text-sm col-span-2">Memuat data kegiatan...</div>
+      <div class="text-center text-gray-500 text-sm col-span-2 py-4">Memuat data kegiatan...</div>
     </div>
   </div>
 
@@ -117,7 +122,7 @@
         container.innerHTML = '';
 
         if(data.jadwal.length === 0) {
-          container.innerHTML = '<div class="text-center text-sm text-gray-400 col-span-2">Belum ada jadwal tersedia.</div>';
+          container.innerHTML = '<div class="text-center text-sm text-gray-400 col-span-2 py-4">Belum ada jadwal tersedia.</div>';
           return;
         }
 
@@ -149,7 +154,7 @@
                 <div class="text-xs text-gray-500 mb-3">⏰ ${j.jam}</div>
                 
                 <div class="bg-white rounded border p-2 mb-2">
-                  <ul class="divide-y">
+                  <ul class="divide-y max-h-48 overflow-y-auto">
                     ${listPemainHtml}
                   </ul>
                 </div>
@@ -159,7 +164,7 @@
 
       } catch (error) {
         console.error("Gagal memuat data dari GAS:", error);
-        document.getElementById('containerListKegiatan').innerHTML = '<div class="text-center text-red-500 text-sm col-span-2">Gagal memuat data. Refresh halaman.</div>';
+        document.getElementById('containerListKegiatan').innerHTML = '<div class="text-center text-red-500 text-sm col-span-2 py-4">Gagal memuat data. Refresh halaman.</div>';
       }
     }
 
@@ -174,20 +179,23 @@
       }
 
       const infoJadwal = option.getAttribute('data-info');
-      const htm = option.getAttribute('data-htm');
+      const htm = parseInt(option.getAttribute('data-htm')) || 0;
       const jam = option.getAttribute('data-jam');
       const sisaKuota = option.getAttribute('data-sisa');
       const kuotaTotal = option.getAttribute('data-kuota');
       const isFull = option.getAttribute('data-full') === 'true';
 
       const warnaKuota = isFull ? 'text-red-600 font-bold' : 'text-green-700 font-bold';
+      
+      const htmTeks = htm === 0 ? '<span class="text-green-600 font-bold">GRATIS 🆓</span>' : `Rp ${htm.toLocaleString('id-ID')}`;
+      const infoKodeUnik = htm === 0 ? '' : '<span class="text-blue-600 font-semibold mt-1 block">*Kode unik (100-500 rupiah) akan ditambahkan otomatis di total tagihan.</span>';
 
       infoText.innerHTML = `
         📍 <strong>Lokasi/Info:</strong> ${infoJadwal} <br>
         ⏰ <strong>Jam Main:</strong> ${jam} <br>
-        💸 <strong>HTM:</strong> Rp ${parseInt(htm).toLocaleString('id-ID')} <br>
+        💸 <strong>HTM:</strong> ${htmTeks} <br>
         🎟️ <strong>Sisa Kuota:</strong> <span class="${warnaKuota}">${sisaKuota} slot tersisa</span> (dari total ${kuotaTotal} kuota)<br>
-        <span class="text-blue-600 font-semibold mt-1 block">*Kode unik (1-99 perak) akan ditambahkan otomatis di total tagihan.</span>`;
+        ${infoKodeUnik}`;
     }
 
     function salinRekening() {
@@ -226,7 +234,6 @@
       btn.disabled = true;
 
       try {
-        // 1. Simpan ke Backend Google Apps Script (Spreadsheet)
         const response = await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ 
@@ -241,7 +248,7 @@
         const result = await response.json();
         
         if (result.status === 'success') {
-          // 2. Kirim Notifikasi Telegram secara instan lewat file telegram.js
+          // Kirim notif telegram instan via telegram.js
           if (typeof kirimNotifTelegram === 'function') {
             kirimNotifTelegram(nama, email, jadwalId, jadwalInfo, result.totalTagihan);
           }
@@ -249,7 +256,7 @@
           localStorage.setItem('tepak_active_tagihan', result.totalTagihan);
           localStorage.setItem('tepak_is_pending', 'true');
 
-          tampilkanHalamanPembayaran(result.totalTagihan);
+          tampilkanHalamanPembayaran(result.totalTagihan, parseInt(htmString) || 0);
           await loadData();
         } else {
           alert('Gagal mendaftar: ' + (result.message || 'Coba lagi.'));
@@ -264,11 +271,28 @@
       }
     }
 
-    function tampilkanHalamanPembayaran(nominal) {
+    function tampilkanHalamanPembayaran(nominal, htmAsli) {
       document.getElementById('formArea').classList.add('hidden');
-      const formatRupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(nominal);
-      document.getElementById('txtTagihan').innerText = formatRupiah;
-      document.getElementById('paymentArea').classList.remove('hidden');
+      const paymentArea = document.getElementById('paymentArea');
+      
+      const isGratis = htmAsli === 0;
+      
+      if (isGratis) {
+        document.getElementById('txtJudulSukses').innerText = '🎉 Pendaftaran Mabar Gratis Berhasil!';
+        document.getElementById('txtSubSukses').innerText = 'Nama kamu sudah masuk ke list peserta. Silakan tunggu verifikasi admin.';
+        document.getElementById('containerTagihanBox').classList.add('hidden');
+        document.getElementById('sectionPembayaranBank').classList.add('hidden');
+      } else {
+        document.getElementById('txtJudulSukses').innerText = '🎉 Pendaftaran Berhasil!';
+        document.getElementById('txtSubSukses').innerText = 'Silakan transfer persis hingga digit terakhir agar otomatis terverifikasi.';
+        document.getElementById('containerTagihanBox').classList.remove('hidden');
+        document.getElementById('sectionPembayaranBank').classList.remove('hidden');
+        
+        const formatRupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(nominal);
+        document.getElementById('txtTagihan').innerText = formatRupiah;
+      }
+      
+      paymentArea.classList.remove('hidden');
     }
 
     function selesaiBayar() {
@@ -284,7 +308,11 @@
       const savedTagihan = localStorage.getItem('tepak_active_tagihan');
 
       if (isPending === 'true' && savedTagihan) {
-        tampilkanHalamanPembayaran(savedTagihan);
+        // Ambil info HTM dari select jika halaman direfresh saat pending
+        const select = document.getElementById('pilihJadwal');
+        // Default aman jika direfresh, cek dari nominal tagihan apakah 0
+        const htmCek = parseInt(savedTagihan) === 0 ? 0 : 35000; 
+        tampilkanHalamanPembayaran(savedTagihan, htmCek);
       }
     });
   </script>
