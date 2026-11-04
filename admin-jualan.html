@@ -3,283 +3,263 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Jualan - Tepak Friendly</title>
+  <title>Admin Panel Jajanan - Tepak Friendly</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="config.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen p-4 font-sans text-slate-800 antialiased">
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
 
-  <div class="max-w-xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-6">
-    <h1 class="text-base font-extrabold text-center text-orange-800">🛍️ Panel Admin Khusus Jualan & UMKM</h1>
-    
-    <!-- Login Section -->
-    <div id="loginSection" class="max-w-sm mx-auto space-y-3 py-6">
-      <div>
-        <label class="block text-xs font-bold text-slate-600 mb-1">Password Admin Jualan</label>
-        <input type="password" id="passInput" placeholder="Masukkan password..." class="w-full p-3 border border-slate-200 rounded-xl text-xs bg-slate-50">
-      </div>
-      <button onclick="login()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Masuk Panel Jualan</button>
-    </div>
-
-    <!-- Panel Utama -->
-    <div id="adminPanel" class="hidden space-y-6">
-      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-        <span class="text-xs font-semibold text-slate-600">Status: <span class="text-emerald-600 font-bold">Online 🟢</span></span>
-        <div class="flex gap-2">
-          <button onclick="loadDataAdminJualan()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-xl transition">🔄 Refresh</button>
-          <button onclick="logout()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1.5 rounded-xl transition">🚪 Logout</button>
+  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
+    <div class="max-w-md mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2.5">
+        <img src="logo.png" alt="Logo Tepak Friendly" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
+        <div>
+          <h1 class="text-sm font-extrabold tracking-tight text-slate-900 leading-tight">Admin Jajanan</h1>
+          <p class="text-[9px] text-slate-500 font-medium">Tepak Friendly UMKM</p>
         </div>
       </div>
-
-      <!-- 1. BAGIAN: LAPAK AKTIF & EDIT -->
-      <div>
-        <h2 class="font-bold text-xs text-emerald-800 uppercase tracking-wide mb-2">🟢 Lapak Aktif & Penugasan Jadwal</h2>
-        <ul id="listLapakAktif" class="space-y-2.5">
-          <li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Memuat lapak aktif...</li>
-        </ul>
-      </div>
-
-      <!-- 2. BAGIAN: APPROVAL LAPAK BARU (PENDING) -->
-      <div class="pt-3 border-t border-slate-100">
-        <h2 class="font-bold text-xs text-orange-800 uppercase tracking-wide mb-2">⏳ Pendaftaran Lapak Baru (Menunggu Assign)</h2>
-        <ul id="listLapakPending" class="space-y-3">
-          <li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Memuat data pendaftaran...</li>
-        </ul>
-      </div>
-
-      <!-- 3. BAGIAN: KONFIRMASI PEMBAYARAN PESANAN -->
-      <div class="pt-3 border-t border-slate-100">
-        <h2 class="font-bold text-xs text-blue-800 uppercase tracking-wide mb-2">💳 Konfirmasi Pembayaran Pesanan Jajanan</h2>
-        <ul id="listPesananPending" class="space-y-3">
-          <li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Memuat data pesanan...</li>
-        </ul>
-      </div>
+      <a href="jualan" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1">
+        <span>←</span> Jajanan
+      </a>
     </div>
-  </div>
+  </header>
 
-  <!-- MODAL EDIT LAPAK AKTIF -->
-  <div id="modalEditLapak" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 transform scale-95 transition-transform duration-300" id="modalEditBox">
-      <h3 class="font-bold text-sm text-slate-900">✏️ Edit Lapak Aktif</h3>
-      <input type="hidden" id="editRowIndex">
+  <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
+    <!-- FORM LOGIN ADMIN JUALAN -->
+    <div id="sectionLogin" class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 mt-12">
+      <h2 class="font-bold text-base text-slate-900 mb-1">Login Admin Jajanan</h2>
+      <p class="text-xs text-slate-500 mb-4">Masukkan password untuk mengelola lapak & pesanan.</p>
       
-      <div class="space-y-2.5 text-xs">
+      <div class="space-y-3">
         <div>
-          <label class="block font-bold text-slate-600 mb-1">Nama Brand / Penjual</label>
-          <input type="text" id="editNamaPenjual" class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
+          <label class="block text-xs font-bold text-slate-600 mb-1">Password Admin</label>
+          <input type="password" id="passwordAdmin" placeholder="Password..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
         </div>
-        <div>
-          <label class="block font-bold text-slate-600 mb-1">Nomor WhatsApp</label>
-          <input type="text" id="editWhatsapp" class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
+        <button onclick="loginAdminJualan()" id="btnLogin" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3.5 rounded-xl transition shadow-md">Masuk Panel Admin</button>
+      </div>
+    </div>
+
+    <!-- PANEL UTAMA ADMIN JUALAN (HIDDEN SEBELUM LOGIN) -->
+    <div id="sectionDashboard" class="hidden space-y-4">
+      
+      <!-- TABEL KELOLA PESANAN MASUK -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 space-y-3">
+        <div class="flex justify-between items-center">
+          <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">📋 Daftar Pesanan Jajanan Masuk</h2>
+          <span id="badgeTotalPesanan" class="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full border border-blue-100">0 Pesanan</span>
         </div>
-        <div>
-          <label class="block font-bold text-slate-600 mb-1">Daftar Menu & Harga</label>
-          <textarea id="editMenuJualan" rows="4" class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50 font-mono text-[11px]"></textarea>
+        <div id="containerPesananAdmin" class="space-y-2.5 max-h-96 overflow-y-auto">
+          <div class="text-center text-xs text-slate-400 py-6">Memuat pesanan...</div>
         </div>
       </div>
 
+      <!-- TABEL KELOLA LAPAK MITRA -->
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 space-y-3">
+        <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">🛍️ Kelola Mitra & Lapak</h2>
+        <div id="containerLapakAdmin" class="space-y-3">
+          <div class="text-center text-xs text-slate-400 py-6">Memuat data lapak...</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODAL EDIT LAPAK -->
+  <div id="modalEditLapak" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+      <h3 class="font-bold text-sm text-slate-900">Edit Lapak Mitra</h3>
+      <input type="hidden" id="editRowIndex">
+      <div>
+        <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Brand / Penjual</label>
+        <input type="text" id="editNamaPenjual" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold text-slate-600 mb-1">WhatsApp</label>
+        <input type="text" id="editWhatsapp" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold text-slate-600 mb-1">Menu & Harga</label>
+        <textarea id="editMenuJualan" rows="3" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"></textarea>
+      </div>
       <div class="flex gap-2 pt-2">
-        <button onclick="tutupModalEdit()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition">Batal</button>
-        <button onclick="simpanEditLapak()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition shadow-xs">Simpan Perubahan</button>
+        <button onclick="tutupModalEdit()" class="flex-1 bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+        <button onclick="simpanEditLapak()" class="flex-1 bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl">Simpan</button>
       </div>
     </div>
   </div>
 
   <!-- MODAL KONFIRMASI KUSTOM -->
-  <div id="customModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 transform scale-95 transition-transform duration-300" id="modalBox">
-      <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Konfirmasi Tindakan</h3>
-      <p id="modalDesc" class="text-xs text-slate-600">Apakah kamu yakin ingin melanjutkan tindakan ini?</p>
-      <div class="flex gap-2 pt-2">
-        <button id="modalBtnCancel" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition">Batal</button>
-        <button id="modalBtnConfirm" class="flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white">Ya, Lanjutkan</button>
+  <div id="modalKonfirmasi" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 text-center space-y-3">
+      <div id="konfirmasiIcon" class="text-2xl">⚠️</div>
+      <h3 id="konfirmasiTitle" class="font-bold text-sm text-slate-900">Konfirmasi Aksi</h3>
+      <p id="konfirmasiDesc" class="text-xs text-slate-500">Apakah kamu yakin?</p>
+      <div class="flex gap-2 pt-1">
+        <button onclick="tutupModalKonfirmasi()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
+        <button id="btnKonfirmasiYa" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">Ya, Lanjutkan</button>
       </div>
     </div>
   </div>
 
-  <script src="config.js"></script>
   <script>
     const GAS_URL = CONFIG.GAS_URL;
-    let listJadwalGlobal = [];
-    let cacheDataJualan = [];
 
-    document.addEventListener('DOMContentLoaded', () => {
-      if (localStorage.getItem('tepak_jualan_login_time')) {
-        document.getElementById('loginSection').classList.add('hidden');
-        document.getElementById('adminPanel').classList.remove('hidden');
-        loadDataAdminJualan();
-      }
-    });
+    async function loginAdminJualan() {
+      const password = document.getElementById('passwordAdmin').value.trim();
+      if (!password) return alert('Masukkan password terlebih dahulu!');
 
-    async function login() {
-      const pass = document.getElementById('passInput').value;
-      if (!pass) return alert('Masukkan password terlebih dahulu!');
+      const btn = document.getElementById('btnLogin');
+      btn.innerText = 'Memeriksa...';
+      btn.disabled = true;
+
       try {
-        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'login_admin_jualan', password: pass }) });
-        const result = await res.json();
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'login_admin_jualan', password })
+        });
+        const result = await response.json();
+
         if (result.status === 'success') {
-          localStorage.setItem('tepak_jualan_login_time', new Date().getTime().toString());
-          document.getElementById('loginSection').classList.add('hidden');
-          document.getElementById('adminPanel').classList.remove('hidden');
+          document.getElementById('sectionLogin').classList.add('hidden');
+          document.getElementById('sectionDashboard').classList.remove('hidden');
           loadDataAdminJualan();
-        } else { alert(result.message); }
-      } catch (e) { alert('Gagal terhubung ke server.'); }
-    }
-
-    function logout() { localStorage.removeItem('tepak_jualan_login_time'); window.location.reload(); }
-
-    function showConfirmModal(title, desc, confirmText, confirmClass, onConfirm) {
-      const modal = document.getElementById('customModal');
-      const modalBox = document.getElementById('modalBox');
-      document.getElementById('modalTitle').innerText = title;
-      document.getElementById('modalDesc').innerText = desc;
-      const btnConfirm = document.getElementById('modalBtnConfirm');
-      btnConfirm.innerText = confirmText;
-      btnConfirm.className = `flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white ${confirmClass}`;
-
-      modal.classList.remove('hidden');
-      requestAnimationFrame(() => {
-        modalBox.classList.remove('scale-95');
-        modalBox.classList.add('scale-100');
-      });
-
-      const newConfirm = btnConfirm.cloneNode(true);
-      const btnCancel = document.getElementById('modalBtnCancel');
-      const newCancel = btnCancel.cloneNode(true);
-      btnConfirm.parentNode.replaceChild(newConfirm, btnConfirm);
-      btnCancel.parentNode.replaceChild(newCancel, btnCancel);
-
-      document.getElementById('modalBtnConfirm').addEventListener('click', () => {
-        modalBox.classList.remove('scale-100');
-        modalBox.classList.add('scale-95');
-        setTimeout(() => modal.classList.add('hidden'), 200);
-        onConfirm();
-      });
-
-      document.getElementById('modalBtnCancel').addEventListener('click', () => {
-        modalBox.classList.remove('scale-100');
-        modalBox.classList.add('scale-95');
-        setTimeout(() => modal.classList.add('hidden'), 200);
-      });
+        } else {
+          alert(result.message || 'Password salah!');
+        }
+      } catch (e) {
+        alert('Gagal terhubung ke server.');
+      } finally {
+        btn.innerText = 'Masuk Panel Admin';
+        btn.disabled = false;
+      }
     }
 
     async function loadDataAdminJualan() {
-      const listLapakAktif = document.getElementById('listLapakAktif');
-      const listLapak = document.getElementById('listLapakPending');
-      const listPesanan = document.getElementById('listPesananPending');
-      const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
-
       try {
         const response = await fetch(GAS_URL);
         const data = await response.json();
-        listJadwalGlobal = data.jadwal || [];
-        cacheDataJualan = data.jualan || [];
+        
+        // 1. Render Daftar Pesanan Masuk
+        const containerPesanan = document.getElementById('containerPesananAdmin');
+        const listPesanan = data.pesanan || [];
+        containerPesanan.innerHTML = '';
+        document.getElementById('badgeTotalPesanan').innerText = `${listPesanan.length} Pesanan`;
 
-        // 1. RENDER LAPAK AKTIF (DENGAN TOMBOL EDIT)
-        const aktifLapak = cacheDataJualan.filter(item => item.status && item.status.toString().toLowerCase().includes('disetujui'));
-        listLapakAktif.innerHTML = '';
-        if (aktifLapak.length === 0) {
-          listLapakAktif.innerHTML = '<li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Belum ada lapak yang aktif.</li>';
+        if (listPesanan.length === 0) {
+          containerPesanan.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 italic">Belum ada pesanan masuk.</div>';
         } else {
-          aktifLapak.forEach(item => {
-            listLapakAktif.innerHTML += `
-              <li class="p-3.5 border border-emerald-200 bg-emerald-50/40 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs transition-all duration-300" id="row_jualan_${item.rowIndex}">
-                <div>
-                  <strong class="text-slate-900 text-sm">🛍️ ${item.namaPenjual}</strong> (WA: ${item.whatsapp})<br>
-                  <span class="text-emerald-700 font-bold">📍 Jadwal: ${item.jadwalInfo}</span>
+          listPesanan.forEach(p => {
+            const isLunas = p.status && p.status.includes('Lunas');
+            const formatHrg = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.totalTagihan);
+            
+            containerPesanan.innerHTML += `
+              <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-2">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <span class="font-extrabold text-slate-900">${p.namaPemesan}</span>
+                    <span class="block text-[10px] text-blue-600 font-bold">Lapak: ${p.namaLapak}</span>
+                  </div>
+                  <span class="font-bold text-slate-800">${formatHrg}</span>
                 </div>
-                <div class="flex gap-1.5">
-                  <button onclick="bukaModalEdit(${item.rowIndex})" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-3 py-1.5 rounded-lg transition shadow-2xs">✏️ Edit</button>
-                  <button onclick="hapusLapak(${item.rowIndex}, this)" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-3 py-1.5 rounded-lg transition">Hapus</button>
+                <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border font-mono">
+                  ${p.detailPesanan}
                 </div>
-              </li>`;
-          });
-        }
-
-        // 2. RENDER PENDING LAPAK
-        const pendingLapak = cacheDataJualan.filter(item => item.status && item.status.toString().toLowerCase().includes('menunggu'));
-        listLapak.innerHTML = '';
-        if (pendingLapak.length === 0) {
-          listLapak.innerHTML = '<li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Tidak ada pendaftaran lapak baru.</li>';
-        } else {
-          pendingLapak.forEach(item => {
-            let checkboxesPerBaris = '';
-            listJadwalGlobal.forEach(j => {
-              checkboxesPerBaris += `
-                <label class="flex items-center gap-2 bg-white p-2 rounded-lg border border-orange-100 cursor-pointer text-xs hover:bg-orange-50/50">
-                  <input type="checkbox" name="chk_jadwal_${item.rowIndex}" value="${j.id}" data-info="${j.info}" class="w-4 h-4 text-orange-600 rounded border-slate-300">
-                  <span class="text-slate-700 font-medium"><strong>[${j.id}]</strong> ${j.info}</span>
-                </label>`;
-            });
-
-            listLapak.innerHTML += `
-              <li class="p-3.5 border border-orange-200 bg-orange-50/50 rounded-xl space-y-2.5 text-xs transition-all duration-300" id="row_jualan_${item.rowIndex}">
-                <div>
-                  <strong class="text-sm text-slate-900">${item.namaPenjual}</strong> (WA: ${item.whatsapp})<br>
-                  <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border mt-1 whitespace-pre-line"><strong>Menu:</strong><br>${item.menuJualan}</div>
-                </div>
-                <div>
-                  <label class="block font-bold text-[10px] text-slate-500 uppercase mb-1.5">Pilih Jadwal Mabar:</label>
-                  <div class="space-y-1.5 max-h-36 overflow-y-auto p-1 bg-orange-50/50 rounded-lg border border-orange-200">
-                    ${checkboxesPerBaris || '<span class="text-slate-400 text-[11px]">Belum ada jadwal tersedia.</span>'}
+                <div class="flex justify-between items-center pt-1 border-t border-slate-200">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isLunas ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'}">
+                    ${p.status || 'Pending 🟡'}
+                  </span>
+                  <div class="flex gap-1.5">
+                    ${!isLunas ? `<button onclick="aksiKonfirmasiPesanan(${p.rowIndex}, 'acc')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition">ACC Lunas</button>` : ''}
+                    <button onclick="aksiKonfirmasiPesanan(${p.rowIndex}, 'hapus')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition">Hapus</button>
                   </div>
                 </div>
-                <div class="flex gap-2 pt-1">
-                  <button onclick="accLapak(${item.rowIndex}, this)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg shadow-xs transition">ACC & Assign Jadwal</button>
-                  <button onclick="hapusLapak(${item.rowIndex}, this)" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-lg shadow-xs transition">Tolak</button>
-                </div>
-              </li>`;
+              </div>`;
           });
         }
 
-        // 3. RENDER PESANAN PENDING
-        const pendingPesanan = (data.pesanan || []).filter(item => item.status && item.status.toString().toLowerCase().includes('menunggu'));
-        listPesanan.innerHTML = '';
-        if (pendingPesanan.length === 0) {
-          listPesanan.innerHTML = '<li class="text-center text-xs text-slate-400 py-3 bg-slate-50 rounded-xl border">Tidak ada pesanan makanan baru.</li>';
-        } else {
-          pendingPesanan.forEach(item => {
-            listPesanan.innerHTML += `
-              <li class="p-3.5 border border-blue-200 bg-blue-50/50 rounded-xl flex justify-between items-center text-xs transition-all duration-300" id="row_pesanan_${item.rowIndex}">
-                <div>
-                  <strong>Pemesan: ${item.namaPemesan}</strong> ➔ Lapak: ${item.namaLapak}<br>
-                  <span class="text-slate-700">Pesanan: ${item.detailPesanan}</span><br>
-                  <span class="font-mono font-bold text-blue-700">Tagihan: ${formatRp.format(item.totalTagihan || 0)}</span> | 📍 ${item.jadwalInfo}
-                </div>
-                <div class="flex flex-col gap-1.5">
-                  <button onclick="accPesanan(${item.rowIndex}, this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-lg shadow-xs transition">ACC Lunas</button>
-                  <button onclick="hapusPesanan(${item.rowIndex}, this)" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-1.5 rounded-lg shadow-xs transition">Hapus</button>
-                </div>
-              </li>`;
-          });
+        // 2. Render Daftar Lapak
+        const containerLapak = document.getElementById('containerLapakAdmin');
+        const listJualan = data.jualan || [];
+        containerLapak.innerHTML = '';
+
+        if (listJualan.length === 0) {
+          containerLapak.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 italic">Belum ada pendaftaran mitra.</div>';
+          return;
         }
-      } catch (e) { console.error(e); }
+
+        listJualan.forEach(l => {
+          containerLapak.innerHTML += `
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-2">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="font-bold text-slate-900 text-sm">🛍️ ${l.namaPenjual}</span>
+                  <span class="block text-[10px] text-slate-500">WA: ${l.whatsapp} | Jadwal: ${l.jadwalInfo || 'Belum diatur'}</span>
+                </div>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">${l.status || 'Pending'}</span>
+              </div>
+              <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border whitespace-pre-line font-mono">${l.menuJualan}</div>
+              <div class="flex gap-2 pt-1 border-t border-slate-200">
+                <button onclick="bukaModalEdit(${l.rowIndex}, '${encodeURIComponent(l.namaPenjual)}', '${encodeURIComponent(l.whatsapp)}', \`${encodeURIComponent(l.menuJualan)}\`)" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] py-2 rounded-lg transition">Edit Lapak</button>
+                <button onclick="aksiKonfirmasiJualan(${l.rowIndex}, 'hapus')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-[10px] px-3 py-2 rounded-lg transition">Hapus</button>
+              </div>
+            </div>`;
+        });
+
+      } catch (e) {
+        console.error(e);
+      }
     }
 
-    // FUNGSI EDIT LAPAK
-    function bukaModalEdit(rowIndex) {
-      const item = cacheDataJualan.find(l => l.rowIndex === rowIndex);
-      if (!item) return alert('Data lapak tidak ditemukan!');
-
-      document.getElementById('editRowIndex').value = rowIndex;
-      document.getElementById('editNamaPenjual').value = item.namaPenjual;
-      document.getElementById('editWhatsapp').value = item.whatsapp;
-      document.getElementById('editMenuJualan').value = item.menuJualan;
-
-      const modal = document.getElementById('modalEditLapak');
-      const box = document.getElementById('modalEditBox');
+    // Modal Konfirmasi Kustom untuk Pesanan
+    function aksiKonfirmasiPesanan(rowIndex, tipe) {
+      const modal = document.getElementById('modalKonfirmasi');
+      document.getElementById('konfirmasiTitle').innerText = tipe === 'acc' ? 'ACC Pembayaran Lunas?' : 'Hapus Pesanan?';
+      document.getElementById('konfirmasiDesc').innerText = tipe === 'acc' ? 'Status pesanan akan diubah menjadi Lunas.' : 'Data pesanan ini akan dihapus permanen.';
+      
+      const btnYa = document.getElementById('btnKonfirmasiYa');
+      btnYa.onclick = async function() {
+        tutupModalKonfirmasi();
+        const actionName = tipe === 'acc' ? 'update_pesanan_status' : 'delete_pesanan';
+        await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: actionName, rowIndex })
+        });
+        loadDataAdminJualan();
+      };
       modal.classList.remove('hidden');
-      requestAnimationFrame(() => {
-        box.classList.remove('scale-95');
-        box.classList.add('scale-100');
-      });
+    }
+
+    function aksiKonfirmasiJualan(rowIndex, tipe) {
+      const modal = document.getElementById('modalKonfirmasi');
+      document.getElementById('konfirmasiTitle').innerText = 'Hapus Lapak Mitra?';
+      document.getElementById('konfirmasiDesc').innerText = 'Lapak dan data terkait akan dihapus permanen.';
+      
+      const btnYa = document.getElementById('btnKonfirmasiYa');
+      btnYa.onclick = async function() {
+        tutupModalKonfirmasi();
+        await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'delete_jualan', rowIndex })
+        });
+        loadDataAdminJualan();
+      };
+      modal.classList.remove('hidden');
+    }
+
+    function tutupModalKonfirmasi() {
+      document.getElementById('modalKonfirmasi').classList.add('hidden');
+    }
+
+    function bukaModalEdit(rowIndex, nama, wa, menu) {
+      document.getElementById('editRowIndex').value = rowIndex;
+      document.getElementById('editNamaPenjual').value = decodeURIComponent(nama);
+      document.getElementById('editWhatsapp').value = decodeURIComponent(wa);
+      document.getElementById('editMenuJualan').value = decodeURIComponent(menu);
+      document.getElementById('modalEditLapak').classList.remove('hidden');
     }
 
     function tutupModalEdit() {
-      const modal = document.getElementById('modalEditLapak');
-      const box = document.getElementById('modalEditBox');
-      box.classList.remove('scale-100');
-      box.classList.add('scale-95');
-      setTimeout(() => modal.classList.add('hidden'), 200);
+      document.getElementById('modalEditLapak').classList.add('hidden');
     }
 
     async function simpanEditLapak() {
@@ -288,128 +268,18 @@
       const whatsapp = document.getElementById('editWhatsapp').value.trim();
       const menuJualan = document.getElementById('editMenuJualan').value.trim();
 
-      if (!namaPenjual || !whatsapp || !menuJualan) return alert('Semua kolom wajib diisi!');
+      if (!namaPenjual || !whatsapp) return alert('Nama dan WhatsApp wajib diisi!');
 
       try {
-        const res = await fetch(GAS_URL, {
+        await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'edit_jualan', rowIndex, namaPenjual, whatsapp, menuJualan })
         });
-        const result = await res.json();
-        if (result.status === 'success') {
-          tutupModalEdit();
-          loadDataAdminJualan();
-        } else {
-          alert('Gagal mengupdate lapak.');
-        }
+        tutupModalEdit();
+        loadDataAdminJualan();
       } catch (e) {
-        alert('Terjadi kesalahan koneksi.');
+        alert('Gagal menyimpan perubahan.');
       }
-    }
-
-    async function accLapak(rowIndex, btn) {
-      const checkboxes = document.querySelectorAll(`input[name="chk_jadwal_${rowIndex}"]:checked`);
-      if (checkboxes.length === 0) return alert('Pilih minimal 1 jadwal mabar untuk lapak ini!');
-
-      let ids = [], infos = [];
-      checkboxes.forEach(chk => {
-        ids.push(chk.value);
-        infos.push(chk.getAttribute('data-info'));
-      });
-
-      showConfirmModal(
-        "Setujui Lapak",
-        `Setujui lapak ini untuk jadwal: ${infos.join(' | ')}?`,
-        "Ya, ACC",
-        "bg-emerald-600 hover:bg-emerald-700",
-        async () => {
-          btn.innerText = 'Memproses...';
-          btn.disabled = true;
-          await fetch(GAS_URL, { 
-            method: 'POST', 
-            body: JSON.stringify({ 
-              action: 'update_jualan_status_with_jadwal', 
-              rowIndex, 
-              jadwalId: ids.join(', '), 
-              jadwalInfo: infos.join(' | ') 
-            }) 
-          });
-          const el = document.getElementById(`row_jualan_${rowIndex}`);
-          if (el) {
-            el.style.opacity = '0';
-            el.style.transform = 'scale(0.95)';
-            setTimeout(() => el.remove(), 300);
-          } else {
-            loadDataAdminJualan();
-          }
-        }
-      );
-    }
-
-    async function hapusLapak(rowIndex, btn) {
-      showConfirmModal(
-        "Hapus / Tolak Lapak",
-        "Yakin ingin menghapus atau menolak lapak ini?",
-        "Ya, Hapus",
-        "bg-rose-600 hover:bg-rose-700",
-        async () => {
-          btn.innerText = 'Menghapus...';
-          btn.disabled = true;
-          await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_jualan', rowIndex }) });
-          const el = document.getElementById(`row_jualan_${rowIndex}`);
-          if (el) {
-            el.style.opacity = '0';
-            el.style.transform = 'scale(0.95)';
-            setTimeout(() => el.remove(), 300);
-          } else {
-            loadDataAdminJualan();
-          }
-        }
-      );
-    }
-
-    async function accPesanan(rowIndex, btn) {
-      showConfirmModal(
-        "Konfirmasi Pembayaran",
-        "Konfirmasi pembayaran pesanan ini sudah lunas?",
-        "Ya, ACC Lunas",
-        "bg-emerald-600 hover:bg-emerald-700",
-        async () => {
-          btn.innerText = 'Memproses...';
-          btn.disabled = true;
-          await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_pesanan_status', rowIndex }) });
-          const el = document.getElementById(`row_pesanan_${rowIndex}`);
-          if (el) {
-            el.style.opacity = '0';
-            el.style.transform = 'scale(0.95)';
-            setTimeout(() => el.remove(), 300);
-          } else {
-            loadDataAdminJualan();
-          }
-        }
-      );
-    }
-
-    async function hapusPesanan(rowIndex, btn) {
-      showConfirmModal(
-        "Hapus Pesanan",
-        "Yakin ingin menghapus pesanan ini?",
-        "Ya, Hapus",
-        "bg-rose-600 hover:bg-rose-700",
-        async () => {
-          btn.innerText = 'Menghapus...';
-          btn.disabled = true;
-          await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_pesanan', rowIndex }) });
-          const el = document.getElementById(`row_pesanan_${rowIndex}`);
-          if (el) {
-            el.style.opacity = '0';
-            el.style.transform = 'scale(0.95)';
-            setTimeout(() => el.remove(), 300);
-          } else {
-            loadDataAdminJualan();
-          }
-        }
-      );
     }
   </script>
 </body>
