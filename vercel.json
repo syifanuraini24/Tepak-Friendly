@@ -1,0 +1,8 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/jualan", "destination": "/jualan.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin-jualan", "destination": "/admin-jualan.html" }
+  ]
+}
