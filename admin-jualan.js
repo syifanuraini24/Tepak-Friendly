@@ -1,294 +1,478 @@
 const GAS_URL = CONFIG.GAS_URL;
-let masterJadwalList = [];
-let masterJualanList = [];
+let cacheLapakData = [];
+let cacheJadwalList = [];
 
-// LOGIN ADMIN JUALAN (KODE PASS: jualan123)
+// Fungsi Toast Notification halus di pojok kanan bawah
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  
+  const bgColors = type === 'success' ? 'bg-slate-900 text-white border-slate-800' : 'bg-rose-600 text-white border-rose-500';
+  const icon = type === 'success' ? '✨' : '⚠️';
+  
+  toast.className = `pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-2xl shadow-lg border text-xs font-bold transition-all duration-300 translate-y-2 opacity-0 ${bgColors}`;
+  toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+  
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.classList.remove('translate-y-2', 'opacity-0');
+  }, 10);
+
+  setTimeout(() => {
+    toast.classList.add('translate-y-2', 'opacity-0');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const isLogged = sessionStorage.getItem('admin_jualan_logged');
+  if (isLogged === 'true') {
+    bukaDashboardAdmin();
+  }
+});
+
 async function loginAdminJualan() {
-  const pass = document.getElementById('inputPassAdmin').value.trim();
-  if (!pass) return alert('Masukkan password admin!');
-
-  const btn = document.getElementById('btnLoginAdmin');
-  btn.innerText = 'Verifikasi...';
+  const password = document.getElementById('passwordAdmin').value.trim();
+  if (!password) return showToast('Masukkan password terlebih dahulu!', 'error');
+  const btn = document.getElementById('btnLogin');
+  btn.innerText = 'Memeriksa...';
   btn.disabled = true;
 
   try {
-    const response = await fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        action: 'login_admin_jualan',
-        password: pass
-      })
-    });
-
+    const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'login_admin_jualan', password }) });
     const result = await response.json();
     if (result.status === 'success') {
-      document.getElementById('sectionLoginAdmin').classList.add('hidden');
-      document.getElementById('sectionDashboardAdmin').classList.remove('hidden');
-      loadAdminJualanData();
-    } else {
-      alert(result.message || 'Password salah!');
+      sessionStorage.setItem('admin_jualan_logged', 'true');
+      bukaDashboardAdmin();
+      showToast('Berhasil masuk ke Panel Admin!');
+    } else { 
+      showToast(result.message || 'Password salah!', 'error'); 
     }
-  } catch (err) {
-    alert('Gagal verifikasi password.');
+  } catch (e) { 
+    showToast('Gagal terhubung ke server.', 'error'); 
   } finally {
-    btn.innerText = 'Masuk Admin';
+    btn.innerText = 'Masuk Panel Admin';
     btn.disabled = false;
   }
 }
 
-async function loadAdminJualanData() {
-  const container = document.getElementById('containerAdminJualan');
-  if (!container) return;
+function bukaDashboardAdmin() {
+  document.getElementById('sectionLogin').classList.add('hidden');
+  document.getElementById('sectionDashboard').classList.remove('hidden');
+  document.getElementById('headerActions').classList.remove('hidden');
+  document.getElementById('linkKembaliJualan').classList.add('hidden');
+  loadDataAdminJualan();
+}
 
-  container.innerHTML = '<div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat data pendaftaran mitra...</div>';
+function logoutAdmin() {
+  sessionStorage.removeItem('admin_jualan_logged');
+  document.getElementById('sectionDashboard').classList.add('hidden');
+  document.getElementById('headerActions').classList.add('hidden');
+  document.getElementById('linkKembaliJualan').classList.remove('hidden');
+  document.getElementById('sectionLogin').classList.remove('hidden');
+  document.getElementById('passwordAdmin').value = '';
+  showToast('Berhasil logout.');
+}
 
+async function refreshDataAdmin(btnElement) {
+  const txt = document.getElementById('refreshText');
+  txt.innerText = 'Memuat...';
+  if(btnElement) btnElement.disabled = true;
+
+  await loadDataAdminJualan();
+
+  txt.innerText = 'Refresh';
+  if(btnElement) btnElement.disabled = false;
+  showToast('Data berhasil diperbarui!');
+}
+
+async function loadDataAdminJualan() {
   try {
     const response = await fetch(GAS_URL);
     const data = await response.json();
     
-    masterJadwalList = data.jadwal || [];
-    masterJualanList = data.jualan || [];
+    cacheJadwalList = data.jadwal || [];
 
-    let countPending = 0, countApproved = 0;
-    masterJualanList.forEach(item => {
-      if (item.status && item.status.toString().toLowerCase().includes('disetujui')) {
-        countApproved++;
-      } else {
-        countPending++;
-      }
-    });
+    // 1. Render Pesanan Dikelompokkan Per Lapak
+    const containerPesanan = document.getElementById('containerPesananAdmin');
+    const listPesanan = data.pesanan || [];
+    containerPesanan.innerHTML = '';
+    document.getElementById('badgeTotalPesanan').innerText = `${listPesanan.length} Pesanan`;
 
-    const elPending = document.getElementById('statPending');
-    const elApproved = document.getElementById('statApproved');
-    if (elPending) elPending.innerText = countPending;
-    if (elApproved) elApproved.innerText = countApproved;
-
-    renderAdminJualanList();
-  } catch (err) {
-    console.error(err);
-    if (container) {
-      container.innerHTML = '<div class="text-center text-rose-500 text-xs py-8 bg-white rounded-2xl border border-rose-200">Gagal memuat data dari server.</div>';
-    }
-  }
-}
-
-function renderAdminJualanList() {
-  const container = document.getElementById('containerAdminJualan');
-  if (!container) return;
-
-  container.innerHTML = '';
-
-  if (masterJualanList.length === 0) {
-    container.innerHTML = '<div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Belum ada pendaftaran mitra UMKM.</div>';
-    return;
-  }
-
-  masterJualanList.forEach((j) => {
-    const isDisetujui = j.status && j.status.toString().toLowerCase().includes('disetujui');
-    const badgeStatus = isDisetujui 
-      ? '<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">Disetujui 🟢</span>'
-      : '<span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-200">Pending 🟡</span>';
-
-    // Parse Checkbox Jadwal Terpilih
-    let selectedJadwalIds = [];
-    if (j.jadwalId && j.jadwalId !== 'PENDING') {
-      selectedJadwalIds = j.jadwalId.toString().split(',').map(id => id.trim());
-    }
-
-    let checkboxJadwalHtml = '';
-    if (masterJadwalList.length === 0) {
-      checkboxJadwalHtml = '<div class="text-slate-400 text-[11px] italic">Tidak ada master jadwal mabar aktif.</div>';
+    if (listPesanan.length === 0) {
+      containerPesanan.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 italic">Belum ada pesanan masuk.</div>';
     } else {
-      masterJadwalList.forEach((m) => {
-        const isChecked = selectedJadwalIds.includes(m.id.toString()) ? 'checked' : '';
-        checkboxJadwalHtml += `
-          <label class="flex items-start gap-2.5 p-2 rounded-xl bg-white border border-slate-200 cursor-pointer hover:bg-slate-50 transition text-xs">
-            <input type="checkbox" name="jadwal_check_${j.rowIndex}" value="${m.id}" data-info="${m.info} (${m.jam})" ${isChecked} class="mt-0.5 accent-blue-600 rounded">
-            <span class="leading-snug text-slate-700">
-              <strong class="text-slate-900">[${m.id}]</strong> ${m.info} (${m.jam})
-            </span>
-          </label>
-        `;
+      let groupedPesanan = {};
+      listPesanan.forEach(p => {
+        let lapak = p.namaLapak || 'Lainnya';
+        if (!groupedPesanan[lapak]) groupedPesanan[lapak] = [];
+        groupedPesanan[lapak].push(p);
       });
+
+      for (let lapak in groupedPesanan) {
+        let pesananArray = groupedPesanan[lapak];
+        let totalSemuaLapak = 0;
+        let listItemsHtml = '';
+
+        pesananArray.forEach(p => {
+          totalSemuaLapak += (parseInt(p.totalTagihan) || 0);
+          const statusStr = p.status ? p.status.toString().trim() : '';
+          const isLunas = statusStr.toLowerCase().includes('lunas');
+          const formatHrg = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.totalTagihan);
+          
+          listItemsHtml += `
+            <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-xs space-y-1.5 shadow-2xs">
+              <div class="flex justify-between items-center">
+                <span class="font-extrabold text-slate-900">👤 ${p.namaPemesan}</span>
+                <span class="font-bold text-slate-700">${formatHrg}</span>
+              </div>
+              <div class="text-[11px] text-slate-600 bg-slate-50 p-1.5 rounded-lg border font-mono">${p.detailPesanan}</div>
+              <div class="flex justify-between items-center pt-1">
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${isLunas ? 'bg-emerald-50 text-emerald-700 border' : 'bg-amber-50 text-amber-700 border'}">${p.status || 'Pending 🟡'}</span>
+                <div class="flex gap-1">
+                  ${!isLunas ? `<button onclick="aksiKonfirmasiPesanan(${p.rowIndex}, 'acc')" class="bg-emerald-600 text-white font-bold text-[9px] px-2 py-1 rounded-md">ACC</button>` : ''}
+                  <button onclick="aksiKonfirmasiPesanan(${p.rowIndex}, 'hapus')" class="bg-rose-50 text-rose-600 border font-bold text-[9px] px-2 py-1 rounded-md">Hapus</button>
+                </div>
+              </div>
+            </div>`;
+        });
+
+        const formatTotalSemua = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalSemuaLapak);
+
+        containerPesanan.innerHTML += `
+          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2.5">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-2">
+              <div>
+                <span class="font-extrabold text-sm text-blue-700">🛍️ ${lapak}</span>
+                <span class="block text-[10px] text-slate-500">${pesananArray.length} Pesanan Masuk (Total: <strong>${formatTotalSemua}</strong>)</span>
+              </div>
+            </div>
+            <div class="space-y-2">
+              ${listItemsHtml}
+            </div>
+          </div>`;
+      }
     }
 
-    // HEADER BERSIH: HANYA TAMPILKAN WHATSAPP (SAMA SEPERTI DI BACKEND)
-    const waInfo = j.whatsapp ? `<p class="text-[11px] text-slate-500 font-mono mt-0.5">📱 WA: ${j.whatsapp}</p>` : '';
+    // 2. Render Lapak dengan Checkbox Multiple Assign Jadwal
+    cacheLapakData = data.jualan || [];
+    const containerLapak = document.getElementById('containerLapakAdmin');
+    containerLapak.innerHTML = '';
 
-    const cardHtml = `
-      <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3.5">
-        
-        <!-- Header Penjual & Status (Hanya Nama Penjual & WhatsApp) -->
-        <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-3">
-          <div>
-            <h3 class="font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
-              🛍️ ${j.namaPenjual}
-            </h3>
-            ${waInfo}
+    if (cacheLapakData.length === 0) {
+      containerLapak.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 italic">Belum ada pendaftaran mitra.</div>';
+      return;
+    }
+
+    cacheLapakData.forEach((l, idx) => {
+      const isDisetujui = l.status && l.status.toLowerCase().includes('disetujui');
+      const assignedIds = (l.jadwalId || '').toString().split(',').map(s => s.trim());
+
+      let checkboxHtml = '';
+      if (cacheJadwalList.length === 0) {
+        checkboxHtml = '<span class="text-[10px] text-slate-400 italic">Belum ada jadwal mabar dibuat.</span>';
+      } else {
+        cacheJadwalList.forEach(j => {
+          const isChecked = assignedIds.includes(j.id) ? 'checked' : '';
+          checkboxHtml += `
+            <label class="flex items-center gap-2 text-xs py-1 px-2 hover:bg-slate-50 rounded-lg cursor-pointer">
+              <input type="checkbox" value="${j.id}" ${isChecked} class="checkbox-jadwal-${l.rowIndex} rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5">
+              <span class="text-slate-700 font-medium"><strong>[${j.id}]</strong> ${j.info} (${j.jam})</span>
+            </label>`;
+        });
+      }
+
+      containerLapak.innerHTML += `
+        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2.5">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="font-bold text-slate-900 text-sm">🛍️ ${l.namaPenjual}</span>
+              <span class="block text-[10px] text-slate-500">Email: ${l.emailPenjual || 'Belum diatur'}</span>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isDisetujui ? 'bg-emerald-50 text-emerald-700 border' : 'bg-blue-50 text-blue-700 border'}">${l.status || 'Pending'}</span>
           </div>
-          <div>${badgeStatus}</div>
-        </div>
 
-        <!-- Box Penugasan Jadwal Mabar -->
-        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
-          <span class="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">Assign ke Jadwal Mabar:</span>
-          <div class="space-y-1.5 max-h-40 overflow-y-auto">
-            ${checkboxJadwalHtml}
+          <div class="space-y-1.5 bg-white p-2.5 rounded-xl border border-slate-200">
+            <span class="block text-[10px] font-bold text-slate-600 uppercase tracking-wide">Assign ke Jadwal Mabar (Bisa Pilih Banyak):</span>
+            <div class="max-h-36 overflow-y-auto space-y-0.5 pr-1 border border-slate-100 rounded-lg p-1 bg-slate-50/50">
+              ${checkboxHtml}
+            </div>
+            <button onclick="simpanAssignMultipleJadwal(${l.rowIndex}, this)" class="w-full mt-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] py-2 rounded-lg transition shadow-2xs">Simpan Pilihan Jadwal</button>
           </div>
-          <button onclick="simpanPilihanJadwal(${j.rowIndex}, event)" class="w-full mt-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-xl transition shadow-xs">
-            💾 Simpan Pilihan Jadwal
-          </button>
-        </div>
 
-        <!-- Accordion Rincian Menu Jualan (Rapi di dalam dropdown) -->
-        <details class="bg-slate-50 rounded-xl border border-slate-200 text-xs group">
-          <summary class="font-bold text-slate-700 p-2.5 cursor-pointer flex justify-between items-center select-none">
-            <span>📜 Lihat Rincian Menu Jualan</span>
-            <span class="text-slate-400 group-open:rotate-180 transition-transform">▼</span>
-          </summary>
-          <div class="p-3 pt-0 border-t border-slate-200/60 font-mono text-[11px] text-slate-600 whitespace-pre-line bg-white rounded-b-xl max-h-36 overflow-y-auto">
-            ${j.menuJualan || 'Tidak ada rincian menu.'}
+          <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border whitespace-pre-line font-mono max-h-28 overflow-y-auto">${l.menuJualan}</div>
+          
+          <div class="flex gap-2 pt-1 border-t border-slate-200">
+            ${!isDisetujui ? `<button onclick="aksiAccLapak(${l.rowIndex}, this)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-2 rounded-lg transition">ACC Mitra 🟢</button>` : ''}
+            <button onclick="bukaModalEditIndex(${idx})" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] py-2 rounded-lg">Edit Menu/Email</button>
+            <button onclick="aksiKonfirmasiJualan(${l.rowIndex})" class="bg-rose-50 text-rose-600 border font-bold text-[10px] px-3 py-2 rounded-lg">Hapus</button>
           </div>
-        </details>
-
-        <!-- Tombol Aksi Edit & Hapus -->
-        <div class="flex justify-between items-center gap-2 pt-2 border-t border-slate-100">
-          <button onclick="bukaModalEdit(${j.rowIndex}, '${encodeURIComponent(j.namaPenjual)}', '${j.whatsapp || ''}', \`${encodeURIComponent(j.menuJualan || '')}\`)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 rounded-xl border border-slate-200 transition">
-            ✏️ Edit Menu/WA
-          </button>
-          <button onclick="hapusMitraJualan(${j.rowIndex})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs py-2 px-3 rounded-xl border border-rose-200 transition">
-            Hapus
-          </button>
-        </div>
-
-      </div>
-    `;
-
-    container.innerHTML += cardHtml;
-  });
-}
-
-// EDIT MITRA & MENU JUALAN
-function bukaModalEdit(rowIndex, namaPenjualEnc, whatsapp, menuJualanEnc) {
-  document.getElementById('editRowIndex').value = rowIndex;
-  document.getElementById('editNamaPenjual').value = decodeURIComponent(namaPenjualEnc);
-  document.getElementById('editWhatsapp').value = whatsapp;
-  document.getElementById('editMenuJualan').value = decodeURIComponent(menuJualanEnc);
-
-  document.getElementById('modalEditMitra').classList.remove('hidden');
-}
-
-function tutupModalEdit() {
-  document.getElementById('modalEditMitra').classList.add('hidden');
-}
-
-async function simpanEditMitra() {
-  const rowIndex = document.getElementById('editRowIndex').value;
-  const namaPenjual = document.getElementById('editNamaPenjual').value.trim();
-  const whatsapp = document.getElementById('editWhatsapp').value.trim();
-  const menuJualan = document.getElementById('editMenuJualan').value.trim();
-
-  if (!namaPenjual || !whatsapp) return alert('Nama penjual dan WhatsApp wajib diisi!');
-
-  const btn = document.getElementById('btnSimpanEdit');
-  btn.innerText = 'Menyimpan...';
-  btn.disabled = true;
-
-  try {
-    const response = await fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        action: 'edit_jualan',
-        rowIndex: parseInt(rowIndex),
-        namaPenjual: namaPenjual,
-        whatsapp: whatsapp,
-        menuJualan: menuJualan
-      })
+        </div>`;
     });
-
-    const result = await response.json();
-    if (result.status === 'success') {
-      alert('Data mitra berhasil diperbarui!');
-      tutupModalEdit();
-      loadAdminJualanData();
-    } else {
-      alert('Gagal mengedit: ' + (result.message || 'Error server.'));
-    }
-  } catch (err) {
-    alert('Gagal terhubung ke server.');
-  } finally {
-    btn.innerText = 'Simpan Perubahan';
-    btn.disabled = false;
-  }
+  } catch (e) { console.error(e); }
 }
 
-async function simpanPilihanJadwal(rowIndex, evt) {
-  const checkboxes = document.querySelectorAll(`input[name="jadwal_check_${rowIndex}"]:checked`);
-  
-  if (checkboxes.length === 0) {
-    return alert('Pilih minimal 1 jadwal mabar untuk disetujui!');
-  }
-
+async function simpanAssignMultipleJadwal(rowIndex, btnElement) {
+  const checkboxes = document.querySelectorAll(`.checkbox-jadwal-${rowIndex}:checked`);
   let selectedIds = [];
   let selectedInfos = [];
 
   checkboxes.forEach(cb => {
-    selectedIds.push(cb.value);
-    selectedInfos.push(cb.getAttribute('data-info'));
+    const jId = cb.value;
+    selectedIds.push(jId);
+    const matched = cacheJadwalList.find(j => j.id === jId);
+    if (matched) {
+      selectedInfos.push(`${matched.id} - ${matched.info} (${matched.jam})`);
+    } else {
+      selectedInfos.push(jId);
+    }
   });
 
-  const btn = evt ? evt.target : null;
-  if (btn) {
-    btn.innerText = 'Menyimpan...';
-    btn.disabled = true;
+  if (selectedIds.length === 0) {
+    return showToast('Pilih minimal 1 jadwal mabar!', 'error');
   }
+
+  const originalText = btnElement.innerText;
+  btnElement.innerText = 'Menyimpan...';
+  btnElement.disabled = true;
 
   try {
     const response = await fetch(GAS_URL, {
       method: 'POST',
       body: JSON.stringify({
         action: 'update_jualan_status_with_jadwal',
-        rowIndex: rowIndex,
+        rowIndex: parseInt(rowIndex),
         jadwalId: selectedIds,
         jadwalInfo: selectedInfos
       })
     });
-
     const result = await response.json();
     if (result.status === 'success') {
-      alert('Pilihan jadwal berhasil disimpan & Mitra telah Disetujui!');
-      loadAdminJualanData();
+      showToast('Berhasil memperbarui jadwal assign!');
+      loadDataAdminJualan();
     } else {
-      alert('Gagal menyimpan: ' + (result.message || 'Terjadi kesalahan.'));
+      throw new Error(result.message);
     }
-  } catch (err) {
-    alert('Gagal terhubung ke server.');
+  } catch (e) {
+    showToast('Gagal menyimpan jadwal: ' + e.message, 'error');
   } finally {
-    if (btn) {
-      btn.innerText = '💾 Simpan Pilihan Jadwal';
-      btn.disabled = false;
+    btnElement.innerText = originalText;
+    btnElement.disabled = false;
+  }
+}
+
+async function aksiAccLapak(rowIndex, btnElement) {
+  if(btnElement) {
+    btnElement.innerText = 'Memproses...';
+    btnElement.disabled = true;
+  }
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'update_jualan_status', rowIndex, status: 'Disetujui 🟢' })
+    });
+    await loadDataAdminJualan();
+    showToast('Mitra berhasil di-ACC!');
+  } catch (e) { 
+    showToast('Gagal ACC lapak.', 'error'); 
+    if(btnElement) {
+      btnElement.innerText = 'ACC Mitra 🟢';
+      btnElement.disabled = false;
     }
   }
 }
 
-async function hapusMitraJualan(rowIndex) {
-  if (!confirm('Apakah kamu yakin ingin menghapus data mitra ini?')) return;
+function aksiKonfirmasiPesanan(rowIndex, tipe) {
+  const modal = document.getElementById('modalKonfirmasi');
+  document.getElementById('konfirmasiTitle').innerText = tipe === 'acc' ? 'ACC Pembayaran Lunas?' : 'Hapus Pesanan?';
+  document.getElementById('btnKonfirmasiYa').onclick = async function() {
+    tutupModalKonfirmasi();
+    await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: tipe === 'acc' ? 'update_pesanan_status' : 'delete_pesanan', rowIndex }) });
+    loadDataAdminJualan();
+    showToast('Aksi pesanan berhasil disimpan!');
+  };
+  modal.classList.remove('hidden');
+}
+
+function aksiKonfirmasiJualan(rowIndex) {
+  const modal = document.getElementById('modalKonfirmasi');
+  document.getElementById('konfirmasiTitle').innerText = 'Hapus Lapak Mitra?';
+  document.getElementById('btnKonfirmasiYa').onclick = async function() {
+    tutupModalKonfirmasi();
+    await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_jualan', rowIndex }) });
+    loadDataAdminJualan();
+    showToast('Lapak mitra berhasil dihapus.');
+  };
+  modal.classList.remove('hidden');
+}
+
+function tutupModalKonfirmasi() { document.getElementById('modalKonfirmasi').classList.add('hidden'); }
+
+// --- CLOSE ORDER & KIRIM EMAIL ---
+function bukaModalCloseOrder() {
+  document.getElementById('modalCloseOrder').classList.remove('hidden');
+}
+
+function tutupModalCloseOrder() {
+  document.getElementById('modalCloseOrder').classList.add('hidden');
+}
+
+async function eksekusiCloseOrderDanKirimEmail() {
+  tutupModalCloseOrder();
+  showToast('Memproses close order & mengirim rekap email...');
 
   try {
     const response = await fetch(GAS_URL, {
       method: 'POST',
-      body: JSON.stringify({
-        action: 'delete_jualan',
-        rowIndex: rowIndex
-      })
+      body: JSON.stringify({ action: 'close_order_and_send_email' })
     });
-
     const result = await response.json();
     if (result.status === 'success') {
-      alert('Data mitra berhasil dihapus!');
-      loadAdminJualanData();
+      showToast('Berhasil! Rekap pesanan terkirim ke email penjual.');
+      loadDataAdminJualan();
+    } else {
+      throw new Error(result.message || 'Gagal mengirim email.');
     }
-  } catch (err) {
-    alert('Gagal menghapus data mitra.');
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+function bukaModalEditIndex(arrayIndex) {
+  const l = cacheLapakData[arrayIndex];
+  if (!l) return;
+  document.getElementById('editRowIndex').value = l.rowIndex;
+  document.getElementById('editNamaPenjual').value = l.namaPenjual || '';
+  document.getElementById('editEmailPenjual').value = l.emailPenjual || '';
+  buildEditFormFromText(l.menuJualan || '');
+  document.getElementById('modalEditLapak').classList.remove('hidden');
+}
+
+function buildEditFormFromText(rawText) {
+  const container = document.getElementById('editContainerKategori');
+  container.innerHTML = '';
+  const lines = rawText.split('\n');
+  let categories = [];
+  let currentCat = { nama: "Menu Utama", items: [] };
+  let lastItem = null;
+
+  lines.forEach(line => {
+    let trim = line.trim();
+    if (!trim) return;
+    if (trim.startsWith('📁')) {
+      if (currentCat.items.length > 0 || currentCat.nama !== "Menu Utama") categories.push(currentCat);
+      currentCat = { nama: trim.replace('📁', '').trim(), items: [] };
+      lastItem = null;
+    } else if (trim.startsWith('└')) {
+      if (lastItem) lastItem.deskripsi = trim.replace('└', '').trim();
+    } else {
+      let clean = trim.replace(/^[•\-\*]\s*/, '').trim();
+      let harga = 0, namaMenu = clean;
+      const matchRp = clean.match(/\(Rp\s*([\d\.]+)\)/i) || clean.match(/Rp\.?\s*([\d\.]+)/i);
+      if (matchRp) {
+        harga = parseInt(matchRp[1].replace(/\./g, '')) || 0;
+        namaMenu = clean.replace(matchRp[0], '').trim();
+      }
+      lastItem = { nama: namaMenu, harga: harga, deskripsi: '' };
+      currentCat.items.push(lastItem);
+    }
+  });
+  categories.push(currentCat);
+  categories.forEach(cat => editTambahKategori(cat.nama, cat.items));
+  updateEditCounters();
+}
+
+function updateEditCounters() {
+  const katCards = document.querySelectorAll('#editContainerKategori .edit-kategori-card');
+  document.getElementById('editCounterKategori').innerText = `${katCards.length}/6 Kategori`;
+  document.getElementById('editBtnTambahKat').classList.toggle('hidden', katCards.length >= 6);
+  katCards.forEach(card => {
+    card.querySelector('.edit-btn-hapus-kat').classList.toggle('hidden', katCards.length <= 1);
+  });
+}
+
+function editTambahKategori(namaKat = '', items = [{ nama: '', harga: '', deskripsi: '' }]) {
+  const container = document.getElementById('editContainerKategori');
+  if (container.querySelectorAll('.edit-kategori-card').length >= 6) return showToast('Maksimal 6 kategori!', 'error');
+
+  const div = document.createElement('div');
+  div.className = 'edit-kategori-card bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2';
+  
+  let itemsHtml = '';
+  items.forEach(item => {
+    itemsHtml += `
+      <div class="flex gap-2 edit-menu-row items-center">
+        <div class="w-3/5 space-y-1">
+          <input type="text" placeholder="Nama Menu" value="${item.nama}" class="w-full p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-nama">
+          <input type="text" placeholder="Deskripsi" value="${item.deskripsi || ''}" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded-lg text-[10px] text-slate-500 edit-menu-deskripsi">
+        </div>
+        <input type="number" placeholder="Harga" value="${item.harga || ''}" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-harga self-start">
+        <button type="button" onclick="this.closest('.edit-menu-row').remove(); updateEditCounters();" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border self-start">✕</button>
+      </div>`;
+  });
+
+  div.innerHTML = `
+    <div class="flex gap-2 items-center">
+      <input type="text" placeholder="Nama Kategori" value="${namaKat}" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl text-xs font-bold text-blue-700 edit-kategori-nama">
+      <button type="button" onclick="this.closest('.edit-kategori-card').remove(); updateEditCounters();" class="bg-rose-50 text-rose-600 font-bold text-xs p-2.5 rounded-xl border edit-btn-hapus-kat">✕</button>
+    </div>
+    <div class="space-y-1.5 edit-container-menu-item pl-2 border-l-2 border-blue-200">${itemsHtml}</div>
+    <button type="button" onclick="editTambahBarisMenu(this)" class="w-full bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-lg transition border shadow-2xs">+ Tambah Menu</button>
+  `;
+  container.appendChild(div);
+  updateEditCounters();
+}
+
+function editTambahBarisMenu(btn) {
+  const menuContainer = btn.closest('.edit-kategori-card').querySelector('.edit-container-menu-item');
+  const div = document.createElement('div');
+  div.className = 'flex gap-2 edit-menu-row items-center';
+  div.innerHTML = `
+    <div class="w-3/5 space-y-1">
+      <input type="text" placeholder="Nama Menu" class="w-full p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-nama">
+      <input type="text" placeholder="Deskripsi" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded-lg text-[10px] text-slate-500 edit-menu-deskripsi">
+    </div>
+    <input type="number" placeholder="Harga" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-harga self-start">
+    <button type="button" onclick="this.closest('.edit-log-row').remove(); updateEditCounters();" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border self-start">✕</button>
+  `;
+  menuContainer.appendChild(div);
+  updateEditCounters();
+}
+
+function tutupModalEdit() { document.getElementById('modalEditLapak').classList.add('hidden'); }
+
+async function simpanEditLapak() {
+  const rowIndex = document.getElementById('editRowIndex').value;
+  const namaPenjual = document.getElementById('editNamaPenjual').value.trim();
+  const emailPenjual = document.getElementById('editEmailPenjual').value.trim();
+  if (!namaPenjual || !emailPenjual) return showToast('Nama dan Email Penjual wajib diisi!', 'error');
+
+  let hasilMenuGabung = [];
+  const katCards = document.querySelectorAll('#editContainerKategori .edit-kategori-card');
+  for (let card of katCards) {
+    const namaKat = card.querySelector('.edit-kategori-nama').value.trim();
+    hasilMenuGabung.push(`📁 ${namaKat}`);
+    card.querySelectorAll('.edit-menu-row').forEach(row => {
+      const m = row.querySelector('.edit-menu-nama').value.trim();
+      const d = row.querySelector('.edit-menu-deskripsi').value.trim();
+      const h = row.querySelector('.edit-menu-harga').value.trim();
+      if (m && h) {
+        hasilMenuGabung.push(`• ${m} (Rp ${parseInt(h).toLocaleString('id-ID')})`);
+        if (d) hasilMenuGabung.push(`  └ ${d}`);
+      }
+    });
+  }
+
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'edit_jualan', rowIndex, namaPenjual, emailPenjual, menuJualan: hasilMenuGabung.join('\n') })
+    });
+    tutupModalEdit();
+    refreshDataAdmin();
+    showToast('Perubahan lapak & email berhasil disimpan!');
+  } catch (e) { 
+    showToast('Gagal menyimpan perubahan.', 'error'); 
   }
 }
