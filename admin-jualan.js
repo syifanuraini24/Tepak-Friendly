@@ -5,8 +5,9 @@ let cacheJadwalList = [];
 // Fungsi Toast Notification halus di pojok kanan bawah
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
-  const toast = document.createElement('div');
+  if (!container) return;
   
+  const toast = document.createElement('div');
   const bgColors = type === 'success' ? 'bg-slate-900 text-white border-slate-800' : 'bg-rose-600 text-white border-rose-500';
   const icon = type === 'success' ? '✨' : '⚠️';
   
@@ -33,14 +34,21 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function loginAdminJualan() {
-  const password = document.getElementById('passwordAdmin').value.trim();
+  const passwordInput = document.getElementById('passwordAdmin');
+  const password = passwordInput ? passwordInput.value.trim() : '';
   if (!password) return showToast('Masukkan password terlebih dahulu!', 'error');
+  
   const btn = document.getElementById('btnLogin');
-  btn.innerText = 'Memeriksa...';
-  btn.disabled = true;
+  if (btn) {
+    btn.innerText = 'Memeriksa...';
+    btn.disabled = true;
+  }
 
   try {
-    const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'login_admin_jualan', password }) });
+    const response = await fetch(GAS_URL, { 
+      method: 'POST', 
+      body: JSON.stringify({ action: 'login_admin_jualan', password }) 
+    });
     const result = await response.json();
     if (result.status === 'success') {
       sessionStorage.setItem('admin_jualan_logged', 'true');
@@ -52,8 +60,10 @@ async function loginAdminJualan() {
   } catch (e) { 
     showToast('Gagal terhubung ke server.', 'error'); 
   } finally {
-    btn.innerText = 'Masuk Panel Admin';
-    btn.disabled = false;
+    if (btn) {
+      btn.innerText = 'Masuk Panel Admin';
+      btn.disabled = false;
+    }
   }
 }
 
@@ -71,19 +81,20 @@ function logoutAdmin() {
   document.getElementById('headerActions').classList.add('hidden');
   document.getElementById('linkKembaliJualan').classList.remove('hidden');
   document.getElementById('sectionLogin').classList.remove('hidden');
-  document.getElementById('passwordAdmin').value = '';
+  const passEl = document.getElementById('passwordAdmin');
+  if (passEl) passEl.value = '';
   showToast('Berhasil logout.');
 }
 
 async function refreshDataAdmin(btnElement) {
   const txt = document.getElementById('refreshText');
-  txt.innerText = 'Memuat...';
-  if(btnElement) btnElement.disabled = true;
+  if (txt) txt.innerText = 'Memuat...';
+  if (btnElement) btnElement.disabled = true;
 
   await loadDataAdminJualan();
 
-  txt.innerText = 'Refresh';
-  if(btnElement) btnElement.disabled = false;
+  if (txt) txt.innerText = 'Refresh';
+  if (btnElement) btnElement.disabled = false;
   showToast('Data berhasil diperbarui!');
 }
 
@@ -119,15 +130,15 @@ async function loadDataAdminJualan() {
           totalSemuaLapak += (parseInt(p.totalTagihan) || 0);
           const statusStr = p.status ? p.status.toString().trim() : '';
           const isLunas = statusStr.toLowerCase().includes('lunas');
-          const formatHrg = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.totalTagihan);
+          const formatHrg = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.totalTagihan || 0);
           
           listItemsHtml += `
             <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-xs space-y-1.5 shadow-2xs">
               <div class="flex justify-between items-center">
-                <span class="font-extrabold text-slate-900">👤 ${p.namaPemesan}</span>
+                <span class="font-extrabold text-slate-900">👤 ${p.namaPemesan || '-'}</span>
                 <span class="font-bold text-slate-700">${formatHrg}</span>
               </div>
-              <div class="text-[11px] text-slate-600 bg-slate-50 p-1.5 rounded-lg border font-mono">${p.detailPesanan}</div>
+              <div class="text-[11px] text-slate-600 bg-slate-50 p-1.5 rounded-lg border font-mono">${p.detailPesanan || '-'}</div>
               <div class="flex justify-between items-center pt-1">
                 <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${isLunas ? 'bg-emerald-50 text-emerald-700 border' : 'bg-amber-50 text-amber-700 border'}">${p.status || 'Pending 🟡'}</span>
                 <div class="flex gap-1">
@@ -174,7 +185,7 @@ async function loadDataAdminJualan() {
         checkboxHtml = '<span class="text-[10px] text-slate-400 italic">Belum ada jadwal mabar dibuat.</span>';
       } else {
         cacheJadwalList.forEach(j => {
-          const isChecked = assignedIds.includes(j.id) ? 'checked' : '';
+          const isChecked = assignedIds.includes(String(j.id)) ? 'checked' : '';
           checkboxHtml += `
             <label class="flex items-center gap-2 text-xs py-1 px-2 hover:bg-slate-50 rounded-lg cursor-pointer">
               <input type="checkbox" value="${j.id}" ${isChecked} class="checkbox-jadwal-${l.rowIndex} rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5">
@@ -183,12 +194,14 @@ async function loadDataAdminJualan() {
         });
       }
 
+      const menuTextSafe = (l.menuJualan !== null && l.menuJualan !== undefined) ? String(l.menuJualan) : '';
+
       containerLapak.innerHTML += `
         <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2.5">
           <div class="flex justify-between items-start">
             <div>
-              <span class="font-bold text-slate-900 text-sm">🛍️ ${l.namaPenjual}</span>
-              <span class="block text-[10px] text-slate-500">WA: ${l.whatsapp}</span>
+              <span class="font-bold text-slate-900 text-sm">🛍️ ${l.namaPenjual || 'Mitra'}</span>
+              <span class="block text-[10px] text-slate-500">WA: ${l.whatsapp || '-'}</span>
             </div>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isDisetujui ? 'bg-emerald-50 text-emerald-700 border' : 'bg-blue-50 text-blue-700 border'}">${l.status || 'Pending'}</span>
           </div>
@@ -201,7 +214,7 @@ async function loadDataAdminJualan() {
             <button onclick="simpanAssignMultipleJadwal(${l.rowIndex}, this)" class="w-full mt-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] py-2 rounded-lg transition shadow-2xs">Simpan Pilihan Jadwal</button>
           </div>
 
-          <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border whitespace-pre-line font-mono max-h-28 overflow-y-auto">${l.menuJualan}</div>
+          <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border whitespace-pre-line font-mono max-h-28 overflow-y-auto">${menuTextSafe || 'Belum ada menu.'}</div>
           
           <div class="flex gap-2 pt-1 border-t border-slate-200">
             ${!isDisetujui ? `<button onclick="aksiAccLapak(${l.rowIndex}, this)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-2 rounded-lg transition">ACC Mitra 🟢</button>` : ''}
@@ -210,7 +223,9 @@ async function loadDataAdminJualan() {
           </div>
         </div>`;
     });
-  } catch (e) { console.error(e); }
+  } catch (e) { 
+    console.error('Error loading data:', e); 
+  }
 }
 
 async function simpanAssignMultipleJadwal(rowIndex, btnElement) {
@@ -221,7 +236,7 @@ async function simpanAssignMultipleJadwal(rowIndex, btnElement) {
   checkboxes.forEach(cb => {
     const jId = cb.value;
     selectedIds.push(jId);
-    const matched = cacheJadwalList.find(j => j.id === jId);
+    const matched = cacheJadwalList.find(j => String(j.id) === String(jId));
     if (matched) {
       selectedInfos.push(`${matched.id} - ${matched.info} (${matched.jam})`);
     } else {
@@ -252,7 +267,7 @@ async function simpanAssignMultipleJadwal(rowIndex, btnElement) {
       showToast('Berhasil memperbarui jadwal assign!');
       loadDataAdminJualan();
     } else {
-      throw new Error(result.message);
+      throw new Error(result.message || 'Gagal menyimpan');
     }
   } catch (e) {
     showToast('Gagal menyimpan jadwal: ' + e.message, 'error');
@@ -263,7 +278,7 @@ async function simpanAssignMultipleJadwal(rowIndex, btnElement) {
 }
 
 async function aksiAccLapak(rowIndex, btnElement) {
-  if(btnElement) {
+  if (btnElement) {
     btnElement.innerText = 'Memproses...';
     btnElement.disabled = true;
   }
@@ -276,7 +291,7 @@ async function aksiAccLapak(rowIndex, btnElement) {
     showToast('Mitra berhasil di-ACC!');
   } catch (e) { 
     showToast('Gagal ACC lapak.', 'error'); 
-    if(btnElement) {
+    if (btnElement) {
       btnElement.innerText = 'ACC Mitra 🟢';
       btnElement.disabled = false;
     }
@@ -307,7 +322,9 @@ function aksiKonfirmasiJualan(rowIndex) {
   modal.classList.remove('hidden');
 }
 
-function tutupModalKonfirmasi() { document.getElementById('modalKonfirmasi').classList.add('hidden'); }
+function tutupModalKonfirmasi() { 
+  document.getElementById('modalKonfirmasi').classList.add('hidden'); 
+}
 
 function bukaModalEditIndex(arrayIndex) {
   const l = cacheLapakData[arrayIndex];
@@ -315,14 +332,19 @@ function bukaModalEditIndex(arrayIndex) {
   document.getElementById('editRowIndex').value = l.rowIndex;
   document.getElementById('editNamaPenjual').value = l.namaPenjual || '';
   document.getElementById('editWhatsapp').value = l.whatsapp || '';
-  buildEditFormFromText(l.menuJualan || '');
+  buildEditFormFromText(l.menuJualan);
   document.getElementById('modalEditLapak').classList.remove('hidden');
 }
 
+// FUNGSI UTAMA PERBAIKAN ERROR rawText.split()
 function buildEditFormFromText(rawText) {
   const container = document.getElementById('editContainerKategori');
   container.innerHTML = '';
-  const lines = rawText.split('\n');
+
+  // 1. Garansi rawText dikonversi ke String murni
+  const text = (rawText !== null && rawText !== undefined) ? String(rawText) : "";
+  const lines = text.split('\n');
+  
   let categories = [];
   let currentCat = { nama: "Menu Utama", items: [] };
   let lastItem = null;
@@ -330,8 +352,11 @@ function buildEditFormFromText(rawText) {
   lines.forEach(line => {
     let trim = line.trim();
     if (!trim) return;
+    
     if (trim.startsWith('📁')) {
-      if (currentCat.items.length > 0 || currentCat.nama !== "Menu Utama") categories.push(currentCat);
+      if (currentCat.items.length > 0 || currentCat.nama !== "Menu Utama") {
+        categories.push(currentCat);
+      }
       currentCat = { nama: trim.replace('📁', '').trim(), items: [] };
       lastItem = null;
     } else if (trim.startsWith('└')) {
@@ -348,17 +373,26 @@ function buildEditFormFromText(rawText) {
       currentCat.items.push(lastItem);
     }
   });
-  categories.push(currentCat);
+
+  if (currentCat.items.length > 0 || currentCat.nama !== "Menu Utama" || categories.length === 0) {
+    categories.push(currentCat);
+  }
+
   categories.forEach(cat => editTambahKategori(cat.nama, cat.items));
   updateEditCounters();
 }
 
 function updateEditCounters() {
   const katCards = document.querySelectorAll('#editContainerKategori .edit-kategori-card');
-  document.getElementById('editCounterKategori').innerText = `${katCards.length}/6 Kategori`;
-  document.getElementById('editBtnTambahKat').classList.toggle('hidden', katCards.length >= 6);
+  const counterEl = document.getElementById('editCounterKategori');
+  const btnTambahEl = document.getElementById('editBtnTambahKat');
+  
+  if (counterEl) counterEl.innerText = `${katCards.length}/6 Kategori`;
+  if (btnTambahEl) btnTambahEl.classList.toggle('hidden', katCards.length >= 6);
+  
   katCards.forEach(card => {
-    card.querySelector('.edit-btn-hapus-kat').classList.toggle('hidden', katCards.length <= 1);
+    const btnHapus = card.querySelector('.edit-btn-hapus-kat');
+    if (btnHapus) btnHapus.classList.toggle('hidden', katCards.length <= 1);
   });
 }
 
@@ -370,11 +404,13 @@ function editTambahKategori(namaKat = '', items = [{ nama: '', harga: '', deskri
   div.className = 'edit-kategori-card bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2';
   
   let itemsHtml = '';
-  items.forEach(item => {
+  const itemList = (Array.isArray(items) && items.length > 0) ? items : [{ nama: '', harga: '', deskripsi: '' }];
+  
+  itemList.forEach(item => {
     itemsHtml += `
       <div class="flex gap-2 edit-menu-row items-center">
         <div class="w-3/5 space-y-1">
-          <input type="text" placeholder="Nama Menu" value="${item.nama}" class="w-full p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-nama">
+          <input type="text" placeholder="Nama Menu" value="${item.nama || ''}" class="w-full p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-nama">
           <input type="text" placeholder="Deskripsi" value="${item.deskripsi || ''}" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded-lg text-[10px] text-slate-500 edit-menu-deskripsi">
         </div>
         <input type="number" placeholder="Harga" value="${item.harga || ''}" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-harga self-start">
@@ -410,7 +446,9 @@ function editTambahBarisMenu(btn) {
   updateEditCounters();
 }
 
-function tutupModalEdit() { document.getElementById('modalEditLapak').classList.add('hidden'); }
+function tutupModalEdit() { 
+  document.getElementById('modalEditLapak').classList.add('hidden'); 
+}
 
 async function simpanEditLapak() {
   const rowIndex = document.getElementById('editRowIndex').value;
@@ -422,7 +460,7 @@ async function simpanEditLapak() {
   const katCards = document.querySelectorAll('#editContainerKategori .edit-kategori-card');
   for (let card of katCards) {
     const namaKat = card.querySelector('.edit-kategori-nama').value.trim();
-    hasilMenuGabung.push(`📁 ${namaKat}`);
+    if (namaKat) hasilMenuGabung.push(`📁 ${namaKat}`);
     card.querySelectorAll('.edit-menu-row').forEach(row => {
       const m = row.querySelector('.edit-menu-nama').value.trim();
       const d = row.querySelector('.edit-menu-deskripsi').value.trim();
