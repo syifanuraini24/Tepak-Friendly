@@ -2,7 +2,7 @@ const GAS_URL = CONFIG.GAS_URL;
 let masterJadwalList = [];
 let masterJualanList = [];
 
-// FUNGSI LOGIN ADMIN JUALAN (KODE PASS: jualan123)
+// LOGIN ADMIN JUALAN (KODE PASS: jualan123)
 async function loginAdminJualan() {
   const pass = document.getElementById('inputPassAdmin').value.trim();
   if (!pass) return alert('Masukkan password admin!');
@@ -89,13 +89,12 @@ function renderAdminJualanList() {
       ? '<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">Disetujui 🟢</span>'
       : '<span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-200">Pending 🟡</span>';
 
-    // Parse ID Jadwal jika bertipe gabungan/koma
+    // Parse Checkbox Jadwal Terpilih
     let selectedJadwalIds = [];
     if (j.jadwalId && j.jadwalId !== 'PENDING') {
       selectedJadwalIds = j.jadwalId.toString().split(',').map(id => id.trim());
     }
 
-    // List Checkbox Jadwal Mabar
     let checkboxJadwalHtml = '';
     if (masterJadwalList.length === 0) {
       checkboxJadwalHtml = '<div class="text-slate-400 text-[11px] italic">Tidak ada master jadwal mabar aktif.</div>';
@@ -113,7 +112,6 @@ function renderAdminJualanList() {
       });
     }
 
-    // Render Card Mitra (Tanpa teks menu liar berantakan di atas)
     const cardHtml = `
       <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3.5">
         
@@ -139,7 +137,7 @@ function renderAdminJualanList() {
           </button>
         </div>
 
-        <!-- Accordion Rincian Menu Jualan (Tertata rapi di dalam dropdown ini) -->
+        <!-- Accordion Rincian Menu Jualan -->
         <details class="bg-slate-50 rounded-xl border border-slate-200 text-xs group">
           <summary class="font-bold text-slate-700 p-2.5 cursor-pointer flex justify-between items-center select-none">
             <span>📜 Lihat Rincian Menu Jualan</span>
@@ -150,10 +148,13 @@ function renderAdminJualanList() {
           </div>
         </details>
 
-        <!-- Tombol Aksi Hapus -->
-        <div class="flex justify-end gap-2 pt-1 border-t border-slate-100">
-          <button onclick="hapusMitraJualan(${j.rowIndex})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs py-2 px-4 rounded-xl border border-rose-200 transition">
-            🗑️ Hapus Mitra
+        <!-- Tombol Aksi Edit & Hapus -->
+        <div class="flex justify-between items-center gap-2 pt-2 border-t border-slate-100">
+          <button onclick="bukaModalEdit(${j.rowIndex}, '${encodeURIComponent(j.namaPenjual)}', '${j.whatsapp}', \`${encodeURIComponent(j.menuJualan || '')}\`)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 rounded-xl border border-slate-200 transition">
+            ✏️ Edit Menu/Mitra
+          </button>
+          <button onclick="hapusMitraJualan(${j.rowIndex})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs py-2 px-3 rounded-xl border border-rose-200 transition">
+            Hapus
           </button>
         </div>
 
@@ -162,6 +163,60 @@ function renderAdminJualanList() {
 
     container.innerHTML += cardHtml;
   });
+}
+
+// EDIT MITRA & MENU JUALAN
+function bukaModalEdit(rowIndex, namaPenjualEnc, whatsapp, menuJualanEnc) {
+  document.getElementById('editRowIndex').value = rowIndex;
+  document.getElementById('editNamaPenjual').value = decodeURIComponent(namaPenjualEnc);
+  document.getElementById('editWhatsapp').value = whatsapp;
+  document.getElementById('editMenuJualan').value = decodeURIComponent(menuJualanEnc);
+
+  document.getElementById('modalEditMitra').classList.remove('hidden');
+}
+
+function tutupModalEdit() {
+  document.getElementById('modalEditMitra').classList.add('hidden');
+}
+
+async function simpanEditMitra() {
+  const rowIndex = document.getElementById('editRowIndex').value;
+  const namaPenjual = document.getElementById('editNamaPenjual').value.trim();
+  const whatsapp = document.getElementById('editWhatsapp').value.trim();
+  const menuJualan = document.getElementById('editMenuJualan').value.trim();
+
+  if (!namaPenjual || !whatsapp) return alert('Nama penjual dan WhatsApp wajib diisi!');
+
+  const btn = document.getElementById('btnSimpanEdit');
+  btn.innerText = 'Menyimpan...';
+  btn.disabled = true;
+
+  try {
+    const response = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'edit_jualan',
+        rowIndex: parseInt(rowIndex),
+        namaPenjual: namaPenjual,
+        whatsapp: whatsapp,
+        menuJualan: menuJualan
+      })
+    });
+
+    const result = await response.json();
+    if (result.status === 'success') {
+      alert('Data mitra berhasil diperbarui!');
+      tutupModalEdit();
+      loadAdminJualanData();
+    } else {
+      alert('Gagal mengedit: ' + (result.message || 'Error server.'));
+    }
+  } catch (err) {
+    alert('Gagal terhubung ke server.');
+  } finally {
+    btn.innerText = 'Simpan Perubahan';
+    btn.disabled = false;
+  }
 }
 
 async function simpanPilihanJadwal(rowIndex, evt) {

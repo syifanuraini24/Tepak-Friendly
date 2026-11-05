@@ -27,7 +27,7 @@
 
   <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
 
-    <!-- SECTION LOGIN ADMIN (DEFAULT TAMPIL) -->
+    <!-- SECTION LOGIN ADMIN -->
     <div id="sectionLoginAdmin" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
       <h2 class="font-bold text-sm text-slate-900">Login Admin Lapak UMKM</h2>
       <p class="text-xs text-slate-500">Masukkan kata sandi admin untuk mengakses penugasan mitra.</p>
@@ -39,7 +39,7 @@
       </button>
     </div>
 
-    <!-- SECTION DASHBOARD ADMIN (TERSEMBUNYI SEBELUM LOGIN) -->
+    <!-- SECTION DASHBOARD ADMIN -->
     <div id="sectionDashboardAdmin" class="hidden space-y-4">
       <!-- STATS SUMMARY -->
       <div class="grid grid-cols-2 gap-3">
@@ -62,6 +62,35 @@
 
         <div id="containerAdminJualan" class="space-y-3.5">
           <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat data pendaftaran mitra...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDIT MENU / MITRA -->
+    <div id="modalEditMitra" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-3 overflow-y-auto">
+      <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 my-auto space-y-3 border border-slate-100 max-h-[90vh] overflow-y-auto">
+        <h3 class="font-extrabold text-slate-900 text-sm">Edit Data Mitra / Menu Jualan</h3>
+        
+        <input type="hidden" id="editRowIndex">
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Brand / Penjual</label>
+          <input type="text" id="editNamaPenjual" class="w-full p-2.5 border border-slate-200 bg-slate-50 rounded-xl text-xs">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Nomor WhatsApp</label>
+          <input type="text" id="editWhatsapp" class="w-full p-2.5 border border-slate-200 bg-slate-50 rounded-xl text-xs">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Rincian Menu Jualan</label>
+          <textarea id="editMenuJualan" rows="6" class="w-full p-2.5 border border-slate-200 bg-slate-50 rounded-xl text-xs font-mono"></textarea>
+        </div>
+
+        <div class="flex gap-2 pt-2">
+          <button onclick="tutupModalEdit()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+          <button onclick="simpanEditMitra()" id="btnSimpanEdit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Simpan Perubahan</button>
         </div>
       </div>
     </div>
