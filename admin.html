@@ -1,44 +1,54 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Tepak Friendly</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-slate-100 min-h-screen p-4 font-sans text-slate-800 antialiased pb-12">
 
   <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-6">
-    
+
     <!-- Header Admin -->
     <div class="flex justify-between items-center border-b border-slate-100 pb-4">
       <div>
         <h1 class="text-base font-extrabold text-slate-900">🛠️ Panel Admin Tepak Friendly</h1>
         <p class="text-[11px] text-slate-500">Kelola jadwal, peserta, dan rekap keuangan mabar</p>
       </div>
-      <div id="statusOnline" class="hidden flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-100">
+      <div id="statusOnline"
+        class="hidden flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-100">
         <span>Online 🟢</span>
       </div>
     </div>
-    
+
     <!-- Bagian Login -->
     <div id="loginSection" class="max-w-sm mx-auto space-y-3 py-6">
       <div>
         <label for="passInput" class="block text-xs font-bold text-slate-600 mb-1">Password Admin</label>
-        <input type="password" id="passInput" placeholder="Masukkan password..." class="w-full p-3 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <input type="password" id="passInput" placeholder="Masukkan password..."
+          class="w-full p-3 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
-      <button onclick="login()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Masuk Dashboard</button>
+      <button onclick="login()"
+        class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Masuk
+        Dashboard</button>
     </div>
 
     <!-- Panel Utama Admin -->
     <div id="adminPanel" class="hidden space-y-5">
-      
+
       <!-- Top Action Bar -->
       <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
         <span class="text-xs font-semibold text-slate-600">Sesi Aktif Admin</span>
         <div class="flex gap-2">
-          <button onclick="loadDataAdmin()" class="bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 transition shadow-xs">🔄 Refresh</button>
-          <button onclick="logout()" class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-rose-200 transition">🚪 Logout</button>
+          <button onclick="loadDataAdmin()"
+            class="bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 transition shadow-xs">🔄
+            Refresh</button>
+          <button onclick="logout()"
+            class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-rose-200 transition">🚪
+            Logout</button>
         </div>
       </div>
 
@@ -58,13 +68,19 @@
       <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
         <h2 class="font-bold text-xs text-slate-800 uppercase tracking-wide">➕ Tambah Jadwal Mabar Baru</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <input type="text" id="addId" placeholder="ID Jadwal (Cth: Mabar-03)" class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <input type="text" id="addInfo" placeholder="Lokasi / Info (Cth: Gor Karapitan)" class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <input type="text" id="addJam" placeholder="Jam Main (Cth: 11:30 - 14:00)" class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <input type="number" id="addHtm" placeholder="HTM (Cth: 27000 / 0 gratis)" class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <input type="number" id="addKuota" placeholder="Kuota Peserta (Cth: 8)" class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white sm:col-span-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <input type="text" id="addId" placeholder="ID Jadwal (Cth: Mabar-03)"
+            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <input type="text" id="addInfo" placeholder="Lokasi / Info (Cth: Gor Karapitan)"
+            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <input type="text" id="addJam" placeholder="Jam Main (Cth: 11:30 - 14:00)"
+            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <input type="number" id="addHtm" placeholder="HTM (Cth: 27000 / 0 gratis)"
+            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <input type="number" id="addKuota" placeholder="Kuota Peserta (Cth: 8)"
+            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white sm:col-span-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
-        <button onclick="tambahJadwalBaru(this)" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-sm">
+        <button onclick="tambahJadwalBaru(this)"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-sm">
           Simpan Jadwal Baru ke Master
         </button>
       </div>
@@ -73,7 +89,8 @@
       <div class="space-y-2.5">
         <h2 class="font-bold text-xs text-slate-800 uppercase tracking-wide">📋 Rekap Peserta & Kuota per Jadwal</h2>
         <div id="summaryJadwalList" class="space-y-3">
-          <div class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Memuat rekap jadwal...</div>
+          <div class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Memuat rekap jadwal...
+          </div>
         </div>
       </div>
 
@@ -81,7 +98,8 @@
       <div class="space-y-2.5 pt-2 border-t border-slate-100">
         <h2 class="font-bold text-xs text-slate-800 uppercase tracking-wide">⏳ Konfirmasi Pembayaran Peserta</h2>
         <ul id="listMenunggu" class="space-y-2.5">
-          <li class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Memuat data konfirmasi...</li>
+          <li class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Memuat data konfirmasi...
+          </li>
         </ul>
       </div>
 
@@ -89,30 +107,37 @@
   </div>
 
   <!-- Modal Konfirmasi Custom -->
-  <div id="customModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+  <div id="customModal"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 transform transition-all space-y-3">
       <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Konfirmasi Tindakan</h3>
       <p id="modalDesc" class="text-xs text-slate-600">Apakah kamu yakin ingin melanjutkan tindakan ini?</p>
       <div class="flex gap-2 pt-2">
-        <button id="modalBtnCancel" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition">Batal</button>
-        <button id="modalBtnConfirm" class="flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white">Ya, Lanjutkan</button>
+        <button id="modalBtnCancel"
+          class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition">Batal</button>
+        <button id="modalBtnConfirm" class="flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white">Ya,
+          Lanjutkan</button>
       </div>
     </div>
   </div>
 
   <!-- Modal Edit Nominal Tagihan -->
-  <div id="modalEditNominal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+  <div id="modalEditNominal"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 space-y-3">
       <h3 class="font-bold text-sm text-slate-900">Edit Nominal Tagihan</h3>
       <p class="text-xs text-slate-500" id="editNamaPesertaLabel">-</p>
       <input type="hidden" id="editRowIndexInput">
       <div>
         <label class="block text-[11px] font-bold text-slate-600 mb-1">Nominal Baru (Rp)</label>
-        <input type="number" id="inputNominalBaru" placeholder="Cth: 35000" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+        <input type="number" id="inputNominalBaru" placeholder="Cth: 35000"
+          class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
       </div>
       <div class="flex gap-2 pt-2">
-        <button onclick="tutupModalEditNominal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-        <button onclick="simpanNominalBaru(this)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Simpan</button>
+        <button onclick="tutupModalEditNominal()"
+          class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+        <button onclick="simpanNominalBaru(this)"
+          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Simpan</button>
       </div>
     </div>
   </div>
@@ -220,15 +245,15 @@
       const list = document.getElementById('listMenunggu');
       const summaryJadwalDiv = document.getElementById('summaryJadwalList');
       list.innerHTML = '<li class="text-center text-xs text-slate-400 py-4">Memuat data...</li>';
-      
+
       try {
         const response = await fetch(GAS_URL);
         const data = await response.json();
         list.innerHTML = '';
         summaryJadwalDiv.innerHTML = '';
-        
+
         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
-        
+
         let totalLunasNum = 0;
         let totalPendingNum = 0;
 
@@ -294,9 +319,14 @@
                     <span class="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-md border">${j.id}</span>
                     <h3 class="font-bold text-sm text-slate-900 mt-1">${j.info} ${isNonaktif ? '<span class="text-rose-600 font-bold text-xs">(Nonaktif)</span>' : ''}</h3>
                   </div>
-                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                    Kuota: ${pesertaJadwal.length}/${j.kuota}
-                  </span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                      Kuota: ${pesertaJadwal.length}/${j.kuota}
+                    </span>
+                    <button onclick="toggleStatusJadwal('${j.id}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}', this)" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border transition ${isNonaktif ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'}">
+                      ${isNonaktif ? '🟢 Aktifkan' : '🔴 Nonaktifkan'}
+                    </button>
+                  </div>
                 </div>
                 
                 <div class="text-xs text-slate-500 flex justify-between bg-slate-50 p-2 rounded-xl border border-slate-100">
@@ -320,8 +350,8 @@
         }
 
         const pendingList = pemainList.filter(item => item.status && item.status.includes('Menunggu'));
-        
-        if(pendingList.length === 0) {
+
+        if (pendingList.length === 0) {
           list.innerHTML = '<li class="text-center text-emerald-700 text-xs font-bold p-4 bg-emerald-50 rounded-2xl border border-emerald-100">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
           return;
         }
@@ -333,13 +363,13 @@
           const tagihanRp = formatRp.format(item.tagihan || 0);
           const waktuDaftar = new Date(item.timestamp || new Date());
           const jamDaftarString = waktuDaftar.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-          
+
           const waktuBerlakuSampai = waktuDaftar.getTime() + batasWaktuMs;
           const sisaMs = waktuBerlakuSampai - waktuSekarang;
-          
+
           let sisaWaktuTeks = '';
           let warnaSisa = 'text-slate-500';
-          
+
           if (sisaMs > 0) {
             const totalMenit = Math.floor(sisaMs / (1000 * 60));
             const jamSisa = Math.floor(totalMenit / 60);
@@ -380,7 +410,30 @@
       }
     }
 
-    // Fungsi untuk Modal Edit Nominal
+    // Fungsi Toggle Status Aktif / Nonaktif Jadwal
+    async function toggleStatusJadwal(jadwalId, statusBaru, btnElement) {
+      btnElement.innerText = 'Memproses...';
+      btnElement.disabled = true;
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'toggle_status_jadwal', jadwalId, statusBaru })
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          loadDataAdmin();
+        } else {
+          throw new Error(result.message || 'Gagal mengubah status');
+        }
+      } catch (error) {
+        console.error("Gagal toggle status:", error);
+        alert('Gagal mengubah status jadwal: ' + error.message);
+        loadDataAdmin();
+      }
+    }
+
     function bukaModalEditNominal(rowIndex, nama, currentTagihan) {
       document.getElementById('editRowIndexInput').value = rowIndex;
       document.getElementById('editNamaPesertaLabel').innerText = `Peserta: ${nama}`;
@@ -406,10 +459,10 @@
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ 
-            action: 'update_tagihan', 
-            rowIndex: parseInt(rowIndex), 
-            tagihanBaru: parseInt(nominalBaru) 
+          body: JSON.stringify({
+            action: 'update_tagihan',
+            rowIndex: parseInt(rowIndex),
+            tagihanBaru: parseInt(nominalBaru)
           })
         });
         const result = await response.json();
@@ -436,7 +489,7 @@
       const htm = document.getElementById('addHtm').value.trim();
       const kuota = document.getElementById('addKuota').value.trim();
 
-      if(!id || !info || !jam || htm === '' || !kuota) {
+      if (!id || !info || !jam || htm === '' || !kuota) {
         return alert('Semua kolom form tambah jadwal harus diisi!');
       }
 
@@ -450,7 +503,7 @@
         });
         const result = await response.json();
 
-        if(result.status === 'success') {
+        if (result.status === 'success') {
           alert('Jadwal baru berhasil ditambahkan!');
           document.getElementById('addId').value = '';
           document.getElementById('addInfo').value = '';
@@ -478,18 +531,18 @@
         "bg-emerald-600 hover:bg-emerald-700",
         async () => {
           const liElement = btnElement.closest('li');
-          
+
           btnElement.innerText = 'Memproses...';
           btnElement.disabled = true;
-          
+
           try {
             const response = await fetch(GAS_URL, {
               method: 'POST',
               body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex })
             });
             const result = await response.json();
-            
-            if(result.status === 'updated' || result.status === 'success') {
+
+            if (result.status === 'updated' || result.status === 'success') {
               loadDataAdmin();
             } else {
               throw new Error(result.message);
@@ -519,8 +572,8 @@
               body: JSON.stringify({ action: 'delete_row', rowIndex: rowIndex })
             });
             const result = await response.json();
-            
-            if(result.status === 'deleted' || result.status === 'success') {
+
+            if (result.status === 'deleted' || result.status === 'success') {
               loadDataAdmin();
             } else {
               throw new Error(result.message);
@@ -534,7 +587,6 @@
       );
     }
 
-    // Fungsi khusus hapus peserta langsung dari rekap
     function hapusPemainDariRekap(rowIndex, btnElement) {
       hapusPemain(rowIndex, {
         closest: () => btnElement.closest('li'),
@@ -544,4 +596,5 @@
     }
   </script>
 </body>
+
 </html>

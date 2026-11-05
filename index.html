@@ -1,198 +1,249 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tepak Friendly - Jadwal & Pendaftaran Mabar</title>
+  <title>Pendaftaran Mabar - Tepak Friendly</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="config.js"></script>
   <script src="telegram.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-24">
 
-  <!-- Header Minimalis -->
-  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-3 shadow-2xs">
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- HEADER -->
+  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
-        <img src="logo.png" alt="Logo Tepak Friendly" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
+        <img src="logo.png" alt="Logo Tepak Friendly"
+          class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
         <div>
-          <h1 class="text-xs font-extrabold tracking-tight text-slate-900 leading-tight">Tepak Friendly</h1>
-          <p class="text-[9px] text-slate-500 font-medium">Jadwal & Mabar Badminton</p>
+          <h1 class="text-sm font-extrabold tracking-tight text-slate-900 leading-tight">Tepak Friendly</h1>
+          <p class="text-[9px] text-slate-500 font-medium">Platform Mabar & Jajanan</p>
         </div>
       </div>
-      <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        Live Sync
-      </span>
+      <a href="jualan"
+        class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1 border border-blue-100">
+        🛍️ Jajanan
+      </a>
     </div>
   </header>
 
+  <!-- MAIN CONTAINER -->
   <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
-    <!-- JADWAL MABAR CONTAINER -->
-    <div class="space-y-3">
-      <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide px-1">Pilih Jadwal Mabar</h2>
-      <div id="containerJadwal" class="space-y-3">
-        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200 shadow-2xs">Memuat jadwal...</div>
+
+    <!-- INFO SECTION -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 space-y-2">
+      <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">🏆 Pilih Jadwal Mabar Aktif</h2>
+      <p class="text-xs text-slate-500">Pilih jadwal di bawah ini untuk mendaftarkan diri atau timmu.</p>
+    </div>
+
+    <!-- CONTAINER DAFTAR JADWAL AKTIF -->
+    <div id="containerJadwalPublik" class="space-y-3.5">
+      <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat jadwal...
       </div>
     </div>
 
-    <!-- MODAL PENDAFTARAN MABAR -->
-    <div id="modalDaftar" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
-      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto">
-        <h3 id="modalJadwalTitle" class="font-bold text-sm text-slate-900 mb-1">Daftar Mabar</h3>
-        <p class="text-[11px] text-slate-500 mb-3" id="modalJadwalSub">-</p>
-        
+    <!-- MODAL PENDAFTARAN -->
+    <div id="modalDaftar"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-3 overflow-y-auto">
+      <div
+        class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3 border border-slate-100 my-auto">
+        <h3 id="modalJadwalTitle" class="font-bold text-sm text-slate-900 mb-1">Form Pendaftaran Mabar</h3>
+        <p class="text-[11px] text-slate-500" id="modalJadwalInfo">-</p>
+
         <div class="space-y-3">
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemain (Pisahkan dengan koma)</label>
-            <textarea id="namaPemain" rows="2" placeholder="Cth: Budi, Andi, Siti" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition"></textarea>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Peserta (Pisahkan dengan koma jika
+              banyak)</label>
+            <textarea id="daftarNama" rows="2" placeholder="Cth: Andi, Budi, Caca"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition"></textarea>
           </div>
+
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Email</label>
-            <input type="text" id="emailPemain" placeholder="Email contoh lorem@gmail.com" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Email (Opsional)</label>
+            <input type="email" id="daftarEmail" placeholder="email@gmail.com"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
+          </div>
+
+          <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex justify-between items-center">
+            <span class="text-xs font-bold text-blue-900">Estimasi HTM Dasar:</span>
+            <span id="labelHtmDasar" class="text-sm font-extrabold text-blue-700">Rp 0</span>
           </div>
         </div>
-        
-        <div class="flex gap-2 mt-4">
-          <button onclick="tutupModalDaftar()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
-          <button onclick="kirimDaftarMabar()" id="btnKirimDaftar" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition">Daftar Sekarang</button>
+
+        <div class="flex gap-2 pt-2">
+          <button onclick="tutupModalDaftar()"
+            class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+          <button onclick="kirimPendaftaran()" id="btnKirimDaftar"
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Daftar
+            Sekarang</button>
         </div>
       </div>
     </div>
 
     <!-- MODAL INVOICE PEMBAYARAN MABAR -->
-    <div id="modalInvoice" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
-      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-3">
-        <div class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Pendaftaran Berhasil</div>
-        <h3 class="font-extrabold text-slate-900 text-base" id="invJudwalMabar">Jadwal Mabar</h3>
-        
-        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-left text-xs space-y-1.5">
-          <div class="flex justify-between"><span class="text-slate-500">Total Tagihan (+Kode Unik):</span> <strong id="invTotalTagihan" class="text-blue-600 text-sm font-extrabold">Rp 0</strong></div>
+    <div id="modalInvoiceMabar"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-3 overflow-y-auto">
+      <div
+        class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 my-auto text-center space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
+
+        <div id="areaStrukMabar" class="space-y-3.5 bg-white p-1">
+          <div class="border-b border-slate-100 pb-3 space-y-1">
+            <span
+              class="inline-block bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wider">Invoice
+              Mabar</span>
+            <h3 class="font-extrabold text-slate-900 text-base mt-1" id="invMabarJudul">Tiket Mabar</h3>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-left text-xs space-y-2">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+              <span class="text-slate-500 font-medium">Nama Peserta:</span>
+              <strong id="invMabarNama" class="text-slate-800 text-right">-</strong>
+            </div>
+
+            <div class="space-y-1 border-b border-slate-100 pb-2">
+              <span class="text-slate-500 font-medium block">Jadwal Mabar:</span>
+              <div id="invMabarInfo"
+                class="font-bold text-slate-800 text-[11px] leading-relaxed bg-white p-2 rounded-xl border border-slate-200 break-words whitespace-pre-line">
+                -</div>
+            </div>
+
+            <div
+              class="pt-1 flex justify-between items-center text-sm bg-blue-50/80 p-2.5 rounded-xl border border-blue-100">
+              <span class="font-bold text-slate-700 text-xs">Total Tagihan (+Kode Unik Web):</span>
+              <span id="invMabarTotal" class="font-extrabold text-blue-700 font-mono text-sm">Rp 0</span>
+            </div>
+          </div>
+
+          <p class="text-[10px] text-slate-500 leading-relaxed">Transfer persis hingga 3 digit terakhir untuk verifikasi
+            otomatis.</p>
+
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 inline-block shadow-2xs space-y-2 w-full">
+            <img src="qris.png" alt="QRIS" class="mx-auto w-44 h-44 object-contain rounded-xl border border-slate-100">
+            <span class="text-[10px] font-bold text-slate-600 block">BCA 0083677071 a.n Andi</span>
+          </div>
         </div>
 
-        <p class="text-[11px] text-slate-500">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.</p>
-        
-        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 inline-block">
-          <img src="qris.png" alt="QRIS" class="mx-auto w-48 h-48 object-contain mb-1 rounded-lg bg-white p-1 border">
-          <span class="text-[10px] text-slate-500 block">BCA 0083677071 a.n Andi</span>
+        <div class="space-y-2 pt-2 border-t border-slate-100">
+          <button onclick="downloadResiMabar()" id="btnDownloadMabar"
+            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-2xl transition shadow-xs flex items-center justify-center gap-1.5">
+            📥 Download Resi (Gambar PNG)
+          </button>
+          <button onclick="selesaiMabar()"
+            class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-2xl transition shadow-md">
+            Tutup & Selesai
+          </button>
         </div>
 
-        <button onclick="tutupModalInvoice()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup & Selesai</button>
       </div>
     </div>
   </main>
 
-  <!-- FLOATING BOTTOM NAVIGATION BAR (Navigasi Melayang) -->
-  <nav aria-label="Navigasi Utama" class="fixed bottom-4 left-0 right-0 z-40 px-4">
-    <div class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
-      <!-- Menu Mabar (Aktif) -->
-      <a href="index" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-blue-600 text-white font-bold text-[10px] shadow-xs transition">
-        <span class="text-base leading-none mb-0.5">🏸</span>
-        <span>Mabar</span>
-      </a>
-      
-      <!-- Menu Jajanan UMKM (Bersih tanpa .html) -->
-      <a href="jualan" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
-        <span class="text-base leading-none mb-0.5">🛍️</span>
-        <span>Jajanan</span>
-      </a>
-    </div>
-  </nav>
-
   <script>
     const GAS_URL = CONFIG.GAS_URL;
-    let jadwalDipilihGlobal = null;
+    let jadwalDipilihId = null;
+    let jadwalDipilihInfo = null;
+    let htmDasarDipilih = 0;
 
-    async function loadDataIndex() {
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const bgColors = type === 'success' ? 'bg-slate-900 text-white border-slate-800' : 'bg-rose-600 text-white border-rose-500';
+      const icon = type === 'success' ? '✨' : '⚠️';
+      toast.className = `pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-2xl shadow-lg border text-xs font-bold transition-all duration-300 translate-y-2 opacity-0 ${bgColors}`;
+      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    async function loadIndexData() {
       try {
         const response = await fetch(GAS_URL);
         const data = await response.json();
-        const container = document.getElementById('containerJadwal');
+        const container = document.getElementById('containerJadwalPublik');
         container.innerHTML = '';
 
-        // Filter HANYA jadwal yang statusnya Aktif (atau kosong/tidak diset)
-        const listJadwal = (data.jadwal || []).filter(j => {
-          const statusJ = j.status ? j.status.toString().trim().toLowerCase() : 'aktif';
-          return statusJ === 'aktif';
+        // Filter: Hanya tampilkan jadwal yang statusnya Aktif (tidak mengandung kata 'nonaktif')
+        const jadwalList = (data.jadwal || []).filter(j => {
+          const status = j.status ? j.status.toString().toLowerCase() : 'aktif';
+          return !status.includes('nonaktif');
         });
-        const listPemain = data.pemain || [];
 
-        if (listJadwal.length === 0) {
-          container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada jadwal mabar aktif tersedia.</div>';
+        if (jadwalList.length === 0) {
+          container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada jadwal mabar aktif saat ini.</div>';
           return;
         }
 
-        listJadwal.forEach(j => {
-          const pemainJadwal = listPemain.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
-          const sisaSlot = parseInt(j.kuota) - pemainJadwal.length;
-          
-          let listPemainHtml = '';
-          if (pemainJadwal.length === 0) {
-            listPemainHtml = '<div class="text-[11px] text-slate-400 italic py-1 text-center">Belum ada pemain terdaftar.</div>';
-          } else {
-            pemainJadwal.forEach((p, idx) => {
-              const badge = p.status.includes('Lunas') 
-                ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>' 
-                : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
-              
-              listPemainHtml += `
-                <li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
-                  <span class="font-bold text-slate-800">${idx + 1}. ${p.nama}</span>
-                  <div>${badge}</div>
-                </li>`;
-            });
-          }
+        jadwalList.forEach(j => {
+          const formatHtm = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(j.htm || 0);
+          const isPenuh = (j.terisi || 0) >= parseInt(j.kuota || 0);
 
           container.innerHTML += `
             <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
               <div class="flex justify-between items-start">
                 <div>
-                  <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">[${j.id}]</span>
-                  <h3 class="font-bold text-sm text-slate-900 mt-1">${j.info}</h3>
-                  <p class="text-[11px] text-slate-500">🕒 ${j.jam} | HTM: Rp ${parseInt(j.htm).toLocaleString('id-ID')}</p>
+                  <span class="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-md border">${j.id}</span>
+                  <h3 class="font-bold text-sm text-slate-900 mt-1">📍 ${j.info}</h3>
                 </div>
-                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${sisaSlot > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
-                  ${sisaSlot > 0 ? `Sisa Slot: ${sisaSlot}` : 'Full'}
+                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${isPenuh ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-blue-50 text-blue-700 border border-blue-100'}">
+                  Kuota: ${j.terisi || 0}/${j.kuota}
                 </span>
               </div>
 
-              <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-                <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center">
-                  <span>👥 Pemain Terdaftar</span>
-                  <span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">${pemainJadwal.length}/${j.kuota}</span>
-                </div>
-                <ul class="divide-y divide-slate-100 max-h-36 overflow-y-auto p-1.5 space-y-1">
-                  ${listPemainHtml}
-                </ul>
+              <div class="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-1">
+                <div>⏰ <strong>Jam:</strong> ${j.jam}</div>
+                <div>💰 <strong>HTM:</strong> ${formatHtm} / orang</div>
               </div>
 
-              <button onclick="bukaModalDaftar('${j.id}', \`${j.info}\`, ${j.htm})" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">
-                + Daftar Mabar Ini
+              <button onclick="bukaModalDaftar('${j.id}', \`${j.info} (${j.jam})\`, ${j.htm || 0}, ${j.terisi || 0}, ${j.kuota || 0})" 
+                class="w-full ${isPenuh ? 'bg-slate-300 text-slate-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs'} font-bold text-xs py-2.5 rounded-xl transition">
+                ${isPenuh ? '⚠️ Kuota Penuh' : '✍️ Daftar Mabar Ini'}
               </button>
             </div>`;
         });
-      } catch (e) { console.error("Error loadDataIndex:", e); }
+      } catch (e) {
+        console.error(e);
+        showToast('Gagal memuat jadwal.', 'error');
+      }
     }
 
-    function bukaModalDaftar(id, info, htm) {
-      jadwalDipilihGlobal = { id, info, htm };
-      document.getElementById('modalJadwalTitle').innerText = `Daftar: ${info}`;
-      document.getElementById('modalJadwalSub').innerText = `HTM: Rp ${parseInt(htm).toLocaleString('id-ID')} per orang`;
-      document.getElementById('namaPemain').value = '';
-      document.getElementById('emailPemain').value = '';
+    function bukaModalDaftar(id, info, htm, terisi, kuota) {
+      if (terisi >= kuota) return showToast('Maaf, kuota jadwal ini sudah penuh!', 'error');
+      jadwalDipilihId = id;
+      jadwalDipilihInfo = info;
+      htmDasarDipilih = htm;
+
+      document.getElementById('modalJadwalTitle').innerText = `Daftar: ${id}`;
+      document.getElementById('modalJadwalInfo').innerText = info;
+      document.getElementById('daftarNama').value = '';
+      document.getElementById('daftarEmail').value = '';
+      document.getElementById('labelHtmDasar').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(htm);
+
       document.getElementById('modalDaftar').classList.remove('hidden');
     }
 
-    function tutupModalDaftar() { document.getElementById('modalDaftar').classList.add('hidden'); }
+    function tutupModalDaftar() {
+      document.getElementById('modalDaftar').classList.add('hidden');
+    }
 
-    async function kirimDaftarMabar() {
-      const nama = document.getElementById('namaPemain').value.trim();
-      const email = document.getElementById('emailPemain').value.trim();
+    async function kirimPendaftaran() {
+      const nama = document.getElementById('daftarNama').value.trim();
+      const email = document.getElementById('daftarEmail').value.trim();
 
-      if (!nama) return alert('Nama pemain harus diisi!');
+      if (!nama) return showToast('Nama peserta harus diisi!', 'error');
 
       const btn = document.getElementById('btnKirimDaftar');
-      const oldText = btn.innerText;
       btn.innerText = 'Memproses...';
       btn.disabled = true;
 
@@ -203,46 +254,58 @@
             action: 'register',
             nama: nama,
             email: email,
-            jadwalId: jadwalDipilihGlobal.id,
-            jadwalInfo: jadwalDipilihGlobal.info,
-            htm: jadwalDipilihGlobal.htm
+            jadwalId: jadwalDipilihId,
+            jadwalInfo: jadwalDipilihInfo,
+            htm: htmDasarDipilih
           })
         });
-
         const result = await response.json();
         tutupModalDaftar();
 
-        try {
-          if (typeof kirimTelegram === 'function') {
-            await kirimTelegram(nama, jadwalDipilihGlobal.info, (result ? result.totalTagihan : 0));
-          }
-        } catch (errTelegram) {
-          console.warn("Telegram warning:", errTelegram);
+        if (result.status === 'success') {
+          document.getElementById('invMabarJudul').innerText = `Tiket: ${jadwalDipilihId}`;
+          document.getElementById('invMabarNama').innerText = nama;
+          document.getElementById('invMabarInfo').innerText = jadwalDipilihInfo;
+          document.getElementById('invMabarTotal').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(result.totalTagihan || 0);
+
+          document.getElementById('modalInvoiceMabar').classList.remove('hidden');
+          showToast('Pendaftaran berhasil dibuat!');
+        } else {
+          throw new Error(result.message || 'Gagal mendaftar');
         }
-
-        document.getElementById('invJudwalMabar').innerText = jadwalDipilihGlobal.info;
-        document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(result.totalTagihan || 0);
-        document.getElementById('modalInvoice').classList.remove('hidden');
-
       } catch (e) {
-        console.error("Error kirimDaftarMabar:", e);
-        alert('Gagal mendaftar mabar.');
+        showToast('Gagal mendaftar: ' + e.message, 'error');
       } finally {
-        btn.innerText = oldText;
+        btn.innerText = 'Daftar Sekarang';
         btn.disabled = false;
       }
     }
 
-    function tutupModalInvoice() { 
-      document.getElementById('modalInvoice').classList.add('hidden'); 
-      loadDataIndex(); 
+    function downloadResiMabar() {
+      const btn = document.getElementById('btnDownloadMabar');
+      btn.innerText = 'Membuat Gambar...';
+      btn.disabled = true;
+
+      const element = document.getElementById('areaStrukMabar');
+      const nama = document.getElementById('invMabarNama').innerText;
+
+      html2canvas(element, { scale: 2, useCORS: true }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Resi-Mabar-${nama.replace(/\s+/g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        btn.innerText = '📥 Download Resi (Gambar PNG)';
+        btn.disabled = false;
+      });
     }
 
-    // Auto-refresh data setiap 5 detik agar status Lunas dari admin langsung tampil real-time
-    document.addEventListener('DOMContentLoaded', () => {
-      loadDataIndex();
-      setInterval(loadDataIndex, 5000);
-    });
+    function selesaiMabar() {
+      document.getElementById('modalInvoiceMabar').classList.add('hidden');
+      window.location.reload();
+    }
+
+    document.addEventListener('DOMContentLoaded', loadIndexData);
   </script>
 </body>
+
 </html>
