@@ -110,11 +110,15 @@
         const container = document.getElementById('containerJadwal');
         container.innerHTML = '';
 
-        const listJadwal = data.jadwal || [];
+        // Filter HANYA jadwal yang statusnya Aktif (atau kosong/tidak diset)
+        const listJadwal = (data.jadwal || []).filter(j => {
+          const statusJ = j.status ? j.status.toString().trim().toLowerCase() : 'aktif';
+          return statusJ === 'aktif';
+        });
         const listPemain = data.pemain || [];
 
         if (listJadwal.length === 0) {
-          container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada jadwal mabar tersedia.</div>';
+          container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada jadwal mabar aktif tersedia.</div>';
           return;
         }
 
