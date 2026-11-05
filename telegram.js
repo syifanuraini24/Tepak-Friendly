@@ -29,8 +29,7 @@ async function kirimTelegram(namaPemain, jadwalInfo, totalTagihan) {
                 `👤 *Nama Pemain:* ${namaPemain}\n` +
                 `📅 *Jadwal:* ${jadwalInfo}\n` +
                 `💰 *Total Tagihan:* ${formatHrg}\n` +
-                `⏳ *Status:* Menunggu Konfirmasi Pembayaran\n\n` +
-                `_Mohon lakukan transfer sesuai nominal termasuk 3 digit kode unik._`;
+                `⏳ *Status:* Menunggu Konfirmasi Pembayaran\n\n`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`;
 
@@ -66,8 +65,7 @@ async function kirimTelegramJualan(namaPemesan, namaLapak, jadwalInfo, detailPes
                 `📍 *Jadwal:* ${jadwalInfo}\n` +
                 `📋 *Rincian Pesanan:* ${detailPesanan}\n` +
                 `💰 *Total Tagihan:* ${formatHrg}\n` +
-                `⏳ *Status:* Menunggu Konfirmasi Pembayaran\n\n` +
-                `_Silakan cek bukti transfer dengan kode unik._`;
+                `⏳ *Status:* Menunggu Konfirmasi Pembayaran\n\n`;
 
   const url = `https://api.telegram.org/bot${TELEGRAM_JUALAN_CONFIG.BOT_TOKEN}/sendMessage`;
 
