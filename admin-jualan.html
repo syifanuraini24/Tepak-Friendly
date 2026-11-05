@@ -25,30 +25,44 @@
     </div>
   </header>
 
-  <!-- MAIN CONTAINER -->
   <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
-    
-    <!-- STATS SUMMARY -->
-    <div class="grid grid-cols-2 gap-3">
-      <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs text-center">
-        <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Mitra Pending</span>
-        <span id="statPending" class="text-xl font-extrabold text-amber-600">0</span>
+
+    <!-- SECTION LOGIN ADMIN (DEFAULT TAMPIL) -->
+    <div id="sectionLoginAdmin" class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-3">
+      <h2 class="font-bold text-sm text-slate-900">Login Admin Lapak UMKM</h2>
+      <p class="text-xs text-slate-500">Masukkan kata sandi admin untuk mengakses penugasan mitra.</p>
+      <div>
+        <input type="password" id="inputPassAdmin" placeholder="Password Admin Jualan..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
       </div>
-      <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs text-center">
-        <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Mitra Disetujui</span>
-        <span id="statApproved" class="text-xl font-extrabold text-emerald-600">0</span>
-      </div>
+      <button onclick="loginAdminJualan()" id="btnLoginAdmin" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-xs">
+        Masuk Admin
+      </button>
     </div>
 
-    <!-- LIST MITRA UMKM -->
-    <div class="space-y-3">
-      <div class="flex justify-between items-center px-1">
-        <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">Daftar Pendaftaran Mitra</h2>
-        <button onclick="loadAdminJualanData()" class="text-[11px] font-bold text-blue-600 hover:underline">🔄 Refresh Data</button>
+    <!-- SECTION DASHBOARD ADMIN (TERSEMBUNYI SEBELUM LOGIN) -->
+    <div id="sectionDashboardAdmin" class="hidden space-y-4">
+      <!-- STATS SUMMARY -->
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs text-center">
+          <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Mitra Pending</span>
+          <span id="statPending" class="text-xl font-extrabold text-amber-600">0</span>
+        </div>
+        <div class="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs text-center">
+          <span class="text-[10px] text-slate-400 font-bold block uppercase tracking-wider">Mitra Disetujui</span>
+          <span id="statApproved" class="text-xl font-extrabold text-emerald-600">0</span>
+        </div>
       </div>
 
-      <div id="containerAdminJualan" class="space-y-3.5">
-        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat data pendaftaran mitra...</div>
+      <!-- LIST MITRA UMKM -->
+      <div class="space-y-3">
+        <div class="flex justify-between items-center px-1">
+          <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">Daftar Pendaftaran Mitra</h2>
+          <button onclick="loadAdminJualanData()" class="text-[11px] font-bold text-blue-600 hover:underline">🔄 Refresh Data</button>
+        </div>
+
+        <div id="containerAdminJualan" class="space-y-3.5">
+          <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat data pendaftaran mitra...</div>
+        </div>
       </div>
     </div>
 

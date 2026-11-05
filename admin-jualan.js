@@ -2,14 +2,43 @@ const GAS_URL = CONFIG.GAS_URL;
 let masterJadwalList = [];
 let masterJualanList = [];
 
+// FUNGSI LOGIN ADMIN JUALAN (KODE PASS: jualan123)
+async function loginAdminJualan() {
+  const pass = document.getElementById('inputPassAdmin').value.trim();
+  if (!pass) return alert('Masukkan password admin!');
+
+  const btn = document.getElementById('btnLoginAdmin');
+  btn.innerText = 'Verifikasi...';
+  btn.disabled = true;
+
+  try {
+    const response = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'login_admin_jualan',
+        password: pass
+      })
+    });
+
+    const result = await response.json();
+    if (result.status === 'success') {
+      document.getElementById('sectionLoginAdmin').classList.add('hidden');
+      document.getElementById('sectionDashboardAdmin').classList.remove('hidden');
+      loadAdminJualanData();
+    } else {
+      alert(result.message || 'Password salah!');
+    }
+  } catch (err) {
+    alert('Gagal verifikasi password.');
+  } finally {
+    btn.innerText = 'Masuk Admin';
+    btn.disabled = false;
+  }
+}
+
 async function loadAdminJualanData() {
   const container = document.getElementById('containerAdminJualan');
-  
-  // Guard check agar tidak melempar error null saat DOM belum siap
-  if (!container) {
-    console.warn("Elemen #containerAdminJualan belum dimuat di DOM.");
-    return;
-  }
+  if (!container) return;
 
   container.innerHTML = '<div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat data pendaftaran mitra...</div>';
 
@@ -20,7 +49,6 @@ async function loadAdminJualanData() {
     masterJadwalList = data.jadwal || [];
     masterJualanList = data.jualan || [];
 
-    // Hitung Stat Pending & Approved
     let countPending = 0, countApproved = 0;
     masterJualanList.forEach(item => {
       if (item.status && item.status.toString().toLowerCase().includes('disetujui')) {
@@ -61,13 +89,13 @@ function renderAdminJualanList() {
       ? '<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">Disetujui 🟢</span>'
       : '<span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-200">Pending 🟡</span>';
 
-    // Parse Jadwal ID Terpilih (Mendukung gabungan koma/array)
+    // Parse ID Jadwal jika bertipe gabungan/koma
     let selectedJadwalIds = [];
     if (j.jadwalId && j.jadwalId !== 'PENDING') {
       selectedJadwalIds = j.jadwalId.toString().split(',').map(id => id.trim());
     }
 
-    // Generate Checkbox List Jadwal Mabar
+    // List Checkbox Jadwal Mabar
     let checkboxJadwalHtml = '';
     if (masterJadwalList.length === 0) {
       checkboxJadwalHtml = '<div class="text-slate-400 text-[11px] italic">Tidak ada master jadwal mabar aktif.</div>';
@@ -85,7 +113,7 @@ function renderAdminJualanList() {
       });
     }
 
-    // Render Card Item Admin
+    // Render Card Mitra (Tanpa teks menu liar berantakan di atas)
     const cardHtml = `
       <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3.5">
         
@@ -111,7 +139,7 @@ function renderAdminJualanList() {
           </button>
         </div>
 
-        <!-- Accordion Rincian Menu Jualan -->
+        <!-- Accordion Rincian Menu Jualan (Tertata rapi di dalam dropdown ini) -->
         <details class="bg-slate-50 rounded-xl border border-slate-200 text-xs group">
           <summary class="font-bold text-slate-700 p-2.5 cursor-pointer flex justify-between items-center select-none">
             <span>📜 Lihat Rincian Menu Jualan</span>
@@ -206,5 +234,3 @@ async function hapusMitraJualan(rowIndex) {
     alert('Gagal menghapus data mitra.');
   }
 }
-
-document.addEventListener('DOMContentLoaded', loadAdminJualanData);
