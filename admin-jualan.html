@@ -64,11 +64,12 @@
     </div>
   </main>
 
-  <!-- MODAL EDIT LAPAK & MENU -->
+  <!-- MODAL EDIT LAPAK & KATEGORI MENU INTERAKTIF -->
   <div id="modalEditLapak" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3">
-      <h3 class="font-bold text-sm text-slate-900">Edit Lapak & Menu Mitra</h3>
+      <h3 class="font-bold text-sm text-slate-900">Edit Lapak & Kategori Menu</h3>
       <input type="hidden" id="editRowIndex">
+      
       <div>
         <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Brand / Penjual</label>
         <input type="text" id="editNamaPenjual" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
@@ -77,12 +78,24 @@
         <label class="block text-[11px] font-bold text-slate-600 mb-1">WhatsApp</label>
         <input type="text" id="editWhatsapp" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
       </div>
-      <div>
-        <label class="block text-[11px] font-bold text-slate-600 mb-1">Daftar Kategori & Menu (Format Teks/Baris)</label>
-        <p class="text-[10px] text-slate-400 mb-1">Gunakan format 📁 Nama Kategori dan • Menu (Rp Harga)</p>
-        <textarea id="editMenuJualan" rows="6" class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono"></textarea>
+
+      <!-- KATEGORI & MENU DINAMIS EDIT -->
+      <div class="space-y-2 pt-2 border-t border-slate-100">
+        <div class="flex justify-between items-center">
+          <label class="text-[11px] font-bold text-slate-800">📁 Kelola Kategori & Menu</label>
+          <span id="editCounterKategori" class="text-[10px] text-slate-400 font-semibold">1/6 Kategori</span>
+        </div>
+
+        <div id="editContainerKategori" class="space-y-3 max-h-64 overflow-y-auto pr-1">
+          <!-- Diisi via JavaScript -->
+        </div>
+
+        <button type="button" onclick="editTambahKategori()" id="editBtnTambahKat" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2 px-3 rounded-xl transition shadow-xs">
+          + Tambah Kategori Lain
+        </button>
       </div>
-      <div class="flex gap-2 pt-2">
+
+      <div class="flex gap-2 pt-3 border-t border-slate-100">
         <button onclick="tutupModalEdit()" class="flex-1 bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
         <button onclick="simpanEditLapak()" class="flex-1 bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl">Simpan Perubahan</button>
       </div>
@@ -255,12 +268,122 @@
       document.getElementById('modalKonfirmasi').classList.add('hidden');
     }
 
-    function bukaModalEdit(rowIndex, nama, wa, menu) {
+    // --- FITUR EDIT KATEGORI & MENU INTERAKTIF DI ADMIN ---
+    function bukaModalEdit(rowIndex, nama, wa, menuEncoded) {
       document.getElementById('editRowIndex').value = rowIndex;
       document.getElementById('editNamaPenjual').value = decodeURIComponent(nama);
       document.getElementById('editWhatsapp').value = decodeURIComponent(wa);
-      document.getElementById('editMenuJualan').value = decodeURIComponent(menu);
+
+      const rawMenu = decodeURIComponent(menuEncoded);
+      buildEditFormFromText(rawMenu);
       document.getElementById('modalEditLapak').classList.remove('hidden');
+    }
+
+    function buildEditFormFromText(rawText) {
+      const container = document.getElementById('editContainerKategori');
+      container.innerHTML = '';
+
+      const lines = rawText.split('\n');
+      let categories = [];
+      let currentCat = { nama: "Menu Utama", items: [] };
+
+      lines.forEach(line => {
+        let trim = line.trim();
+        if (!trim) return;
+        if (trim.startsWith('📁')) {
+          if (currentCat.items.length > 0 || currentCat.nama !== "Menu Utama") {
+            categories.push(currentCat);
+          }
+          currentCat = { nama: trim.replace('📁', '').trim(), items: [] };
+        } else {
+          let clean = trim.replace(/^[•\-\*]\s*/, '').trim();
+          let harga = 0, namaMenu = clean;
+          const matchRp = clean.match(/\(Rp\s*([\d\.]+)\)/i) || clean.match(/Rp\.?\s*([\d\.]+)/i);
+          if (matchRp) {
+            harga = parseInt(matchRp[1].replace(/\./g, '')) || 0;
+            namaMenu = clean.replace(matchRp[0], '').trim();
+          }
+          currentCat.items.push({ nama: namaMenu, harga: harga });
+        }
+      });
+      categories.push(currentCat);
+
+      categories.forEach(cat => {
+        tambahKategoriEditForm(cat.nama, cat.items);
+      });
+      updateEditCounters();
+    }
+
+    function updateEditCounters() {
+      const katCards = document.querySelectorAll('#editContainerKategori .edit-kategori-card');
+      document.getElementById('editCounterKategori').innerText = `${katCards.length}/6 Kategori`;
+      
+      if (katCards.length >= 6) {
+        document.getElementById('editBtnTambahKat').classList.add('hidden');
+      } else {
+        document.getElementById('editBtnTambahKat').classList.remove('hidden');
+      }
+
+      katCards.forEach(card => {
+        const btnHapusKat = card.querySelector('.edit-btn-hapus-kat');
+        if (katCards.length > 1) {
+          btnHapusKat.classList.remove('hidden');
+        } else {
+          btnHapusKat.classList.add('hidden');
+        }
+      });
+    }
+
+    function editTambahKategori(namaKat = '', items = [{ nama: '', harga: '' }]) {
+      const container = document.getElementById('editContainerKategori');
+      if (container.querySelectorAll('.edit-kategori-card').length >= 6) return alert('Maksimal 6 kategori!');
+
+      const div = document.createElement('div');
+      div.className = 'edit-kategori-card bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2';
+      
+      let itemsHtml = '';
+      items.forEach(item => {
+        itemsHtml += `
+          <div class="flex gap-2 edit-menu-row items-center">
+            <input type="text" placeholder="Nama Menu" value="${item.nama}" class="w-3/5 p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-nama">
+            <input type="number" placeholder="Harga (Rp)" value="${item.harga || ''}" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-harga">
+            <button type="button" onclick="this.closest('.edit-menu-row').remove(); updateEditCounters();" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border border-rose-200">✕</button>
+          </div>`;
+      });
+
+      div.innerHTML = `
+        <div class="flex gap-2 items-center">
+          <input type="text" placeholder="Nama Kategori" value="${namaKat}" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl text-xs font-bold text-blue-700 edit-kategori-nama">
+          <button type="button" onclick="this.closest('.edit-kategori-card').remove(); updateEditCounters();" class="bg-rose-50 text-rose-600 font-bold text-xs p-2.5 rounded-xl border border-rose-200 edit-btn-hapus-kat">✕</button>
+        </div>
+        <div class="space-y-1.5 edit-container-menu-item pl-2 border-l-2 border-blue-200">
+          ${itemsHtml}
+        </div>
+        <button type="button" onclick="editTambahBarisMenu(this)" class="w-full bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-lg transition border border-slate-200 shadow-2xs">
+          + Tambah Menu di Kategori Ini
+        </button>
+      `;
+      container.appendChild(div);
+      updateEditCounters();
+    }
+
+    function editTambahBarisMenu(btn) {
+      const containerCard = btn.closest('.edit-kategori-card');
+      const menuContainer = containerCard.querySelector('.edit-container-menu-item');
+      
+      let totalMenu = 0;
+      document.querySelectorAll('.edit-menu-row').forEach(() => totalMenu++);
+      if (totalMenu >= 30) return alert('Maksimal total 30 menu!');
+
+      const div = document.createElement('div');
+      div.className = 'flex gap-2 edit-menu-row items-center';
+      div.innerHTML = `
+        <input type="text" placeholder="Nama Menu" class="w-3/5 p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-nama">
+        <input type="number" placeholder="Harga (Rp)" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-harga">
+        <button type="button" onclick="this.closest('.edit-menu-row').remove(); updateEditCounters();" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border border-rose-200">✕</button>
+      `;
+      menuContainer.appendChild(div);
+      updateEditCounters();
     }
 
     function tutupModalEdit() {
@@ -271,9 +394,34 @@
       const rowIndex = document.getElementById('editRowIndex').value;
       const namaPenjual = document.getElementById('editNamaPenjual').value.trim();
       const whatsapp = document.getElementById('editWhatsapp').value.trim();
-      const menuJualan = document.getElementById('editMenuJualan').value.trim();
 
       if (!namaPenjual || !whatsapp) return alert('Nama dan WhatsApp wajib diisi!');
+
+      let hasilMenuGabung = [];
+      let totalMenuCount = 0;
+      const katCards = document.querySelectorAll('#editContainerKategori .edit-kategori-card');
+
+      for (let card of katCards) {
+        const namaKat = card.querySelector('.edit-kategori-nama').value.trim();
+        if (!namaKat) return alert('Nama kategori tidak boleh kosong!');
+
+        hasilMenuGabung.push(`📁 ${namaKat}`);
+
+        const menuRows = card.querySelectorAll('.edit-menu-row');
+        for (let row of menuRows) {
+          const m = row.querySelector('.edit-menu-nama').value.trim();
+          const h = row.querySelector('.edit-menu-harga').value.trim();
+          if (m && h) {
+            hasilMenuGabung.push(`• ${m} (Rp ${parseInt(h).toLocaleString('id-ID')})`);
+            totalMenuCount++;
+          }
+        }
+      }
+
+      if (totalMenuCount === 0) return alert('Minimal masukkan 1 menu beserta harganya!');
+      if (totalMenuCount > 30) return alert('Total menu tidak boleh lebih dari 30 item!');
+
+      const menuJualan = hasilMenuGabung.join('\n');
 
       try {
         await fetch(GAS_URL, {
