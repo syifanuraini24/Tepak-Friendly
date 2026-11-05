@@ -112,16 +112,19 @@ function renderAdminJualanList() {
       });
     }
 
+    // HEADER BERSIH: HANYA TAMPILKAN WHATSAPP (SAMA SEPERTI DI BACKEND)
+    const waInfo = j.whatsapp ? `<p class="text-[11px] text-slate-500 font-mono mt-0.5">📱 WA: ${j.whatsapp}</p>` : '';
+
     const cardHtml = `
       <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3.5">
         
-        <!-- Header Penjual & Status -->
-        <div class="flex justify-between items-start gap-2">
+        <!-- Header Penjual & Status (Hanya Nama Penjual & WhatsApp) -->
+        <div class="flex justify-between items-start gap-2 border-b border-slate-100 pb-3">
           <div>
             <h3 class="font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
               🛍️ ${j.namaPenjual}
             </h3>
-            <p class="text-[11px] text-slate-500 font-mono mt-0.5">📱 WA: ${j.whatsapp}</p>
+            ${waInfo}
           </div>
           <div>${badgeStatus}</div>
         </div>
@@ -137,7 +140,7 @@ function renderAdminJualanList() {
           </button>
         </div>
 
-        <!-- Accordion Rincian Menu Jualan -->
+        <!-- Accordion Rincian Menu Jualan (Rapi di dalam dropdown) -->
         <details class="bg-slate-50 rounded-xl border border-slate-200 text-xs group">
           <summary class="font-bold text-slate-700 p-2.5 cursor-pointer flex justify-between items-center select-none">
             <span>📜 Lihat Rincian Menu Jualan</span>
@@ -150,8 +153,8 @@ function renderAdminJualanList() {
 
         <!-- Tombol Aksi Edit & Hapus -->
         <div class="flex justify-between items-center gap-2 pt-2 border-t border-slate-100">
-          <button onclick="bukaModalEdit(${j.rowIndex}, '${encodeURIComponent(j.namaPenjual)}', '${j.whatsapp}', \`${encodeURIComponent(j.menuJualan || '')}\`)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 rounded-xl border border-slate-200 transition">
-            ✏️ Edit Menu/Mitra
+          <button onclick="bukaModalEdit(${j.rowIndex}, '${encodeURIComponent(j.namaPenjual)}', '${j.whatsapp || ''}', \`${encodeURIComponent(j.menuJualan || '')}\`)" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2 rounded-xl border border-slate-200 transition">
+            ✏️ Edit Menu/WA
           </button>
           <button onclick="hapusMitraJualan(${j.rowIndex})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs py-2 px-3 rounded-xl border border-rose-200 transition">
             Hapus
