@@ -2,6 +2,30 @@ const GAS_URL = CONFIG.GAS_URL;
 let lapakDipilih = null, jadwalDipilih = null, infoJadwalDipilih = null;
 let menuParsedGlobal = [];
 
+// Fungsi Toast Notification halus di pojok kanan bawah
+function showToast(message, type = 'success') {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  
+  const toast = document.createElement('div');
+  const bgColors = type === 'success' ? 'bg-slate-900 text-white border-slate-800' : 'bg-rose-600 text-white border-rose-500';
+  const icon = type === 'success' ? '✨' : '⚠️';
+  
+  toast.className = `pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-2xl shadow-lg border text-xs font-bold transition-all duration-300 translate-y-2 opacity-0 ${bgColors}`;
+  toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+  
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.classList.remove('translate-y-2', 'opacity-0');
+  }, 10);
+
+  setTimeout(() => {
+    toast.classList.add('translate-y-2', 'opacity-0');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
 function gantiTab(tab) {
   if (tab === 'pesan') {
     document.getElementById('sectionPesan').classList.remove('hidden');
@@ -33,7 +57,7 @@ function updateCounters() {
 
 function tambahKategori() {
   const container = document.getElementById('containerKategori');
-  if (container.querySelectorAll('.kategori-card').length >= 6) return alert('Maksimal 6 kategori!');
+  if (container.querySelectorAll('.kategori-card').length >= 6) return showToast('Maksimal 6 kategori!', 'error');
 
   const div = document.createElement('div');
   div.className = 'kategori-card bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2';
@@ -71,7 +95,7 @@ function tambahBarisMenu(btn) {
   
   let totalMenu = 0;
   document.querySelectorAll('.menu-row').forEach(() => totalMenu++);
-  if (totalMenu >= 30) return alert('Maksimal total 30 menu!');
+  if (totalMenu >= 30) return showToast('Maksimal total 30 menu!', 'error');
 
   const div = document.createElement('div');
   div.className = 'flex gap-2 menu-row items-center';
@@ -90,7 +114,7 @@ function tambahBarisMenu(btn) {
 function hapusMenuRow(btn) {
   const menuRow = btn.closest('.menu-row');
   const containerCard = menuRow.closest('.kategori-card');
-  if (containerCard.querySelectorAll('.menu-row').length <= 1) return alert('Minimal 1 menu per kategori.');
+  if (containerCard.querySelectorAll('.menu-row').length <= 1) return showToast('Minimal 1 menu per kategori.', 'error');
   menuRow.remove();
   updateCounters();
 }
@@ -123,7 +147,7 @@ async function loadDataJualanPage() {
             ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>' 
             : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
           
-          listPesananHtml += `
+          listItemsHtml += `
             <li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
               <div>
                 <span class="font-bold text-slate-800">${idx + 1}. ${p.namaPemesan}</span>
@@ -156,8 +180,8 @@ async function loadDataJualanPage() {
           </div>
 
           <div class="pt-2 border-t border-slate-100 flex justify-between items-center">
-            <span class="text-[11px] text-slate-400">WA: ${l.whatsapp}</span>
-            <button onclick="bukaModalPesan('${l.namaPenjual}', '${l.jadwalId || 'UMUM'}', '${l.jadwalInfo || 'Mitra UMKM'}', \`${encodeURIComponent(l.menuJualan)}\`)" class="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-xs">
+            <span class="text-[11px] text-slate-400 truncate max-w-[200px]">Email: ${l.emailPenjual || l.whatsapp || '-'}</span>
+            <button onclick="bukaModalPesan('${l.namaPenjual}', '${l.jadwalId || 'UMUM'}', '${l.jadwalInfo || 'Mitra UMKM'}', \`${encodeURIComponent(l.menuJualan)}\`)" class="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-xs shrink-0">
               🛍️ Pesan Menu
             </button>
           </div>
@@ -277,8 +301,8 @@ async function kirimPesanan() {
   const note = document.getElementById('pesanNote').value.trim();
   const totalHargaRaw = parseInt(document.getElementById('labelTotalHarga').getAttribute('data-raw')) || 0;
 
-  if (!nama) return alert('Nama pemesan harus diisi!');
-  if (totalHargaRaw <= 0) return alert('Pilih minimal 1 menu!');
+  if (!nama) return showToast('Nama pemesan harus diisi!', 'error');
+  if (totalHargaRaw <= 0) return showToast('Pilih minimal 1 menu!', 'error');
 
   let detailRincian = [];
   menuParsedGlobal.forEach(m => { if (m.qty > 0) detailRincian.push(`${m.nama} (${m.qty}x)`); });
@@ -320,7 +344,6 @@ async function kirimPesanan() {
     document.getElementById('invNamaLapak').innerText = `Lapak: ${lapakDipilih}`;
     document.getElementById('invNamaPemesan').innerText = nama;
     
-    // FORMAT LERETAN JADWAL AGAR TAMPIL BERIS-BARIS RAPI
     const formatJadwal = (infoJadwalDipilih || '-').replace(/\s*\|\s*/g, '\n• ');
     document.getElementById('invJadwal').innerText = formatJadwal.includes('• ') ? '• ' + formatJadwal : formatJadwal;
 
@@ -328,8 +351,9 @@ async function kirimPesanan() {
     document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(finalTagihan);
     
     document.getElementById('modalInvoicePesanan').classList.remove('hidden');
+    showToast('Pesanan berhasil dibuat!');
   } catch (e) { 
-    alert('Gagal mengirim pesanan.'); 
+    showToast('Gagal mengirim pesanan.', 'error'); 
   } finally {
     btn.innerText = 'Pesan & Bayar';
     btn.disabled = false;
@@ -361,8 +385,8 @@ function selesaiBayarPesanan() {
 
 async function daftarJualan() {
   const namaPenjual = document.getElementById('namaPenjual').value.trim();
-  const whatsapp = document.getElementById('whatsappPenjual').value.trim();
-  if(!namaPenjual || !whatsapp) return alert('Nama brand dan WhatsApp harus diisi!');
+  const emailPenjual = document.getElementById('emailPenjual').value.trim();
+  if(!namaPenjual || !emailPenjual) return showToast('Nama brand dan Email Penjual harus diisi!', 'error');
 
   let hasilMenuGabung = [];
   let totalMenuCount = 0;
@@ -370,7 +394,7 @@ async function daftarJualan() {
   const katCards = document.querySelectorAll('.kategori-card');
   for (let card of katCards) {
     const namaKat = card.querySelector('.kategori-nama').value.trim();
-    if (!namaKat) return alert('Nama kategori tidak boleh kosong!');
+    if (!namaKat) return showToast('Nama kategori tidak boleh kosong!', 'error');
 
     hasilMenuGabung.push(`📁 ${namaKat}`);
 
@@ -381,25 +405,27 @@ async function daftarJualan() {
       const h = row.querySelector('.menu-harga').value.trim();
       if (m && h) {
         hasilMenuGabung.push(`• ${m} (Rp ${parseInt(h).toLocaleString('id-ID')})`);
-        if (d) hasilMenuGabung.push(` └ ${d}`);
+        if (d) hasilMenuGabung.push(`  └ ${d}`);
         totalMenuCount++;
       }
     }
   }
 
-  if (totalMenuCount === 0) return alert('Minimal masukkan 1 menu beserta harganya!');
+  if (totalMenuCount === 0) return showToast('Minimal masukkan 1 menu beserta harganya!', 'error');
 
   try {
     const response = await fetch(GAS_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'register_jualan', namaPenjual, menuJualan: hasilMenuGabung.join('\n'), whatsapp })
+      body: JSON.stringify({ action: 'register_jualan', namaPenjual, menuJualan: hasilMenuGabung.join('\n'), emailPenjual })
     });
     if ((await response.json()).status === 'success') {
-      alert('Pendaftaran mitra berhasil! Menunggu penugasan jadwal dari Admin.');
+      showToast('Pendaftaran mitra berhasil! Menunggu penugasan jadwal dari Admin.');
       gantiTab('pesan');
       loadDataJualanPage();
     }
-  } catch (e) { alert('Gagal daftar lapak.'); }
+  } catch (e) { 
+    showToast('Gagal daftar lapak.', 'error'); 
+  }
 }
 
 document.addEventListener('DOMContentLoaded', loadDataJualanPage);
