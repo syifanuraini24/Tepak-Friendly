@@ -2,10 +2,6 @@
  * KONFIGURASI TELEGRAM NOTIFIKASI
  * Edit di sini jika ada perubahan Token atau Chat ID
  */
-var TELEGRAM_CONFIG = {
-  BOT_TOKEN: "8997385135:AAE2EbhKjEA31midSWg_KosLkbs0N7gdXXA", // Ganti dengan Token Bot Telegram
-  CHAT_ID: "-5327500047"       // Ganti dengan Chat ID Telegram/Grup
-};
 // --- 1. KONFIGURASI BOT TELEGRAM MABAR ---
 var TELEGRAM_CONFIG = {
   BOT_TOKEN: "8997385135:AAE2EbhKjEA31midSWg_KosLkbs0N7gdXXA", // Ganti dengan Token Bot Telegram
