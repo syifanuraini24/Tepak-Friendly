@@ -174,7 +174,6 @@
         const container = document.getElementById('containerJadwalPublik');
         container.innerHTML = '';
 
-        // Filter: Hanya tampilkan jadwal yang statusnya Aktif (tidak mengandung kata 'nonaktif')
         const jadwalList = (data.jadwal || []).filter(j => {
           const status = j.status ? j.status.toString().toLowerCase() : 'aktif';
           return !status.includes('nonaktif');
