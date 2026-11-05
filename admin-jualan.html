@@ -86,9 +86,7 @@
           <span id="editCounterKategori" class="text-[10px] text-slate-400 font-semibold">1/6 Kategori</span>
         </div>
 
-        <div id="editContainerKategori" class="space-y-3 max-h-64 overflow-y-auto pr-1">
-          <!-- Diisi via JavaScript -->
-        </div>
+        <div id="editContainerKategori" class="space-y-3 max-h-64 overflow-y-auto pr-1"></div>
 
         <button type="button" onclick="editTambahKategori()" id="editBtnTambahKat" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2 px-3 rounded-xl transition shadow-xs">
           + Tambah Kategori Lain
@@ -117,6 +115,7 @@
 
   <script>
     const GAS_URL = CONFIG.GAS_URL;
+    let cacheLapakData = []; // Menyimpan data lapak agar mudah diakses saat edit
 
     async function loginAdminJualan() {
       const password = document.getElementById('passwordAdmin').value.trim();
@@ -163,7 +162,8 @@
           containerPesanan.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 italic">Belum ada pesanan masuk.</div>';
         } else {
           listPesanan.forEach(p => {
-            const isLunas = p.status && p.status.includes('Lunas');
+            const statusStr = p.status ? p.status.toString().trim() : '';
+            const isLunas = statusStr.toLowerCase().includes('lunas');
             const formatHrg = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.totalTagihan);
             
             containerPesanan.innerHTML += `
@@ -191,17 +191,17 @@
           });
         }
 
-        // 2. Render Daftar Lapak
+        // 2. Render Daftar Lapak (Simpan ke cacheLapakData agar aman dipanggil saat edit)
+        cacheLapakData = data.jualan || [];
         const containerLapak = document.getElementById('containerLapakAdmin');
-        const listJualan = data.jualan || [];
         containerLapak.innerHTML = '';
 
-        if (listJualan.length === 0) {
+        if (cacheLapakData.length === 0) {
           containerLapak.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 italic">Belum ada pendaftaran mitra.</div>';
           return;
         }
 
-        listJualan.forEach(l => {
+        cacheLapakData.forEach((l, idx) => {
           containerLapak.innerHTML += `
             <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-2">
               <div class="flex justify-between items-start">
@@ -213,7 +213,7 @@
               </div>
               <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border whitespace-pre-line font-mono max-h-28 overflow-y-auto">${l.menuJualan}</div>
               <div class="flex gap-2 pt-1 border-t border-slate-200">
-                <button onclick="bukaModalEdit(${l.rowIndex}, '${encodeURIComponent(l.namaPenjual)}', '${encodeURIComponent(l.whatsapp)}', \`${encodeURIComponent(l.menuJualan)}\`)" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] py-2 rounded-lg transition">Edit Lapak & Menu</button>
+                <button onclick="bukaModalEditIndex(${idx})" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] py-2 rounded-lg transition">Edit Lapak & Menu</button>
                 <button onclick="aksiKonfirmasiJualan(${l.rowIndex}, 'hapus')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-[10px] px-3 py-2 rounded-lg transition">Hapus</button>
               </div>
             </div>`;
@@ -268,14 +268,16 @@
       document.getElementById('modalKonfirmasi').classList.add('hidden');
     }
 
-    // --- FITUR EDIT KATEGORI & MENU INTERAKTIF DI ADMIN ---
-    function bukaModalEdit(rowIndex, nama, wa, menuEncoded) {
-      document.getElementById('editRowIndex').value = rowIndex;
-      document.getElementById('editNamaPenjual').value = decodeURIComponent(nama);
-      document.getElementById('editWhatsapp').value = decodeURIComponent(wa);
+    // --- FITUR EDIT MENGGUNAKAN CACHE INDEX (MENGHINDARI ERROR KARAKTER SPESIAL) ---
+    function bukaModalEditIndex(arrayIndex) {
+      const l = cacheLapakData[arrayIndex];
+      if (!l) return;
 
-      const rawMenu = decodeURIComponent(menuEncoded);
-      buildEditFormFromText(rawMenu);
+      document.getElementById('editRowIndex').value = l.rowIndex;
+      document.getElementById('editNamaPenjual').value = l.namaPenjual || '';
+      document.getElementById('editWhatsapp').value = l.whatsapp || '';
+
+      buildEditFormFromText(l.menuJualan || '');
       document.getElementById('modalEditLapak').classList.remove('hidden');
     }
 
@@ -309,7 +311,7 @@
       categories.push(currentCat);
 
       categories.forEach(cat => {
-        tambahKategoriEditForm(cat.nama, cat.items);
+        editTambahKategori(cat.nama, cat.items);
       });
       updateEditCounters();
     }
