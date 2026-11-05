@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="logo.png">
   <title>Admin Dashboard - Tepak Friendly</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -304,7 +303,7 @@
                         <button onclick="bukaModalEditNominal(${p.rowIndex}, '${p.nama}', ${p.tagihan || 0})" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-1.5 rounded-lg border border-slate-200 transition" title="Edit Nominal">
                           ✏️
                         </button>
-                        <button onclick="hapusPemainDariRekap(${p.rowIndex}, this)" class="bg-rose-50 hover:bg-rose-100 text-rose-600 p-1.5 rounded-lg border border-rose-200 transition" title="Hapus Peserta">
+                        <button onclick="hapusPemainDariRekap(${p.rowIndex}, this)" class="bg-rose-50 hover:bg-rose-100 text-rose-600 p-1.5 rounded-lg border border-slate-200 transition" title="Hapus Peserta">
                           🗑️
                         </button>
                       </div>
@@ -320,10 +319,13 @@
                     <span class="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-md border">${j.id}</span>
                     <h3 class="font-bold text-sm text-slate-900 mt-1">${j.info} ${isNonaktif ? '<span class="text-rose-600 font-bold text-xs">(Nonaktif)</span>' : ''}</h3>
                   </div>
-                  <div class="flex items-center gap-2">
+                  <div class="flex items-center gap-1.5 flex-wrap justify-end">
                     <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
                       Kuota: ${pesertaJadwal.length}/${j.kuota}
                     </span>
+                    <button onclick="copyListKeWA('${j.id}', \`${j.info}\`, ${j.kuota})" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 transition" title="Salin List ke WhatsApp">
+                      📋 Copy WA
+                    </button>
                     <button onclick="toggleStatusJadwal('${j.id}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}', this)" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border transition ${isNonaktif ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'}">
                       ${isNonaktif ? '🟢 Aktifkan' : '🔴 Nonaktifkan'}
                     </button>
@@ -409,6 +411,42 @@
         console.error("Gagal memuat data dari GAS:", error);
         list.innerHTML = '<li class="text-center text-rose-600 text-xs py-4 bg-rose-50 rounded-2xl border">Gagal memuat data. Periksa koneksi atau URL GAS.</li>';
       }
+    }
+
+    // Fungsi Copy List Peserta ke WhatsApp
+    function copyListKeWA(jadwalId, jadwalInfo, kuota) {
+      fetch(GAS_URL)
+        .then(res => res.json())
+        .then(data => {
+          const pemainList = data.pemain || [];
+          const pesertaJadwal = pemainList.filter(p => p.jadwalId === jadwalId && p.status && !p.status.includes('Dihapus'));
+
+          let teksWA = `🏸 *REKAP PESERTA MABAR* 🏸\n`;
+          teksWA += `📍 *${jadwalInfo}* (${jadwalId})\n`;
+          teksWA += `👥 Slot Terisi: ${pesertaJadwal.length}/${kuota}\n\n`;
+
+          if (pesertaJadwal.length === 0) {
+            teksWA += `_Belum ada peserta terdaftar._`;
+          } else {
+            pesertaJadwal.forEach((p, idx) => {
+              const statusEmoji = p.status.includes('Lunas') ? 'Lunas 🟢' : 'Pending 🟡';
+              teksWA += `${idx + 1}. ${p.nama} (${statusEmoji})\n`;
+            });
+          }
+
+          teksWA += `\n_Yuk yang mau gabung silakan amankan slotnya!_`;
+
+          navigator.clipboard.writeText(teksWA).then(() => {
+            alert(`List peserta [${jadwalId}] berhasil disalin! Silakan paste di WhatsApp.`);
+          }).catch(err => {
+            console.error('Gagal menyalin:', err);
+            alert('Gagal menyalin teks ke clipboard.');
+          });
+        })
+        .catch(err => {
+          console.error('Gagal mengambil data:', err);
+          alert('Gagal memuat data terbaru.');
+        });
     }
 
     async function toggleStatusJadwal(jadwalId, statusBaru, btnElement) {
@@ -530,8 +568,6 @@
         "Ya, ACC Lunas",
         "bg-emerald-600 hover:bg-emerald-700",
         async () => {
-          const liElement = btnElement.closest('li');
-
           btnElement.innerText = 'Memproses...';
           btnElement.disabled = true;
 
