@@ -9,6 +9,9 @@
 </head>
 <body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
 
+  <!-- TOAST NOTIFICATION CONTAINER (Di pojok kanan bawah agar tidak mengganggu atas) -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
   <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
@@ -123,6 +126,31 @@
     let cacheLapakData = [];
     let cacheJadwalList = [];
 
+    // Fungsi Toast Notification halus di pojok kanan bawah
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      const bgColors = type === 'success' ? 'bg-slate-900 text-white border-slate-800' : 'bg-rose-600 text-white border-rose-500';
+      const icon = type === 'success' ? '✨' : '⚠️';
+      
+      toast.className = `pointer-events-auto flex items-center gap-2 px-4 py-3 rounded-2xl shadow-lg border text-xs font-bold transition-all duration-300 translate-y-2 opacity-0 ${bgColors}`;
+      toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+      
+      container.appendChild(toast);
+      
+      // Munculkan animasi halus
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+
+      // Hilangkan otomatis setelah 3 detik
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const isLogged = sessionStorage.getItem('admin_jualan_logged');
       if (isLogged === 'true') {
@@ -132,7 +160,7 @@
 
     async function loginAdminJualan() {
       const password = document.getElementById('passwordAdmin').value.trim();
-      if (!password) return alert('Masukkan password!');
+      if (!password) return showToast('Masukkan password terlebih dahulu!', 'error');
       const btn = document.getElementById('btnLogin');
       btn.innerText = 'Memeriksa...';
       btn.disabled = true;
@@ -143,11 +171,12 @@
         if (result.status === 'success') {
           sessionStorage.setItem('admin_jualan_logged', 'true');
           bukaDashboardAdmin();
+          showToast('Berhasil masuk ke Panel Admin!');
         } else { 
-          alert(result.message || 'Password salah!'); 
+          showToast(result.message || 'Password salah!', 'error'); 
         }
       } catch (e) { 
-        alert('Gagal terhubung ke server.'); 
+        showToast('Gagal terhubung ke server.', 'error'); 
       } finally {
         btn.innerText = 'Masuk Panel Admin';
         btn.disabled = false;
@@ -169,6 +198,7 @@
       document.getElementById('linkKembaliJualan').classList.remove('hidden');
       document.getElementById('sectionLogin').classList.remove('hidden');
       document.getElementById('passwordAdmin').value = '';
+      showToast('Berhasil logout.');
     }
 
     async function refreshDataAdmin(btnElement) {
@@ -180,6 +210,7 @@
 
       txt.innerText = 'Refresh';
       if(btnElement) btnElement.disabled = false;
+      showToast('Data berhasil diperbarui!');
     }
 
     async function loadDataAdminJualan() {
@@ -299,13 +330,12 @@
       });
 
       if (selectedIds.length === 0) {
-        return alert('Pilih minimal 1 jadwal mabar!');
+        return showToast('Pilih minimal 1 jadwal mabar!', 'error');
       }
 
-      if(btnElement) {
-        btnElement.innerText = 'Menyimpan...';
-        btnElement.disabled = true;
-      }
+      const originalText = btnElement.innerText;
+      btnElement.innerText = 'Menyimpan...';
+      btnElement.disabled = true;
 
       try {
         const response = await fetch(GAS_URL, {
@@ -319,17 +349,16 @@
         });
         const result = await response.json();
         if (result.status === 'success') {
-          alert('Berhasil memperbarui jadwal assign!');
+          showToast('Berhasil memperbarui jadwal assign!');
           loadDataAdminJualan();
         } else {
           throw new Error(result.message);
         }
       } catch (e) {
-        alert('Gagal menyimpan jadwal: ' + e.message);
-        if(btnElement) {
-          btnElement.innerText = 'Simpan Pilihan Jadwal';
-          btnElement.disabled = false;
-        }
+        showToast('Gagal menyimpan jadwal: ' + e.message, 'error');
+      } finally {
+        btnElement.innerText = originalText;
+        btnElement.disabled = false;
       }
     }
 
@@ -344,8 +373,9 @@
           body: JSON.stringify({ action: 'update_jualan_status', rowIndex, status: 'Disetujui 🟢' })
         });
         await loadDataAdminJualan();
+        showToast('Mitra berhasil di-ACC!');
       } catch (e) { 
-        alert('Gagal ACC lapak.'); 
+        showToast('Gagal ACC lapak.', 'error'); 
         if(btnElement) {
           btnElement.innerText = 'ACC Mitra 🟢';
           btnElement.disabled = false;
@@ -360,6 +390,7 @@
         tutupModalKonfirmasi();
         await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: tipe === 'acc' ? 'update_pesanan_status' : 'delete_pesanan', rowIndex }) });
         loadDataAdminJualan();
+        showToast('Aksi pesanan berhasil disimpan!');
       };
       modal.classList.remove('hidden');
     }
@@ -371,6 +402,7 @@
         tutupModalKonfirmasi();
         await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_jualan', rowIndex }) });
         loadDataAdminJualan();
+        showToast('Lapak mitra berhasil dihapus.');
       };
       modal.classList.remove('hidden');
     }
@@ -432,7 +464,7 @@
 
     function editTambahKategori(namaKat = '', items = [{ nama: '', harga: '', deskripsi: '' }]) {
       const container = document.getElementById('editContainerKategori');
-      if (container.querySelectorAll('.edit-kategori-card').length >= 6) return alert('Maksimal 6 kategori!');
+      if (container.querySelectorAll('.edit-kategori-card').length >= 6) return showToast('Maksimal 6 kategori!', 'error');
 
       const div = document.createElement('div');
       div.className = 'edit-kategori-card bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2';
@@ -484,7 +516,7 @@
       const rowIndex = document.getElementById('editRowIndex').value;
       const namaPenjual = document.getElementById('editNamaPenjual').value.trim();
       const whatsapp = document.getElementById('editWhatsapp').value.trim();
-      if (!namaPenjual || !whatsapp) return alert('Nama dan WhatsApp wajib diisi!');
+      if (!namaPenjual || !whatsapp) return showToast('Nama dan WhatsApp wajib diisi!', 'error');
 
       let hasilMenuGabung = [];
       const katCards = document.querySelectorAll('#editContainerKategori .edit-kategori-card');
@@ -509,7 +541,10 @@
         });
         tutupModalEdit();
         refreshDataAdmin();
-      } catch (e) { alert('Gagal menyimpan perubahan.'); }
+        showToast('Perubahan menu berhasil disimpan!');
+      } catch (e) { 
+        showToast('Gagal menyimpan perubahan.', 'error'); 
+      }
     }
   </script>
 </body>
