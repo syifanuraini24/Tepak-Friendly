@@ -21,7 +21,6 @@
           <p class="text-[9px] text-slate-500 font-medium">Tepak Friendly Jajanan</p>
         </div>
       </div>
-      <!-- Diperbarui ke rute bersih tanpa .html -->
       <a href="index" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1">
         <span>←</span> Mabar
       </a>
@@ -48,42 +47,61 @@
       </div>
     </div>
 
-    <!-- SECTION PENDAFTARAN MITRA -->
-    <div id="sectionDaftar" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5">
-      <h2 class="font-bold text-sm text-slate-900 mb-1">Form Pendaftaran Mitra UMKM</h2>
-      <p class="text-[11px] text-slate-500 mb-4">Daftar sekali saja. Jadwal buka lapak akan diatur oleh Admin.</p>
+    <!-- SECTION PENDAFTARAN MITRA DENGAN KATEGORI & MENU -->
+    <div id="sectionDaftar" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-4">
+      <div>
+        <h2 class="font-bold text-sm text-slate-900 mb-1">Form Pendaftaran Mitra UMKM</h2>
+        <p class="text-[11px] text-slate-500">Atur kategori dan menu jualanmu (Maks. 6 Kategori & Total 30 Menu).</p>
+      </div>
       
-      <div class="space-y-3.5">
+      <div class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">Nama Brand / Penjual</label>
-          <input type="text" id="namaPenjual" placeholder="Cth: Es Teh Mantul" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
+          <input type="text" id="namaPenjual" placeholder="Cth: Es Teh & Snack Mantul" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
         </div>
         
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">Nomor WhatsApp Aktif</label>
           <input type="text" id="whatsappPenjual" placeholder="Cth: 081234567890" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
         </div>
-        
-        <div>
-          <div class="flex justify-between items-center mb-1">
-            <label class="block text-xs font-bold text-slate-600">Daftar Menu & Harga (Maks. 10)</label>
-            <span id="counterMenu" class="text-[10px] text-slate-400 font-semibold">1/10 Menu</span>
-          </div>
-          
-          <div id="containerListMenu" class="space-y-2 mb-2">
-            <div class="flex gap-2 menu-row items-center">
-              <input type="text" placeholder="Nama Menu (Cth: Es Teh Manis)" class="w-3/5 p-2.5 border border-slate-200 bg-slate-50 rounded-xl text-xs menu-nama">
-              <input type="number" placeholder="Harga (Rp)" class="w-2/5 p-2.5 border border-slate-200 bg-slate-50 rounded-xl text-xs menu-harga">
-            </div>
-          </div>
-
-          <button type="button" onclick="tambahBarisMenu()" id="btnTambahMenu" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2 px-3 rounded-xl transition w-full border border-slate-200">
-            + Tambah Menu Lain
-          </button>
-        </div>
       </div>
 
-      <button onclick="daftarJualan()" id="btnSubmitJualan" class="w-full mt-5 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl transition shadow-md shadow-orange-200">
+      <!-- KONTAINER KATEGORI & MENU -->
+      <div class="space-y-3 pt-2 border-t border-slate-100">
+        <div class="flex justify-between items-center">
+          <label class="text-xs font-bold text-slate-800">📁 Kategori & Menu Jualan</label>
+          <span id="counterKategori" class="text-[10px] text-slate-400 font-semibold">1/6 Kategori</span>
+        </div>
+
+        <div id="containerKategori" class="space-y-3">
+          <!-- Kategori Item Default ke-1 -->
+          <div class="kategori-card bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
+            <div class="flex gap-2 items-center">
+              <input type="text" placeholder="Nama Kategori (Cth: Minuman / Makanan Berat)" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl text-xs font-bold text-blue-700 kategori-nama">
+              <button type="button" onclick="hapusKategori(this)" class="bg-rose-50 text-rose-600 font-bold text-xs p-2.5 rounded-xl border border-rose-200 hidden btn-hapus-kat">✕</button>
+            </div>
+            
+            <!-- List Menu dalam Kategori Ini -->
+            <div class="space-y-1.5 container-menu-item pl-2 border-l-2 border-blue-200">
+              <div class="flex gap-2 menu-row items-center">
+                <input type="text" placeholder="Nama Menu (Cth: Es Teh Manis)" class="w-3/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-nama">
+                <input type="number" placeholder="Harga (Rp)" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-harga">
+                <button type="button" onclick="hapusMenuRow(this)" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border border-rose-200">✕</button>
+              </div>
+            </div>
+
+            <button type="button" onclick="tambahBarisMenu(this)" class="w-full bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-lg transition border border-slate-200 shadow-2xs">
+              + Tambah Menu di Kategori Ini
+            </button>
+          </div>
+        </div>
+
+        <button type="button" onclick="tambahKategori()" id="btnTambahKat" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition shadow-xs">
+          + Tambah Kategori Lain (Maks. 6)
+        </button>
+      </div>
+
+      <button onclick="daftarJualan()" id="btnSubmitJualan" class="w-full mt-4 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl transition shadow-md shadow-orange-200">
         Kirim Pendaftaran Mitra
       </button>
     </div>
@@ -92,7 +110,7 @@
     <div id="modalPesan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
       <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto">
         <h3 id="modalLapakTitle" class="font-bold text-sm text-slate-900 mb-1">Pesan Makanan</h3>
-        <p class="text-[11px] text-slate-500 mb-3">Klik tombol (+) (-) untuk memilih jumlah pesanan.</p>
+        <p class="text-[11px] text-slate-500 mb-3">Pilih menu berdasarkan kategori menggunakan tombol (+) (-).</p>
         
         <div class="space-y-3">
           <div>
@@ -101,8 +119,8 @@
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Pilih Menu & Jumlah</label>
-            <div id="containerMenuInteraktif" class="space-y-2 bg-slate-50 p-2.5 rounded-xl border border-slate-200 max-h-48 overflow-y-auto"></div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Daftar Menu</label>
+            <div id="containerMenuInteraktif" class="space-y-3 bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-56 overflow-y-auto"></div>
           </div>
 
           <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex justify-between items-center">
@@ -120,7 +138,6 @@
 
     <!-- MODAL INVOICE & QRIS PEMBAYARAN -->
     <div id="modalInvoicePesanan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
-      <!-- Area Struk yang akan di-capture jadi Gambar PNG -->
       <div id="areaStrukResi" class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-3">
         <div class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Invoice Pesanan</div>
         <h3 class="font-extrabold text-slate-900 text-base" id="invNamaLapak">Pesan ke Lapak</h3>
@@ -146,7 +163,6 @@
         </div>
       </div>
 
-      <!-- Tombol Aksi di Luar Area Capture -->
       <div class="max-w-sm w-full mt-3 space-y-2">
         <button onclick="downloadResiGambar()" id="btnDownloadImg" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">📥 Download Resi (Gambar PNG)</button>
         <button onclick="selesaiBayarPesanan()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup & Selesai</button>
@@ -173,22 +189,90 @@
       }
     }
 
-    function tambahBarisMenu() {
-      const container = document.getElementById('containerListMenu');
-      if (container.getElementsByClassName('menu-row').length >= 10) return alert('Maksimal 10 menu!');
+    function updateCounters() {
+      const katCards = document.querySelectorAll('.kategori-card');
+      document.getElementById('counterKategori').innerText = `${katCards.length}/6 Kategori`;
+      
+      let totalMenu = 0;
+      document.querySelectorAll('.menu-row').forEach(() => totalMenu++);
+      if (katCards.length >= 6) {
+        document.getElementById('btnTambahKat').classList.add('hidden');
+      } else {
+        document.getElementById('btnTambahKat').classList.remove('hidden');
+      }
+
+      // Tampilkan tombol hapus kategori jika lebih dari 1
+      katCards.forEach(card => {
+        const btnHapusKat = card.querySelector('.btn-hapus-kat');
+        if (katCards.length > 1) {
+          btnHapusKat.classList.remove('hidden');
+        } else {
+          btnHapusKat.classList.add('hidden');
+        }
+      });
+    }
+
+    function tambahKategori() {
+      const container = document.getElementById('containerKategori');
+      const katCards = container.querySelectorAll('.kategori-card');
+      if (katCards.length >= 6) return alert('Maksimal 6 kategori!');
+
+      const div = document.createElement('div');
+      div.className = 'kategori-card bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2';
+      div.innerHTML = `
+        <div class="flex gap-2 items-center">
+          <input type="text" placeholder="Nama Kategori (Cth: Snack / Dessert)" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl text-xs font-bold text-blue-700 kategori-nama">
+          <button type="button" onclick="hapusKategori(this)" class="bg-rose-50 text-rose-600 font-bold text-xs p-2.5 rounded-xl border border-rose-200 btn-hapus-kat">✕</button>
+        </div>
+        <div class="space-y-1.5 container-menu-item pl-2 border-l-2 border-blue-200">
+          <div class="flex gap-2 menu-row items-center">
+            <input type="text" placeholder="Nama Menu" class="w-3/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-nama">
+            <input type="number" placeholder="Harga (Rp)" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-harga">
+            <button type="button" onclick="hapusMenuRow(this)" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border border-rose-200">✕</button>
+          </div>
+        </div>
+        <button type="button" onclick="tambahBarisMenu(this)" class="w-full bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-lg transition border border-slate-200 shadow-2xs">
+          + Tambah Menu di Kategori Ini
+        </button>
+      `;
+      container.appendChild(div);
+      updateCounters();
+    }
+
+    function hapusKategori(btn) {
+      btn.closest('.kategori-card').remove();
+      updateCounters();
+    }
+
+    function tambahBarisMenu(btn) {
+      const containerCard = btn.closest('.kategori-card');
+      const menuContainer = containerCard.querySelector('.container-menu-item');
+      
+      let totalMenu = 0;
+      document.querySelectorAll('.menu-row').forEach(() => totalMenu++);
+      if (totalMenu >= 30) return alert('Maksimal total 30 menu untuk seluruh kategori!');
+
       const div = document.createElement('div');
       div.className = 'flex gap-2 menu-row items-center';
       div.innerHTML = `
-        <input type="text" placeholder="Nama Menu" class="w-3/5 p-2.5 border border-slate-200 bg-slate-50 rounded-xl text-xs menu-nama">
-        <input type="number" placeholder="Harga (Rp)" class="w-2/5 p-2.5 border border-slate-200 bg-slate-50 rounded-xl text-xs menu-harga">
-        <button type="button" onclick="this.closest('.menu-row').remove(); updateCounterMenu();" class="bg-rose-50 text-rose-600 font-bold text-xs px-2.5 py-2.5 rounded-xl border border-rose-200">✕</button>
+        <input type="text" placeholder="Nama Menu" class="w-3/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-nama">
+        <input type="number" placeholder="Harga (Rp)" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-harga">
+        <button type="button" onclick="hapusMenuRow(this)" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border border-rose-200">✕</button>
       `;
-      container.appendChild(div);
-      updateCounterMenu();
+      menuContainer.appendChild(div);
+      updateCounters();
     }
 
-    function updateCounterMenu() {
-      document.getElementById('counterMenu').innerText = `${document.getElementById('containerListMenu').getElementsByClassName('menu-row').length}/10 Menu`;
+    function hapusMenuRow(btn) {
+      const menuRow = btn.closest('.menu-row');
+      const containerCard = menuRow.closest('.kategori-card');
+      const totalMenuInCard = containerCard.querySelectorAll('.menu-row').length;
+      
+      if (totalMenuInCard <= 1) {
+        return alert('Setiap kategori minimal harus memiliki 1 menu. Atau hapus kategorinya jika tidak digunakan.');
+      }
+      menuRow.remove();
+      updateCounters();
     }
 
     async function loadDataJualanPage() {
@@ -265,19 +349,31 @@
       } catch (e) { console.error(e); }
     }
 
+    // Parser canggih untuk membaca teks menu berformat kategori
     function parseMenuText(rawMenuText) {
       const lines = rawMenuText.split('\n');
       let menus = [];
-      lines.forEach((line, idx) => {
-        let cleanLine = line.replace(/^[•\-\*]\s*/, '').trim();
-        if (!cleanLine) return;
+      let currentKategori = "Menu Utama";
+      let globalIdx = 0;
+
+      lines.forEach((line) => {
+        let trimLine = line.trim();
+        if (!trimLine) return;
+
+        // Cek apakah baris ini adalah Kategori (ditandai dengan huruf tebal atau format khusus, misal diakhiri tanpa harga)
+        if (trimLine.startsWith('📁') || (!trimLine.includes('Rp') && !trimLine.includes('•') && !trimLine.includes('-'))) {
+          currentKategori = trimLine.replace('📁', '').trim();
+          return;
+        }
+
+        let cleanLine = trimLine.replace(/^[•\-\*]\s*/, '').trim();
         let harga = 0, namaMenu = cleanLine;
         const matchRp = cleanLine.match(/\(Rp\s*([\d\.]+)\)/i) || cleanLine.match(/Rp\.?\s*([\d\.]+)/i);
         if (matchRp) {
           harga = parseInt(matchRp[1].replace(/\./g, '')) || 0;
           namaMenu = cleanLine.replace(matchRp[0], '').trim();
         }
-        menus.push({ id: idx, nama: namaMenu, harga: harga, qty: 0 });
+        menus.push({ id: globalIdx++, kategori: currentKategori, nama: namaMenu, harga: harga, qty: 0 });
       });
       return menus;
     }
@@ -299,28 +395,44 @@
         container.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">Tidak ada menu tersedia.</div>';
         return;
       }
-      menuParsedGlobal.forEach((m, index) => {
-        const formatHrg = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(m.harga);
-        container.innerHTML += `
-          <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 text-xs">
-            <div class="pr-2">
-              <div class="font-bold text-slate-800">${m.nama}</div>
-              <div class="text-[10px] text-slate-500">${formatHrg}</div>
-            </div>
-            <div class="flex items-center gap-2">
-              <button type="button" onclick="ubahQty(${index}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 rounded-md font-bold text-slate-700 flex items-center justify-center">-</button>
-              <span id="qty_${index}" class="font-bold w-4 text-center">${m.qty}</span>
-              <button type="button" onclick="ubahQty(${index}, 1)" class="w-6 h-6 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-md font-bold flex items-center justify-center">+</button>
-            </div>
-          </div>`;
+
+      // Kelompokkan berdasarkan kategori
+      let grouped = {};
+      menuParsedGlobal.forEach(m => {
+        if (!grouped[m.kategori]) grouped[m.kategori] = [];
+        grouped[m.kategori].push(m);
       });
+
+      for (let kat in grouped) {
+        let katHtml = `<div class="space-y-1.5"><div class="text-[11px] font-extrabold text-blue-700 bg-blue-50 px-2 py-1 rounded-lg">📁 ${kat}</div>`;
+        grouped[kat].forEach(m => {
+          const formatHrg = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(m.harga);
+          katHtml += `
+            <div class="flex justify-between items-center bg-white p-2 rounded-lg border border-slate-200 text-xs ml-2">
+              <div class="pr-2">
+                <div class="font-bold text-slate-800">${m.nama}</div>
+                <div class="text-[10px] text-slate-500">${formatHrg}</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="ubahQty(${m.id}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 rounded-md font-bold text-slate-700 flex items-center justify-center">-</button>
+                <span id="qty_${m.id}" class="font-bold w-4 text-center">${m.qty}</span>
+                <button type="button" onclick="ubahQty(${m.id}, 1)" class="w-6 h-6 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-md font-bold flex items-center justify-center">+</button>
+              </div>
+            </div>`;
+        });
+        katHtml += `</div>`;
+        container.innerHTML += katHtml;
+      }
       hitungTotalOtomatis();
     }
 
-    function ubahQty(index, delta) {
-      menuParsedGlobal[index].qty = Math.max(0, menuParsedGlobal[index].qty + delta);
-      document.getElementById(`qty_${index}`).innerText = menuParsedGlobal[index].qty;
-      hitungTotalOtomatis();
+    function ubahQty(id, delta) {
+      const item = menuParsedGlobal.find(m => m.id === id);
+      if (item) {
+        item.qty = Math.max(0, item.qty + delta);
+        document.getElementById(`qty_${id}`).innerText = item.qty;
+        hitungTotalOtomatis();
+      }
     }
 
     function hitungTotalOtomatis() {
@@ -364,7 +476,6 @@
         });
         
         const result = await response.json();
-        
         tutupModalPesan();
 
         try {
@@ -387,7 +498,7 @@
 
       } catch (e) { 
         console.error("Error kirimPesanan:", e);
-        alert('Gagal mengirim pesanan. Periksa koneksi internet atau URL Apps Script.'); 
+        alert('Gagal mengirim pesanan.'); 
       } finally {
         btn.innerText = oldText;
         btn.disabled = false;
@@ -426,19 +537,34 @@
       const whatsapp = document.getElementById('whatsappPenjual').value.trim();
       if(!namaPenjual || !whatsapp) return alert('Nama brand dan WhatsApp harus diisi!');
 
-      let menuList = [];
-      document.querySelectorAll('.menu-row').forEach(row => {
-        const m = row.querySelector('.menu-nama').value.trim();
-        const h = row.querySelector('.menu-harga').value.trim();
-        if (m && h) menuList.push(`• ${m} (Rp ${parseInt(h).toLocaleString('id-ID')})`);
-      });
+      let hasilMenuGabung = [];
+      let totalMenuCount = 0;
 
-      if (menuList.length === 0) return alert('Minimal masukkan 1 menu beserta harganya!');
+      const katCards = document.querySelectorAll('.kategori-card');
+      for (let card of katCards) {
+        const namaKat = card.querySelector('.kategori-nama').value.trim();
+        if (!namaKat) return alert('Nama kategori tidak boleh ada yang kosong!');
+
+        hasilMenuGabung.push(`📁 ${namaKat}`);
+
+        const menuRows = card.querySelectorAll('.menu-row');
+        for (let row of menuRows) {
+          const m = row.querySelector('.menu-nama').value.trim();
+          const h = row.querySelector('.menu-harga').value.trim();
+          if (m && h) {
+            hasilMenuGabung.push(`• ${m} (Rp ${parseInt(h).toLocaleString('id-ID')})`);
+            totalMenuCount++;
+          }
+        }
+      }
+
+      if (totalMenuCount === 0) return alert('Minimal masukkan 1 menu beserta harganya!');
+      if (totalMenuCount > 30) return alert('Total menu tidak boleh lebih dari 30 item!');
 
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'register_jualan', namaPenjual, menuJualan: menuList.join('\n'), whatsapp })
+          body: JSON.stringify({ action: 'register_jualan', namaPenjual, menuJualan: hasilMenuGabung.join('\n'), whatsapp })
         });
         if ((await response.json()).status === 'success') {
           alert('Pendaftaran mitra berhasil! Menunggu penugasan jadwal dari Admin.');
