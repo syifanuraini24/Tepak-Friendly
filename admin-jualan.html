@@ -19,7 +19,6 @@
         </div>
       </div>
       
-      <!-- Tombol Aksi Header (Refresh & Logout akan muncul saat sudah login) -->
       <div id="headerActions" class="hidden flex items-center gap-1.5">
         <button onclick="refreshDataAdmin(this)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-1.5 px-2.5 rounded-xl transition flex items-center gap-1" title="Refresh Data">
           🔄 <span id="refreshText">Refresh</span>
@@ -122,8 +121,8 @@
   <script>
     const GAS_URL = CONFIG.GAS_URL;
     let cacheLapakData = [];
+    let cacheJadwalList = [];
 
-    // Cek status login saat halaman dimuat
     document.addEventListener('DOMContentLoaded', () => {
       const isLogged = sessionStorage.getItem('admin_jualan_logged');
       if (isLogged === 'true') {
@@ -172,7 +171,6 @@
       document.getElementById('passwordAdmin').value = '';
     }
 
-    // Fungsi Refresh Halus (Smooth Refresh tanpa Hard Refresh halaman)
     async function refreshDataAdmin(btnElement) {
       const txt = document.getElementById('refreshText');
       txt.innerText = 'Memuat...';
@@ -189,6 +187,8 @@
         const response = await fetch(GAS_URL);
         const data = await response.json();
         
+        cacheJadwalList = data.jadwal || [];
+
         // 1. Render Pesanan
         const containerPesanan = document.getElementById('containerPesananAdmin');
         const listPesanan = data.pesanan || [];
@@ -223,7 +223,7 @@
           });
         }
 
-        // 2. Render Lapak
+        // 2. Render Lapak dengan Dropdown Assign Jadwal
         cacheLapakData = data.jualan || [];
         const containerLapak = document.getElementById('containerLapakAdmin');
         containerLapak.innerHTML = '';
@@ -235,24 +235,85 @@
 
         cacheLapakData.forEach((l, idx) => {
           const isDisetujui = l.status && l.status.toLowerCase().includes('disetujui');
+          
+          // Buat opsi dropdown jadwal mabar
+          let jadwalOptions = '<option value="">-- Pilih Jadwal Mabar --</option>';
+          cacheJadwalList.forEach(j => {
+            const selected = (l.jadwalId === j.id) ? 'selected' : '';
+            jadwalOptions += `<option value="${j.id}" ${selected}>[${j.id}] ${j.info} (${j.jam})</option>`;
+          });
+
           containerLapak.innerHTML += `
-            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-2">
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2.5">
               <div class="flex justify-between items-start">
                 <div>
                   <span class="font-bold text-slate-900 text-sm">🛍️ ${l.namaPenjual}</span>
-                  <span class="block text-[10px] text-slate-500">WA: ${l.whatsapp} | Jadwal: ${l.jadwalInfo || 'Belum diatur'}</span>
+                  <span class="block text-[10px] text-slate-500">WA: ${l.whatsapp}</span>
                 </div>
                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isDisetujui ? 'bg-emerald-50 text-emerald-700 border' : 'bg-blue-50 text-blue-700 border'}">${l.status || 'Pending'}</span>
               </div>
+
+              <!-- Pilihan Assign ke Jadwal -->
+              <div class="space-y-1 bg-white p-2.5 rounded-xl border border-slate-200">
+                <label class="block text-[10px] font-bold text-slate-600">Assign ke Jadwal Mabar:</label>
+                <div class="flex gap-2">
+                  <select id="selectJadwal_${l.rowIndex}" class="w-full p-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-medium focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    ${jadwalOptions}
+                  </select>
+                  <button onclick="simpanAssignJadwal(${l.rowIndex}, this)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition shadow-2xs whitespace-nowrap">Simpan</button>
+                </div>
+              </div>
+
               <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border whitespace-pre-line font-mono max-h-28 overflow-y-auto">${l.menuJualan}</div>
+              
               <div class="flex gap-2 pt-1 border-t border-slate-200">
-                ${!isDisetujui ? `<button onclick="aksiAccLapak(${l.rowIndex}, this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-3 py-2 rounded-lg transition">ACC Mitra 🟢</button>` : ''}
+                ${!isDisetujui ? `<button onclick="aksiAccLapak(${l.rowIndex}, this)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-2 rounded-lg transition">ACC Mitra 🟢</button>` : ''}
                 <button onclick="bukaModalEditIndex(${idx})" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] py-2 rounded-lg">Edit Menu</button>
                 <button onclick="aksiKonfirmasiJualan(${l.rowIndex})" class="bg-rose-50 text-rose-600 border font-bold text-[10px] px-3 py-2 rounded-lg">Hapus</button>
               </div>
             </div>`;
         });
       } catch (e) { console.error(e); }
+    }
+
+    async function simpanAssignJadwal(rowIndex, btnElement) {
+      const selectEl = document.getElementById(`selectJadwal_${rowIndex}`);
+      const selectedJadwalId = selectEl.value;
+      if (!selectedJadwalId) return alert('Pilih jadwal mabar terlebih dahulu!');
+
+      // Cari info jadwal berdasarkan ID yang dipilih
+      const matchedJadwal = cacheJadwalList.find(j => j.id === selectedJadwalId);
+      const jadwalInfo = matchedJadwal ? `${matchedJadwal.id} - ${matchedJadwal.info} (${matchedJadwal.jam})` : selectedJadwalId;
+
+      if(btnElement) {
+        btnElement.innerText = '...';
+        btnElement.disabled = true;
+      }
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'update_jualan_status_with_jadwal',
+            rowIndex: parseInt(rowIndex),
+            jadwalId: selectedJadwalId,
+            jadwalInfo: jadwalInfo
+          })
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+          alert('Berhasil meng-assign jadwal mabar!');
+          loadDataAdminJualan();
+        } else {
+          throw new Error(result.message);
+        }
+      } catch (e) {
+        alert('Gagal menyimpan jadwal: ' + e.message);
+        if(btnElement) {
+          btnElement.innerText = 'Simpan';
+          btnElement.disabled = false;
+        }
+      }
     }
 
     async function aksiAccLapak(rowIndex, btnElement) {
@@ -281,7 +342,7 @@
       document.getElementById('btnKonfirmasiYa').onclick = async function() {
         tutupModalKonfirmasi();
         await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: tipe === 'acc' ? 'update_pesanan_status' : 'delete_pesanan', rowIndex }) });
-        loadDataAdmin();
+        loadDataAdminJualan();
       };
       modal.classList.remove('hidden');
     }
@@ -292,7 +353,7 @@
       document.getElementById('btnKonfirmasiYa').onclick = async function() {
         tutupModalKonfirmasi();
         await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_jualan', rowIndex }) });
-        loadDataAdmin();
+        loadDataAdminJualan();
       };
       modal.classList.remove('hidden');
     }
