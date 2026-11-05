@@ -336,7 +336,11 @@ function bukaModalEditIndex(arrayIndex) {
   document.getElementById('editRowIndex').value = l.rowIndex;
   document.getElementById('editNamaPenjual').value = l.namaPenjual || '';
   document.getElementById('editEmailPenjual').value = l.emailPenjual || '';
-  buildEditFormFromText(l.menuJualan || '');
+  
+  // Pastikan menuJualan dipastikan berupa string agar tidak error split
+  const menuText = l.menuJualan ? String(l.menuJualan) : '';
+  buildEditFormFromText(menuText);
+  
   document.getElementById('modalEditLapak').classList.remove('hidden');
 }
 
