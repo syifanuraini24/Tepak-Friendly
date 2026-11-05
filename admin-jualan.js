@@ -334,12 +334,9 @@ function bukaModalEditIndex(arrayIndex) {
   const l = cacheLapakData[arrayIndex];
   if (!l) return;
   document.getElementById('editRowIndex').value = l.rowIndex;
-  
-  // Pastikan memetakan properti data dengan benar sesuai kolom
   document.getElementById('editNamaPenjual').value = l.namaPenjual || '';
   document.getElementById('editEmailPenjual').value = l.emailPenjual || '';
   
-  // Ambil teks menu jualan secara aman
   const menuText = l.menuJualan ? String(l.menuJualan) : '';
   buildEditFormFromText(menuText);
   
