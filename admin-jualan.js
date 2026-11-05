@@ -2,9 +2,9 @@ const GAS_URL = CONFIG.GAS_URL;
 let cacheLapakData = [];
 let cacheJadwalList = [];
 
-// Fungsi Toast Notification halus di pojok kanan bawah
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
+  if (!container) return;
   const toast = document.createElement('div');
   
   const bgColors = type === 'success' ? 'bg-slate-900 text-white border-slate-800' : 'bg-rose-600 text-white border-rose-500';
@@ -15,10 +15,7 @@ function showToast(message, type = 'success') {
   
   container.appendChild(toast);
   
-  setTimeout(() => {
-    toast.classList.remove('translate-y-2', 'opacity-0');
-  }, 10);
-
+  setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
   setTimeout(() => {
     toast.classList.add('translate-y-2', 'opacity-0');
     setTimeout(() => toast.remove(), 300);
@@ -77,13 +74,13 @@ function logoutAdmin() {
 
 async function refreshDataAdmin(btnElement) {
   const txt = document.getElementById('refreshText');
-  txt.innerText = 'Memuat...';
-  if(btnElement) btnElement.disabled = true;
+  if (txt) txt.innerText = 'Memuat...';
+  if (btnElement) btnElement.disabled = true;
 
   await loadDataAdminJualan();
 
-  txt.innerText = 'Refresh';
-  if(btnElement) btnElement.disabled = false;
+  if (txt) txt.innerText = 'Refresh';
+  if (btnElement) btnElement.disabled = false;
   showToast('Data berhasil diperbarui!');
 }
 
@@ -194,7 +191,7 @@ async function loadDataAdminJualan() {
           </div>
 
           <div class="space-y-1.5 bg-white p-2.5 rounded-xl border border-slate-200">
-            <span class="block text-[10px] font-bold text-slate-600 uppercase tracking-wide">Assign ke Jadwal Mabar (Bisa Pilih Banyak):</span>
+            <span class="block text-[10px] font-bold text-slate-600 uppercase tracking-wide">Assign ke Jadwal Mabar:</span>
             <div class="max-h-36 overflow-y-auto space-y-0.5 pr-1 border border-slate-100 rounded-lg p-1 bg-slate-50/50">
               ${checkboxHtml}
             </div>
@@ -229,9 +226,7 @@ async function simpanAssignMultipleJadwal(rowIndex, btnElement) {
     }
   });
 
-  if (selectedIds.length === 0) {
-    return showToast('Pilih minimal 1 jadwal mabar!', 'error');
-  }
+  if (selectedIds.length === 0) return showToast('Pilih minimal 1 jadwal mabar!', 'error');
 
   const originalText = btnElement.innerText;
   btnElement.innerText = 'Menyimpan...';
@@ -263,7 +258,7 @@ async function simpanAssignMultipleJadwal(rowIndex, btnElement) {
 }
 
 async function aksiAccLapak(rowIndex, btnElement) {
-  if(btnElement) {
+  if (btnElement) {
     btnElement.innerText = 'Memproses...';
     btnElement.disabled = true;
   }
@@ -276,7 +271,7 @@ async function aksiAccLapak(rowIndex, btnElement) {
     showToast('Mitra berhasil di-ACC!');
   } catch (e) { 
     showToast('Gagal ACC lapak.', 'error'); 
-    if(btnElement) {
+    if (btnElement) {
       btnElement.innerText = 'ACC Mitra 🟢';
       btnElement.disabled = false;
     }
@@ -310,13 +305,8 @@ function aksiKonfirmasiJualan(rowIndex) {
 function tutupModalKonfirmasi() { document.getElementById('modalKonfirmasi').classList.add('hidden'); }
 
 // --- CLOSE ORDER & KIRIM EMAIL ---
-function bukaModalCloseOrder() {
-  document.getElementById('modalCloseOrder').classList.remove('hidden');
-}
-
-function tutupModalCloseOrder() {
-  document.getElementById('modalCloseOrder').classList.add('hidden');
-}
+function bukaModalCloseOrder() { document.getElementById('modalCloseOrder').classList.remove('hidden'); }
+function tutupModalCloseOrder() { document.getElementById('modalCloseOrder').classList.add('hidden'); }
 
 async function eksekusiCloseOrderDanKirimEmail() {
   tutupModalCloseOrder();
@@ -339,6 +329,7 @@ async function eksekusiCloseOrderDanKirimEmail() {
   }
 }
 
+// --- MODAL EDIT LAPAK & MENU ---
 function bukaModalEditIndex(arrayIndex) {
   const l = cacheLapakData[arrayIndex];
   if (!l) return;
@@ -385,10 +376,15 @@ function buildEditFormFromText(rawText) {
 
 function updateEditCounters() {
   const katCards = document.querySelectorAll('#editContainerKategori .edit-kategori-card');
-  document.getElementById('editCounterKategori').innerText = `${katCards.length}/6 Kategori`;
-  document.getElementById('editBtnTambahKat').classList.toggle('hidden', katCards.length >= 6);
+  const counterEl = document.getElementById('editCounterKategori');
+  if (counterEl) counterEl.innerText = `${katCards.length}/6 Kategori`;
+  
+  const btnTambah = document.getElementById('editBtnTambahKat');
+  if (btnTambah) btnTambah.classList.toggle('hidden', katCards.length >= 6);
+
   katCards.forEach(card => {
-    card.querySelector('.edit-btn-hapus-kat').classList.toggle('hidden', katCards.length <= 1);
+    const btnHapus = card.querySelector('.edit-btn-hapus-kat');
+    if (btnHapus) btnHapus.classList.toggle('hidden', katCards.length <= 1);
   });
 }
 
@@ -434,7 +430,7 @@ function editTambahBarisMenu(btn) {
       <input type="text" placeholder="Deskripsi" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded-lg text-[10px] text-slate-500 edit-menu-deskripsi">
     </div>
     <input type="number" placeholder="Harga" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-harga self-start">
-    <button type="button" onclick="this.closest('.edit-log-row').remove(); updateEditCounters();" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border self-start">✕</button>
+    <button type="button" onclick="this.closest('.edit-menu-row').remove(); updateEditCounters();" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border self-start">✕</button>
   `;
   menuContainer.appendChild(div);
   updateEditCounters();
