@@ -2,7 +2,7 @@ const GAS_URL = CONFIG.GAS_URL;
 let cacheLapakData = [];
 let cacheJadwalList = [];
 
-// Fungsi Toast Notification halus di pojok kanan bawah
+// Fungsi Toast Notification
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
   if (!container) return;
@@ -166,7 +166,7 @@ async function loadDataAdminJualan() {
       }
     }
 
-    // 2. Render Lapak dengan Checkbox Multiple Assign Jadwal
+    // 2. Render Lapak Mitra
     cacheLapakData = data.jualan || [];
     const containerLapak = document.getElementById('containerLapakAdmin');
     containerLapak.innerHTML = '';
@@ -201,7 +201,7 @@ async function loadDataAdminJualan() {
           <div class="flex justify-between items-start">
             <div>
               <span class="font-bold text-slate-900 text-sm">🛍️ ${l.namaPenjual || 'Mitra'}</span>
-              <span class="block text-[10px] text-slate-500">WA: ${l.whatsapp || '-'}</span>
+              <span class="block text-[10px] text-slate-500">Email: ${l.emailPenjual || l.whatsapp || '-'}</span>
             </div>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isDisetujui ? 'bg-emerald-50 text-emerald-700 border' : 'bg-blue-50 text-blue-700 border'}">${l.status || 'Pending'}</span>
           </div>
@@ -225,6 +225,76 @@ async function loadDataAdminJualan() {
     });
   } catch (e) { 
     console.error('Error loading data:', e); 
+  }
+}
+
+// Fitur Cetak Ringkasan Pesanan (Print / PDF)
+function cetakSummaryOrder() {
+  const containerPesanan = document.getElementById('containerPesananAdmin');
+  if (!containerPesanan || containerPesanan.innerText.includes('Belum ada pesanan')) {
+    return showToast('Tidak ada data pesanan untuk dicetak!', 'error');
+  }
+
+  const printWindow = window.open('', '_blank', 'width=800,height=600');
+  const tgl = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Summary Order Jajanan - Tepak Friendly</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+        h1 { font-size: 18px; margin-bottom: 4px; }
+        p { font-size: 12px; color: #666; margin-top: 0; }
+        .bg-slate-50 { border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-bottom: 12px; page-break-inside: avoid; }
+        .font-extrabold { font-weight: bold; }
+        .text-blue-700 { color: #1d4ed8; }
+        .text-slate-900 { color: #0f172a; }
+        .bg-white { border: 1px solid #eee; padding: 6px 10px; margin-top: 6px; border-radius: 6px; }
+        button, span.px-2 { display: none !important; }
+        @media print {
+          body { padding: 0; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>📋 Rekap Summary Order Jajanan - Tepak Friendly</h1>
+      <p>Tanggal Cetak: ${tgl}</p>
+      <hr style="margin-bottom: 15px; border: 0.5px solid #ccc;"/>
+      ${containerPesanan.innerHTML}
+      <br/>
+      <button onclick="window.print()" style="padding: 10px 20px; font-weight: bold; background: #1d4ed8; color: white; border: none; border-radius: 8px; cursor: pointer;">Print / Simpan PDF</button>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+// Fitur Close Order & Send Email
+async function kirimEmailCloseOrder(btnElement) {
+  if (!confirm('Apakah Anda yakin ingin Close Order dan mengirimkan email rekap pesanan ke semua penjual?')) return;
+
+  const originalText = btnElement.innerText;
+  btnElement.innerText = 'Mengirim Email...';
+  btnElement.disabled = true;
+
+  try {
+    const response = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'close_order_and_send_email' })
+    });
+    const result = await response.json();
+    if (result.status === 'success') {
+      showToast(result.message || 'Email rekap berhasil dikirim ke penjual!');
+    } else {
+      throw new Error(result.message || 'Gagal mengirim email');
+    }
+  } catch (e) {
+    showToast('Gagal kirim email: ' + e.message, 'error');
+  } finally {
+    btnElement.innerText = originalText;
+    btnElement.disabled = false;
   }
 }
 
@@ -331,17 +401,15 @@ function bukaModalEditIndex(arrayIndex) {
   if (!l) return;
   document.getElementById('editRowIndex').value = l.rowIndex;
   document.getElementById('editNamaPenjual').value = l.namaPenjual || '';
-  document.getElementById('editWhatsapp').value = l.whatsapp || '';
+  document.getElementById('editEmailPenjual').value = l.emailPenjual || l.whatsapp || '';
   buildEditFormFromText(l.menuJualan);
   document.getElementById('modalEditLapak').classList.remove('hidden');
 }
 
-// FUNGSI UTAMA PERBAIKAN ERROR rawText.split()
 function buildEditFormFromText(rawText) {
   const container = document.getElementById('editContainerKategori');
   container.innerHTML = '';
 
-  // 1. Garansi rawText dikonversi ke String murni
   const text = (rawText !== null && rawText !== undefined) ? String(rawText) : "";
   const lines = text.split('\n');
   
@@ -453,8 +521,8 @@ function tutupModalEdit() {
 async function simpanEditLapak() {
   const rowIndex = document.getElementById('editRowIndex').value;
   const namaPenjual = document.getElementById('editNamaPenjual').value.trim();
-  const whatsapp = document.getElementById('editWhatsapp').value.trim();
-  if (!namaPenjual || !whatsapp) return showToast('Nama dan WhatsApp wajib diisi!', 'error');
+  const emailPenjual = document.getElementById('editEmailPenjual').value.trim();
+  if (!namaPenjual || !emailPenjual) return showToast('Nama dan Email wajib diisi!', 'error');
 
   let hasilMenuGabung = [];
   const katCards = document.querySelectorAll('#editContainerKategori .edit-kategori-card');
@@ -475,7 +543,7 @@ async function simpanEditLapak() {
   try {
     await fetch(GAS_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'edit_jualan', rowIndex, namaPenjual, whatsapp, menuJualan: hasilMenuGabung.join('\n') })
+      body: JSON.stringify({ action: 'edit_jualan', rowIndex, namaPenjual, emailPenjual, menuJualan: hasilMenuGabung.join('\n') })
     });
     tutupModalEdit();
     refreshDataAdmin();

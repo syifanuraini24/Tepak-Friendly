@@ -65,7 +65,7 @@
     <!-- PANEL UTAMA ADMIN -->
     <div id="sectionDashboard" class="hidden space-y-4">
 
-      <!-- TABEL KELOLA PESANAN MASUK (DIKELOMPOKKAN PER LAPAK) -->
+      <!-- TABEL KELOLA PESANAN MASUK -->
       <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 space-y-3">
         <div class="flex justify-between items-center">
           <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">📋 Daftar Pesanan Jajanan Masuk</h2>
@@ -73,7 +73,20 @@
             class="text-[10px] bg-blue-50 text-blue-700 font-bold px-2 py-0.5 rounded-full border border-blue-100">0
             Pesanan</span>
         </div>
-        <div id="containerPesananAdmin" class="space-y-3 max-h-96 overflow-y-auto">
+
+        <!-- TOMBOL CETAK & CLOSE ORDER EMAIL -->
+        <div class="flex gap-2 pt-1">
+          <button onclick="cetakSummaryOrder()"
+            class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1 shadow-2xs">
+            🖨️ Print Summary Order
+          </button>
+          <button onclick="kirimEmailCloseOrder(this)"
+            class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1 shadow-2xs">
+            📧 Close Order & Kirim Email
+          </button>
+        </div>
+
+        <div id="containerPesananAdmin" class="space-y-3 max-h-96 overflow-y-auto pt-1">
           <div class="text-center text-xs text-slate-400 py-6">Memuat pesanan...</div>
         </div>
       </div>
@@ -102,8 +115,8 @@
           class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
       </div>
       <div>
-        <label class="block text-[11px] font-bold text-slate-600 mb-1">WhatsApp</label>
-        <input type="text" id="editWhatsapp"
+        <label class="block text-[11px] font-bold text-slate-600 mb-1">Email Penjual</label>
+        <input type="email" id="editEmailPenjual" placeholder="contoh@gmail.com"
           class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs">
       </div>
 
@@ -143,7 +156,7 @@
     </div>
   </div>
 
-  <!-- Memanggil file JavaScript secara terpisah -->
+  <!-- Memanggil file JavaScript -->
   <script src="admin-jualan.js"></script>
 </body>
 
