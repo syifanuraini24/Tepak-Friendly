@@ -174,6 +174,7 @@
         const container = document.getElementById('containerJadwalPublik');
         container.innerHTML = '';
 
+        // Menyaring jadwal yang aktif saja (menyembunyikan status Nonaktif)
         const jadwalList = (data.jadwal || []).filter(j => {
           const status = j.status ? j.status.toString().toLowerCase() : 'aktif';
           return !status.includes('nonaktif');
@@ -263,7 +264,7 @@
 
         if (result.status === 'success') {
 
-          // Kirim notifikasi ke Telegram menggunakan fungsi dari telegram.js
+          // Memanggil fungsi kirimTelegram dari telegram.js milik Anda
           if (typeof kirimTelegram === 'function') {
             kirimTelegram(nama, jadwalDipilihInfo, result.totalTagihan);
           }
