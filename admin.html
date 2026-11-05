@@ -100,6 +100,23 @@
     </div>
   </div>
 
+  <!-- Modal Edit Nominal Tagihan -->
+  <div id="modalEditNominal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 space-y-3">
+      <h3 class="font-bold text-sm text-slate-900">Edit Nominal Tagihan</h3>
+      <p class="text-xs text-slate-500" id="editNamaPesertaLabel">-</p>
+      <input type="hidden" id="editRowIndexInput">
+      <div>
+        <label class="block text-[11px] font-bold text-slate-600 mb-1">Nominal Baru (Rp)</label>
+        <input type="number" id="inputNominalBaru" placeholder="Cth: 35000" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="tutupModalEditNominal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+        <button onclick="simpanNominalBaru(this)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Simpan</button>
+      </div>
+    </div>
+  </div>
+
   <script src="config.js"></script>
   <script>
     const GAS_URL = CONFIG.GAS_URL;
@@ -252,9 +269,14 @@
                       <span class="font-bold text-slate-800">${idx + 1}. ${p.nama}</span>
                       <span class="block text-[10px] text-slate-400">${p.email || '-'}</span>
                     </div>
-                    <div class="text-right">
-                      <span class="block font-mono font-semibold text-slate-700">${nominalTagihan}</span>
-                      <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isLunas ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${p.status}</span>
+                    <div class="text-right flex items-center gap-2">
+                      <div>
+                        <span class="block font-mono font-semibold text-slate-700">${nominalTagihan}</span>
+                        <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isLunas ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${p.status}</span>
+                      </div>
+                      <button onclick="bukaModalEditNominal(${p.rowIndex}, '${p.nama}', ${p.tagihan || 0})" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-1.5 rounded-lg border border-slate-200 transition" title="Edit Nominal">
+                        ✏️
+                      </button>
                     </div>
                   </li>`;
               });
@@ -353,6 +375,55 @@
       }
     }
 
+    // Fungsi untuk Modal Edit Nominal
+    function bukaModalEditNominal(rowIndex, nama, currentTagihan) {
+      document.getElementById('editRowIndexInput').value = rowIndex;
+      document.getElementById('editNamaPesertaLabel').innerText = `Peserta: ${nama}`;
+      document.getElementById('inputNominalBaru').value = currentTagihan;
+      document.getElementById('modalEditNominal').classList.remove('hidden');
+    }
+
+    function tutupModalEditNominal() {
+      document.getElementById('modalEditNominal').classList.add('hidden');
+    }
+
+    async function simpanNominalBaru(btnElement) {
+      const rowIndex = document.getElementById('editRowIndexInput').value;
+      const nominalBaru = document.getElementById('inputNominalBaru').value.trim();
+
+      if (!nominalBaru || isNaN(nominalBaru)) {
+        return alert('Masukkan nominal angka yang valid!');
+      }
+
+      btnElement.innerText = 'Menyimpan...';
+      btnElement.disabled = true;
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ 
+            action: 'update_tagihan', 
+            rowIndex: parseInt(rowIndex), 
+            tagihanBaru: parseInt(nominalBaru) 
+          })
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          tutupModalEditNominal();
+          loadDataAdmin();
+        } else {
+          throw new Error(result.message || 'Gagal menyimpan');
+        }
+      } catch (error) {
+        console.error("Gagal edit tagihan:", error);
+        alert('Gagal memperbarui nominal: ' + error.message);
+      } finally {
+        btnElement.innerText = 'Simpan';
+        btnElement.disabled = false;
+      }
+    }
+
     async function tambahJadwalBaru(btn) {
       const id = document.getElementById('addId').value.trim();
       const info = document.getElementById('addInfo').value.trim();
@@ -425,20 +496,7 @@
                 }
               }, 300);
 
-              const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
-              const elLunas = document.getElementById('totalDanaLunas');
-              const elPending = document.getElementById('totalDanaPending');
-              
-              let currentLunas = parseInt(elLunas.innerText.replace(/[^0-9]/g, '')) || 0;
-              let currentPending = parseInt(elPending.innerText.replace(/[^0-9]/g, '')) || 0;
-              
-              currentLunas += nominal;
-              currentPending = Math.max(0, currentPending - nominal);
-              
-              elLunas.innerText = formatRp.format(currentLunas);
-              elPending.innerText = formatRp.format(currentPending);
-
-              loadDataAdminSilent();
+              loadDataAdmin();
             } else {
               throw new Error(result.message);
             }
@@ -460,7 +518,6 @@
         "bg-rose-600 hover:bg-rose-700",
         async () => {
           const liElement = btnElement.closest('li');
-          const nominal = parseInt(liElement.getAttribute('data-nominal') || 0);
           
           btnElement.innerText = 'Menghapus...';
           btnElement.disabled = true;
@@ -483,13 +540,7 @@
                 }
               }, 300);
 
-              const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
-              const elPending = document.getElementById('totalDanaPending');
-              let currentPending = parseInt(elPending.innerText.replace(/[^0-9]/g, '')) || 0;
-              currentPending = Math.max(0, currentPending - nominal);
-              elPending.innerText = formatRp.format(currentPending);
-
-              loadDataAdminSilent();
+              loadDataAdmin();
             } else {
               throw new Error(result.message);
             }
@@ -501,76 +552,6 @@
           }
         }
       );
-    }
-
-    async function loadDataAdminSilent() {
-      try {
-        const response = await fetch(GAS_URL);
-        const data = await response.json();
-        const summaryJadwalDiv = document.getElementById('summaryJadwalList');
-        summaryJadwalDiv.innerHTML = '';
-        
-        const jadwalList = data.jadwal || [];
-        const pemainList = data.pemain || [];
-
-        jadwalList.forEach(j => {
-          const pesertaJadwal = pemainList.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
-          const lunasCount = pesertaJadwal.filter(p => p.status.includes('Lunas')).length;
-          const pendingCount = pesertaJadwal.filter(p => p.status.includes('Menunggu')).length;
-          const isNonaktif = j.status && j.status.toString().toLowerCase().includes('nonaktif');
-
-          let listNamaHtml = '';
-          if (pesertaJadwal.length === 0) {
-            listNamaHtml = '<li class="text-slate-400 italic text-[11px] py-2 text-center">Belum ada peserta terdaftar.</li>';
-          } else {
-            pesertaJadwal.forEach((p, idx) => {
-              const isLunas = p.status.includes('Lunas');
-              listNamaHtml += `
-                <li class="py-1.5 px-2.5 border-b border-slate-100 last:border-b-0 flex justify-between items-center text-xs">
-                  <div>
-                    <span class="font-bold text-slate-800">${idx + 1}. ${p.nama}</span>
-                    <span class="block text-[10px] text-slate-400">${p.email || '-'}</span>
-                  </div>
-                  <div class="text-right">
-                    <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isLunas ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${p.status}</span>
-                  </div>
-                </li>`;
-            });
-          }
-
-          summaryJadwalDiv.innerHTML += `
-            <div class="border ${isNonaktif ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200 bg-white'} rounded-2xl p-4 shadow-xs space-y-3">
-              <div class="flex justify-between items-start border-b border-slate-100 pb-2">
-                <div>
-                  <span class="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-md border">${j.id}</span>
-                  <h3 class="font-bold text-sm text-slate-900 mt-1">${j.info} ${isNonaktif ? '<span class="text-rose-600 font-bold text-xs">(Nonaktif)</span>' : ''}</h3>
-                </div>
-                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                  Kuota: ${pesertaJadwal.length}/${j.kuota}
-                </span>
-              </div>
-              
-              <div class="text-xs text-slate-500 flex justify-between bg-slate-50 p-2 rounded-xl border border-slate-100">
-                <span>⏰ ${j.jam}</span>
-                <span>HTM Dasar: Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</span>
-              </div>
-
-              <div class="rounded-xl border border-slate-200 overflow-hidden">
-                <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200">Daftar Peserta:</div>
-                <ul class="divide-y divide-slate-100 max-h-40 overflow-y-auto">
-                  ${listNamaHtml}
-                </ul>
-              </div>
-
-              <div class="flex justify-between items-center pt-1 text-[11px] text-slate-600 border-t border-slate-100">
-                <span>🟢 Lunas: <strong>${lunasCount}</strong> peserta</span>
-                <span>🟡 Pending: <strong>${pendingCount}</strong> peserta</span>
-              </div>
-            </div>`;
-        });
-      } catch (e) {
-        console.error("Gagal sinkronisasi senyap:", e);
-      }
     }
   </script>
 </body>
