@@ -264,7 +264,7 @@
                 const isLunas = p.status.includes('Lunas');
                 const nominalTagihan = formatRp.format(p.tagihan || 0);
                 listNamaHtml += `
-                  <li class="py-1.5 px-2.5 border-b border-slate-100 last:border-b-0 flex justify-between items-center text-xs">
+                  <li class="py-1.5 px-2.5 border-b border-slate-100 last:border-b-0 flex justify-between items-center text-xs" data-row="${p.rowIndex}">
                     <div>
                       <span class="font-bold text-slate-800">${idx + 1}. ${p.nama}</span>
                       <span class="block text-[10px] text-slate-400">${p.email || '-'}</span>
@@ -274,9 +274,14 @@
                         <span class="block font-mono font-semibold text-slate-700">${nominalTagihan}</span>
                         <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isLunas ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${p.status}</span>
                       </div>
-                      <button onclick="bukaModalEditNominal(${p.rowIndex}, '${p.nama}', ${p.tagihan || 0})" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-1.5 rounded-lg border border-slate-200 transition" title="Edit Nominal">
-                        ✏️
-                      </button>
+                      <div class="flex gap-1">
+                        <button onclick="bukaModalEditNominal(${p.rowIndex}, '${p.nama}', ${p.tagihan || 0})" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-1.5 rounded-lg border border-slate-200 transition" title="Edit Nominal">
+                          ✏️
+                        </button>
+                        <button onclick="hapusPemainDariRekap(${p.rowIndex}, this)" class="bg-rose-50 hover:bg-rose-100 text-rose-600 p-1.5 rounded-lg border border-rose-200 transition" title="Hapus Peserta">
+                          🗑️
+                        </button>
+                      </div>
                     </div>
                   </li>`;
               });
@@ -473,7 +478,6 @@
         "bg-emerald-600 hover:bg-emerald-700",
         async () => {
           const liElement = btnElement.closest('li');
-          const nominal = parseInt(liElement.getAttribute('data-nominal') || 0);
           
           btnElement.innerText = 'Memproses...';
           btnElement.disabled = true;
@@ -486,16 +490,6 @@
             const result = await response.json();
             
             if(result.status === 'updated' || result.status === 'success') {
-              liElement.style.transition = 'opacity 0.3s ease';
-              liElement.style.opacity = '0';
-              setTimeout(() => {
-                liElement.remove();
-                const listMenunggu = document.getElementById('listMenunggu');
-                if (listMenunggu.children.length === 0) {
-                  listMenunggu.innerHTML = '<li class="text-center text-emerald-700 text-xs font-bold p-4 bg-emerald-50 rounded-2xl border border-emerald-100">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
-                }
-              }, 300);
-
               loadDataAdmin();
             } else {
               throw new Error(result.message);
@@ -504,7 +498,6 @@
             alert('Gagal mengupdate status: ' + error.message);
             btnElement.innerText = 'ACC Lunas';
             btnElement.disabled = false;
-            liElement.style.opacity = '1';
           }
         }
       );
@@ -517,8 +510,6 @@
         "Ya, Hapus",
         "bg-rose-600 hover:bg-rose-700",
         async () => {
-          const liElement = btnElement.closest('li');
-          
           btnElement.innerText = 'Menghapus...';
           btnElement.disabled = true;
 
@@ -530,16 +521,6 @@
             const result = await response.json();
             
             if(result.status === 'deleted' || result.status === 'success') {
-              liElement.style.transition = 'opacity 0.3s ease';
-              liElement.style.opacity = '0';
-              setTimeout(() => {
-                liElement.remove();
-                const listMenunggu = document.getElementById('listMenunggu');
-                if (listMenunggu.children.length === 0) {
-                  listMenunggu.innerHTML = '<li class="text-center text-emerald-700 text-xs font-bold p-4 bg-emerald-50 rounded-2xl border border-emerald-100">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
-                }
-              }, 300);
-
               loadDataAdmin();
             } else {
               throw new Error(result.message);
@@ -548,10 +529,18 @@
             alert('Gagal menghapus data: ' + error.message);
             btnElement.innerText = 'Hapus';
             btnElement.disabled = false;
-            liElement.style.opacity = '1';
           }
         }
       );
+    }
+
+    // Fungsi khusus hapus peserta langsung dari rekap
+    function hapusPemainDariRekap(rowIndex, btnElement) {
+      hapusPemain(rowIndex, {
+        closest: () => btnElement.closest('li'),
+        innerText: '',
+        disabled: false
+      });
     }
   </script>
 </body>
