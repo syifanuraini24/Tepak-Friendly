@@ -4,6 +4,13 @@ let masterJualanList = [];
 
 async function loadAdminJualanData() {
   const container = document.getElementById('containerAdminJualan');
+  
+  // Guard check agar tidak melempar error null saat DOM belum siap
+  if (!container) {
+    console.warn("Elemen #containerAdminJualan belum dimuat di DOM.");
+    return;
+  }
+
   container.innerHTML = '<div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat data pendaftaran mitra...</div>';
 
   try {
@@ -23,18 +30,24 @@ async function loadAdminJualanData() {
       }
     });
 
-    document.getElementById('statPending').innerText = countPending;
-    document.getElementById('statApproved').innerText = countApproved;
+    const elPending = document.getElementById('statPending');
+    const elApproved = document.getElementById('statApproved');
+    if (elPending) elPending.innerText = countPending;
+    if (elApproved) elApproved.innerText = countApproved;
 
     renderAdminJualanList();
   } catch (err) {
     console.error(err);
-    container.innerHTML = '<div class="text-center text-rose-500 text-xs py-8 bg-white rounded-2xl border border-rose-200">Gagal memuat data dari server.</div>';
+    if (container) {
+      container.innerHTML = '<div class="text-center text-rose-500 text-xs py-8 bg-white rounded-2xl border border-rose-200">Gagal memuat data dari server.</div>';
+    }
   }
 }
 
 function renderAdminJualanList() {
   const container = document.getElementById('containerAdminJualan');
+  if (!container) return;
+
   container.innerHTML = '';
 
   if (masterJualanList.length === 0) {
@@ -48,7 +61,7 @@ function renderAdminJualanList() {
       ? '<span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">Disetujui 🟢</span>'
       : '<span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-200">Pending 🟡</span>';
 
-    // Parse Jadwal ID Terpilih (Support Array / String Gabungan Koma)
+    // Parse Jadwal ID Terpilih (Mendukung gabungan koma/array)
     let selectedJadwalIds = [];
     if (j.jadwalId && j.jadwalId !== 'PENDING') {
       selectedJadwalIds = j.jadwalId.toString().split(',').map(id => id.trim());
@@ -93,7 +106,7 @@ function renderAdminJualanList() {
           <div class="space-y-1.5 max-h-40 overflow-y-auto">
             ${checkboxJadwalHtml}
           </div>
-          <button onclick="simpanPilihanJadwal(${j.rowIndex})" class="w-full mt-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-xl transition shadow-xs">
+          <button onclick="simpanPilihanJadwal(${j.rowIndex}, event)" class="w-full mt-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 rounded-xl transition shadow-xs">
             💾 Simpan Pilihan Jadwal
           </button>
         </div>
@@ -123,7 +136,7 @@ function renderAdminJualanList() {
   });
 }
 
-async function simpanPilihanJadwal(rowIndex) {
+async function simpanPilihanJadwal(rowIndex, evt) {
   const checkboxes = document.querySelectorAll(`input[name="jadwal_check_${rowIndex}"]:checked`);
   
   if (checkboxes.length === 0) {
@@ -138,9 +151,11 @@ async function simpanPilihanJadwal(rowIndex) {
     selectedInfos.push(cb.getAttribute('data-info'));
   });
 
-  const btn = event.target;
-  btn.innerText = 'Menyimpan...';
-  btn.disabled = true;
+  const btn = evt ? evt.target : null;
+  if (btn) {
+    btn.innerText = 'Menyimpan...';
+    btn.disabled = true;
+  }
 
   try {
     const response = await fetch(GAS_URL, {
@@ -163,8 +178,10 @@ async function simpanPilihanJadwal(rowIndex) {
   } catch (err) {
     alert('Gagal terhubung ke server.');
   } finally {
-    btn.innerText = '💾 Simpan Pilihan Jadwal';
-    btn.disabled = false;
+    if (btn) {
+      btn.innerText = '💾 Simpan Pilihan Jadwal';
+      btn.disabled = false;
+    }
   }
 }
 
