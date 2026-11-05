@@ -152,7 +152,7 @@ async function loadDataAdminJualan() {
       }
     }
 
-    // 2. Render Lapak dengan Checkbox Multiple Assign Jadwal
+    // 2. Render Lapak dengan UI yang Clean & UX Friendly
     cacheLapakData = data.jualan || [];
     const containerLapak = document.getElementById('containerLapakAdmin');
     containerLapak.innerHTML = '';
@@ -173,37 +173,49 @@ async function loadDataAdminJualan() {
         cacheJadwalList.forEach(j => {
           const isChecked = assignedIds.includes(j.id) ? 'checked' : '';
           checkboxHtml += `
-            <label class="flex items-center gap-2 text-xs py-1 px-2 hover:bg-slate-50 rounded-lg cursor-pointer">
-              <input type="checkbox" value="${j.id}" ${isChecked} class="checkbox-jadwal-${l.rowIndex} rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5">
+            <label class="flex items-center gap-2 text-xs py-1.5 px-2 hover:bg-slate-50 rounded-lg cursor-pointer">
+              <input type="checkbox" value="${j.id}" ${isChecked} class="checkbox-jadwal-${l.rowIndex} rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4">
               <span class="text-slate-700 font-medium"><strong>[${j.id}]</strong> ${j.info} (${j.jam})</span>
             </label>`;
         });
       }
 
       containerLapak.innerHTML += `
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2.5">
-          <div class="flex justify-between items-start">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 text-xs space-y-3 shadow-2xs">
+          <!-- Header Lapak -->
+          <div class="flex justify-between items-start border-b border-slate-100 pb-2.5">
             <div>
-              <span class="font-bold text-slate-900 text-sm">🛍️ ${l.namaPenjual}</span>
-              <span class="block text-[10px] text-slate-500">Email: ${l.emailPenjual || 'Belum diatur'}</span>
+              <span class="font-extrabold text-slate-900 text-sm">🛍️ ${l.namaPenjual}</span>
+              <span class="block text-[11px] text-slate-500 mt-0.5">📧 ${l.emailPenjual || 'Belum ada email'}</span>
             </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isDisetujui ? 'bg-emerald-50 text-emerald-700 border' : 'bg-blue-50 text-blue-700 border'}">${l.status || 'Pending'}</span>
+            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${isDisetujui ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-blue-50 text-blue-700 border border-blue-200'}">${l.status || 'Pending'}</span>
           </div>
 
-          <div class="space-y-1.5 bg-white p-2.5 rounded-xl border border-slate-200">
+          <!-- Pilihan Checkbox Multiple Jadwal -->
+          <div class="space-y-1.5 bg-slate-50/70 p-3 rounded-xl border border-slate-200/70">
             <span class="block text-[10px] font-bold text-slate-600 uppercase tracking-wide">Assign ke Jadwal Mabar:</span>
-            <div class="max-h-36 overflow-y-auto space-y-0.5 pr-1 border border-slate-100 rounded-lg p-1 bg-slate-50/50">
+            <div class="max-h-36 overflow-y-auto space-y-1 pr-1 border border-slate-200/60 rounded-lg p-1.5 bg-white">
               ${checkboxHtml}
             </div>
-            <button onclick="simpanAssignMultipleJadwal(${l.rowIndex}, this)" class="w-full mt-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] py-2 rounded-lg transition shadow-2xs">Simpan Pilihan Jadwal</button>
+            <button onclick="simpanAssignMultipleJadwal(${l.rowIndex}, this)" class="w-full mt-1.5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] py-2 rounded-xl transition shadow-2xs">Simpan Pilihan Jadwal</button>
           </div>
 
-          <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border whitespace-pre-line font-mono max-h-28 overflow-y-auto">${l.menuJualan}</div>
+          <!-- Menu Ringkas / Collapsible Preview -->
+          <details class="group bg-slate-50 p-2.5 rounded-xl border border-slate-200/60">
+            <summary class="font-bold text-slate-700 cursor-pointer text-[11px] flex justify-items-center justify-between">
+              <span>📜 Lihat Rincian Menu Jualan</span>
+              <span class="text-blue-600 font-normal">▼</span>
+            </summary>
+            <div class="mt-2 text-[11px] text-slate-600 bg-white p-2.5 rounded-lg border border-slate-200 whitespace-pre-line font-mono max-h-36 overflow-y-auto">
+              ${l.menuJualan || 'Belum ada menu.'}
+            </div>
+          </details>
           
-          <div class="flex gap-2 pt-1 border-t border-slate-200">
-            ${!isDisetujui ? `<button onclick="aksiAccLapak(${l.rowIndex}, this)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-2 rounded-lg transition">ACC Mitra 🟢</button>` : ''}
-            <button onclick="bukaModalEditIndex(${idx})" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] py-2 rounded-lg">Edit Menu/Email</button>
-            <button onclick="aksiKonfirmasiJualan(${l.rowIndex})" class="bg-rose-50 text-rose-600 border font-bold text-[10px] px-3 py-2 rounded-lg">Hapus</button>
+          <!-- Tombol Aksi -->
+          <div class="flex gap-2 pt-1 border-t border-slate-100">
+            ${!isDisetujui ? `<button onclick="aksiAccLapak(${l.rowIndex}, this)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] py-2.5 rounded-xl transition shadow-xs">ACC Mitra 🟢</button>` : ''}
+            <button onclick="bukaModalEditIndex(${idx})" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] py-2.5 rounded-xl transition">Edit Menu/Email</button>
+            <button onclick="aksiKonfirmasiJualan(${l.rowIndex})" class="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-[11px] px-3.5 py-2.5 rounded-xl transition">Hapus</button>
           </div>
         </div>`;
     });
