@@ -1,383 +1,207 @@
-const GAS_URL = CONFIG.GAS_URL;
-let lapakDipilih = null, jadwalDipilih = null, infoJadwalDipilih = null;
-let menuParsedGlobal = [];
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lapak UMKM & Pesan Jajanan - Tepak Friendly</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="config.js"></script>
+  <script src="telegram.js"></script>
+</head>
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
 
-function gantiTab(tab) {
-  if (tab === 'pesan') {
-    document.getElementById('sectionPesan').classList.remove('hidden');
-    document.getElementById('sectionDaftar').classList.add('hidden');
-    document.getElementById('tabPesan').className = 'flex-1 bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition';
-    document.getElementById('tabDaftar').className = 'flex-1 bg-transparent text-slate-600 font-bold text-xs py-2.5 rounded-xl transition';
-  } else {
-    document.getElementById('sectionPesan').classList.add('hidden');
-    document.getElementById('sectionDaftar').classList.remove('hidden');
-    document.getElementById('tabDaftar').className = 'flex-1 bg-orange-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition';
-    document.getElementById('tabPesan').className = 'flex-1 bg-transparent text-slate-600 font-bold text-xs py-2.5 rounded-xl transition';
-  }
-}
-
-function updateCounters() {
-  const katCards = document.querySelectorAll('.kategori-card');
-  document.getElementById('counterKategori').innerText = `${katCards.length}/6 Kategori`;
-  if (katCards.length >= 6) {
-    document.getElementById('btnTambahKat').classList.add('hidden');
-  } else {
-    document.getElementById('btnTambahKat').classList.remove('hidden');
-  }
-  katCards.forEach(card => {
-    const btnHapusKat = card.querySelector('.btn-hapus-kat');
-    if (katCards.length > 1) btnHapusKat.classList.remove('hidden');
-    else btnHapusKat.classList.add('hidden');
-  });
-}
-
-function tambahKategori() {
-  const container = document.getElementById('containerKategori');
-  if (container.querySelectorAll('.kategori-card').length >= 6) return alert('Maksimal 6 kategori!');
-
-  const div = document.createElement('div');
-  div.className = 'kategori-card bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2';
-  div.innerHTML = `
-    <div class="flex gap-2 items-center">
-      <input type="text" placeholder="Nama Kategori" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl text-xs font-bold text-blue-700 kategori-nama">
-      <button type="button" onclick="hapusKategori(this)" class="bg-rose-50 text-rose-600 font-bold text-xs p-2.5 rounded-xl border border-rose-200 btn-hapus-kat">✕</button>
-    </div>
-    <div class="space-y-2 container-menu-item pl-2 border-l-2 border-blue-200">
-      <div class="flex gap-2 menu-row items-center">
-        <div class="w-3/5 space-y-1">
-          <input type="text" placeholder="Nama Menu" class="w-full p-2 border border-slate-200 bg-white rounded-lg text-xs menu-nama">
-          <input type="text" placeholder="Deskripsi singkat" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded-lg text-[10px] text-slate-500 menu-deskripsi">
+  <!-- HEADER -->
+  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
+    <div class="max-w-md mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2.5">
+        <img src="logo.png" alt="Logo Tepak Friendly" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
+        <div>
+          <h1 class="text-sm font-extrabold tracking-tight text-slate-900 leading-tight">Lapak UMKM</h1>
+          <p class="text-[9px] text-slate-500 font-medium">Tepak Friendly Jajanan</p>
         </div>
-        <input type="number" placeholder="Harga (Rp)" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-harga self-start">
-        <button type="button" onclick="hapusMenuRow(this)" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border border-rose-200 self-start">✕</button>
+      </div>
+      <a href="index" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1">
+        <span>←</span> Mabar
+      </a>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
+    
+    <!-- NAVIGATION TABS -->
+    <div class="flex gap-2 bg-white p-1 rounded-2xl border border-slate-200 shadow-xs">
+      <button onclick="gantiTab('pesan')" id="tabPesan" class="flex-1 bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition">🛍️ Lihat Lapak & Pesan</button>
+      <button onclick="gantiTab('daftar')" id="tabDaftar" class="flex-1 bg-transparent text-slate-600 font-bold text-xs py-2.5 rounded-xl transition">➕ Daftar Mitra</button>
+    </div>
+    
+    <!-- SECTION LIHAT LAPAK -->
+    <div id="sectionPesan" class="space-y-3">
+      <div class="flex justify-between items-center px-1">
+        <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">Daftar Lapak UMKM Aktif</h2>
+        <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          LIVE ORDER
+        </span>
+      </div>
+      <div id="containerLapakPublik" class="space-y-3.5">
+        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat data lapak...</div>
       </div>
     </div>
-    <button type="button" onclick="tambahBarisMenu(this)" class="w-full bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-lg transition border border-slate-200 shadow-2xs">
-      + Tambah Menu di Kategori Ini
-    </button>
-  `;
-  container.appendChild(div);
-  updateCounters();
-}
 
-function hapusKategori(btn) {
-  btn.closest('.kategori-card').remove();
-  updateCounters();
-}
+    <!-- SECTION PENDAFTARAN MITRA -->
+    <div id="sectionDaftar" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-4">
+      <div>
+        <h2 class="font-bold text-sm text-slate-900 mb-1">Form Pendaftaran Mitra UMKM</h2>
+        <p class="text-[11px] text-slate-500">Atur kategori dan menu jualanmu (Maks. 6 Kategori & Total 30 Menu).</p>
+      </div>
+      
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Nama Brand / Penjual</label>
+          <input type="text" id="namaPenjual" placeholder="Cth: Es Teh & Snack Mantul" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">Nomor WhatsApp Aktif</label>
+          <input type="text" id="whatsappPenjual" placeholder="Cth: 081234567890" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
+        </div>
+      </div>
 
-function tambahBarisMenu(btn) {
-  const containerCard = btn.closest('.kategori-card');
-  const menuContainer = containerCard.querySelector('.container-menu-item');
-  
-  let totalMenu = 0;
-  document.querySelectorAll('.menu-row').forEach(() => totalMenu++);
-  if (totalMenu >= 30) return alert('Maksimal total 30 menu!');
+      <div class="space-y-3 pt-2 border-t border-slate-100">
+        <div class="flex justify-between items-center">
+          <label class="text-xs font-bold text-slate-800">📁 Kategori & Menu Jualan</label>
+          <span id="counterKategori" class="text-[10px] text-slate-400 font-semibold">1/6 Kategori</span>
+        </div>
 
-  const div = document.createElement('div');
-  div.className = 'flex gap-2 menu-row items-center';
-  div.innerHTML = `
-    <div class="w-3/5 space-y-1">
-      <input type="text" placeholder="Nama Menu" class="w-full p-2 border border-slate-200 bg-white rounded-lg text-xs menu-nama">
-      <input type="text" placeholder="Deskripsi singkat" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded-lg text-[10px] text-slate-500 menu-deskripsi">
-    </div>
-    <input type="number" placeholder="Harga (Rp)" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-harga self-start">
-    <button type="button" onclick="hapusMenuRow(this)" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border border-rose-200 self-start">✕</button>
-  `;
-  menuContainer.appendChild(div);
-  updateCounters();
-}
-
-function hapusMenuRow(btn) {
-  const menuRow = btn.closest('.menu-row');
-  const containerCard = menuRow.closest('.kategori-card');
-  if (containerCard.querySelectorAll('.menu-row').length <= 1) return alert('Minimal 1 menu per kategori.');
-  menuRow.remove();
-  updateCounters();
-}
-
-async function loadDataJualanPage() {
-  try {
-    const response = await fetch(GAS_URL);
-    const data = await response.json();
-    const container = document.getElementById('containerLapakPublik');
-    container.innerHTML = '';
-    
-    const lapakDisetujui = (data.jualan || []).filter(l => l.status && l.status.toString().trim().toLowerCase().includes('disetujui'));
-
-    if(lapakDisetujui.length === 0) {
-      container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada lapak UMKM yang aktif saat ini.</div>';
-      return;
-    }
-
-    const semuaPesanan = data.pesanan || [];
-
-    lapakDisetujui.forEach(l => {
-      const pesananLapak = semuaPesanan.filter(p => p.namaLapak && p.namaLapak.trim().toLowerCase() === l.namaPenjual.trim().toLowerCase());
-
-      let listPesananHtml = '';
-      if (pesananLapak.length === 0) {
-        listPesananHtml = '<div class="text-[11px] text-slate-400 italic py-1 text-center">Belum ada pesanan di lapak ini.</div>';
-      } else {
-        pesananLapak.forEach((p, idx) => {
-          const statusBadge = p.status && p.status.includes('Lunas') 
-            ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>' 
-            : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
-          
-          listPesananHtml += `
-            <li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
-              <div>
-                <span class="font-bold text-slate-800">${idx + 1}. ${p.namaPemesan}</span>
-                <span class="block text-[10px] text-slate-500 font-mono">${p.detailPesanan}</span>
+        <div id="containerKategori" class="space-y-3">
+          <div class="kategori-card bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
+            <div class="flex gap-2 items-center">
+              <input type="text" placeholder="Nama Kategori (Cth: Minuman)" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl text-xs font-bold text-blue-700 kategori-nama">
+              <button type="button" onclick="hapusKategori(this)" class="bg-rose-50 text-rose-600 font-bold text-xs p-2.5 rounded-xl border border-rose-200 hidden btn-hapus-kat">✕</button>
+            </div>
+            
+            <div class="space-y-2 container-menu-item pl-2 border-l-2 border-blue-200">
+              <div class="flex gap-2 menu-row items-center">
+                <div class="w-3/5 space-y-1">
+                  <input type="text" placeholder="Nama Menu" class="w-full p-2 border border-slate-200 bg-white rounded-lg text-xs menu-nama">
+                  <input type="text" placeholder="Deskripsi singkat" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded-lg text-[10px] text-slate-500 menu-deskripsi">
+                </div>
+                <input type="number" placeholder="Harga (Rp)" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-harga self-start">
+                <button type="button" onclick="hapusMenuRow(this)" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border border-rose-200 self-start">✕</button>
               </div>
-              <div>${statusBadge}</div>
-            </li>`;
-        });
-      }
-
-      container.innerHTML += `
-        <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
-          <div>
-            <div class="flex justify-between items-start">
-              <h3 class="font-bold text-sm text-slate-900">🛍️ ${l.namaPenjual}</h3>
-              <span class="text-[10px] bg-blue-50 text-blue-700 font-bold px-2.5 py-0.5 rounded-full border border-blue-100">📍 ${l.jadwalId || 'Umum'}</span>
             </div>
-            <p class="text-[11px] text-slate-500 mt-0.5">Jadwal: ${l.jadwalInfo || 'Menunggu Penugasan Admin'}</p>
-            <div class="mt-2 text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100 whitespace-pre-line font-mono"><strong>Menu Tersedia:</strong><br>${l.menuJualan}</div>
-          </div>
 
-          <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-            <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center">
-              <span>📋 Daftar Pesanan Masuk</span>
-              <span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">${pesananLapak.length} Pesanan</span>
-            </div>
-            <ul class="divide-y divide-slate-100 max-h-36 overflow-y-auto p-1.5 space-y-1">
-              ${listPesananHtml}
-            </ul>
-          </div>
-
-          <div class="pt-2 border-t border-slate-100 flex justify-between items-center">
-            <span class="text-[11px] text-slate-400">WA: ${l.whatsapp}</span>
-            <button onclick="bukaModalPesan('${l.namaPenjual}', '${l.jadwalId || 'UMUM'}', '${l.jadwalInfo || 'Mitra UMKM'}', \`${encodeURIComponent(l.menuJualan)}\`)" class="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-xs">
-              🛍️ Pesan Menu
+            <button type="button" onclick="tambahBarisMenu(this)" class="w-full bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-lg transition border border-slate-200 shadow-2xs">
+              + Tambah Menu di Kategori Ini
             </button>
           </div>
-        </div>`;
-    });
-  } catch (e) { console.error(e); }
-}
+        </div>
 
-function parseMenuText(rawMenuText) {
-  const lines = rawMenuText.split('\n');
-  let menus = [];
-  let currentKategori = "Menu Utama";
-  let globalIdx = 0;
-  let lastMenuObj = null;
+        <button type="button" onclick="tambahKategori()" id="btnTambahKat" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition shadow-xs">
+          + Tambah Kategori Lain (Maks. 6)
+        </button>
+      </div>
 
-  lines.forEach((line) => {
-    let trimLine = line.trim();
-    if (!trimLine) return;
+      <button onclick="daftarJualan()" id="btnSubmitJualan" class="w-full mt-4 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl transition shadow-md shadow-orange-200">
+        Kirim Pendaftaran Mitra
+      </button>
+    </div>
 
-    if (trimLine.startsWith('📁')) {
-      currentKategori = trimLine.replace('📁', '').trim();
-      lastMenuObj = null;
-      return;
-    }
-
-    if (trimLine.startsWith('└')) {
-      if (lastMenuObj) lastMenuObj.deskripsi = trimLine.replace('└', '').trim();
-      return;
-    }
-
-    let cleanLine = trimLine.replace(/^[•\-\*]\s*/, '').trim();
-    let harga = 0, namaMenu = cleanLine;
-    const matchRp = cleanLine.match(/\(Rp\s*([\d\.]+)\)/i) || cleanLine.match(/Rp\.?\s*([\d\.]+)/i);
-    if (matchRp) {
-      harga = parseInt(matchRp[1].replace(/\./g, '')) || 0;
-      namaMenu = cleanLine.replace(matchRp[0], '').trim();
-    }
-    
-    lastMenuObj = { id: globalIdx++, kategori: currentKategori, nama: namaMenu, harga: harga, deskripsi: '', qty: 0 };
-    menus.push(lastMenuObj);
-  });
-  return menus;
-}
-
-function bukaModalPesan(namaLapak, jId, jInfo, menuEncoded) {
-  lapakDipilih = namaLapak; jadwalDipilih = jId; infoJadwalDipilih = jInfo;
-  document.getElementById('modalLapakTitle').innerText = `Pesan ke: ${namaLapak}`;
-  document.getElementById('pesanNama').value = '';
-  document.getElementById('pesanNote').value = '';
-
-  menuParsedGlobal = parseMenuText(decodeURIComponent(menuEncoded));
-  renderListMenuInteraktif();
-  document.getElementById('modalPesan').classList.remove('hidden');
-}
-
-function renderListMenuInteraktif() {
-  const container = document.getElementById('containerMenuInteraktif');
-  container.innerHTML = '';
-  if (menuParsedGlobal.length === 0) {
-    container.innerHTML = '<div class="text-xs text-slate-400 text-center py-2">Tidak ada menu tersedia.</div>';
-    return;
-  }
-
-  let grouped = {};
-  menuParsedGlobal.forEach(m => {
-    if (!grouped[m.kategori]) grouped[m.kategori] = [];
-    grouped[m.kategori].push(m);
-  });
-
-  for (let kat in grouped) {
-    let katHtml = `<div class="space-y-1.5"><div class="text-[11px] font-extrabold text-blue-700 bg-blue-50 px-2 py-1 rounded-lg">📁 ${kat}</div>`;
-    grouped[kat].forEach(m => {
-      const formatHrg = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(m.harga);
-      katHtml += `
-        <div class="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-200 text-xs ml-2">
-          <div class="pr-2">
-            <div class="font-bold text-slate-800">${m.nama}</div>
-            ${m.deskripsi ? `<div class="text-[10px] text-slate-400 italic">${m.deskripsi}</div>` : ''}
-            <div class="text-[10px] text-blue-600 font-semibold mt-0.5">${formatHrg}</div>
+    <!-- MODAL PESAN INTERAKTIF -->
+    <div id="modalPesan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-3 overflow-y-auto">
+      <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3 border border-slate-100 my-auto">
+        <h3 id="modalLapakTitle" class="font-bold text-sm text-slate-900 mb-1">Pesan Makanan</h3>
+        <p class="text-[11px] text-slate-500">Pilih menu dan tulis catatan khusus jika ada.</p>
+        
+        <div class="space-y-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemesan</label>
+            <input type="text" id="pesanNama" placeholder="Nama kamu..." class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50">
           </div>
-          <div class="flex items-center gap-2">
-            <button type="button" onclick="ubahQty(${m.id}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 rounded-md font-bold text-slate-700 flex items-center justify-center">-</button>
-            <span id="qty_${m.id}" class="font-bold w-4 text-center">${m.qty}</span>
-            <button type="button" onclick="ubahQty(${m.id}, 1)" class="w-6 h-6 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-md font-bold flex items-center justify-center">+</button>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Daftar Menu</label>
+            <div id="containerMenuInteraktif" class="space-y-3 bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-48 overflow-y-auto"></div>
           </div>
-        </div>`;
-    });
-    katHtml += `</div>`;
-    container.innerHTML += katHtml;
-  }
-  hitungTotalOtomatis();
-}
 
-function ubahQty(id, delta) {
-  const item = menuParsedGlobal.find(m => m.id === id);
-  if (item) {
-    item.qty = Math.max(0, item.qty + delta);
-    document.getElementById(`qty_${id}`).innerText = item.qty;
-    hitungTotalOtomatis();
-  }
-}
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Catatan Pesanan / Note (Opsional)</label>
+            <input type="text" id="pesanNote" placeholder="Cth: Jangan pakai es, kuah pisah..." class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
+          </div>
 
-function hitungTotalOtomatis() {
-  let total = 0;
-  menuParsedGlobal.forEach(m => { total += (m.harga * m.qty); });
-  const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(total);
-  document.getElementById('labelTotalHarga').innerText = formatRp;
-  document.getElementById('labelTotalHarga').setAttribute('data-raw', total);
-}
+          <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex justify-between items-center">
+            <span class="text-xs font-bold text-blue-900">Total Harga:</span>
+            <span id="labelTotalHarga" class="text-sm font-extrabold text-blue-700" data-raw="0">Rp 0</span>
+          </div>
+        </div>
+        
+        <div class="flex gap-2 pt-2">
+          <button onclick="tutupModalPesan()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+          <button onclick="kirimPesanan()" id="btnKirimPesan" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Pesan & Bayar</button>
+        </div>
+      </div>
+    </div>
 
-function tutupModalPesan() { 
-  document.getElementById('modalPesan').classList.add('hidden'); 
-}
+    <!-- MODAL INVOICE PESANAN (FIXED: RESPONSIF HP & KODE RAPI) -->
+    <div id="modalInvoicePesanan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-3 overflow-y-auto">
+      <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 my-auto text-center space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
+        
+        <!-- Area Resi yang di-download -->
+        <div id="areaStrukResi" class="space-y-3.5 bg-white p-1">
+          <!-- Header Invoice -->
+          <div class="border-b border-slate-100 pb-3 space-y-1">
+            <span class="inline-block bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wider">Invoice Pesanan</span>
+            <h3 class="font-extrabold text-slate-900 text-base mt-1" id="invNamaLapak">Pesan ke Lapak</h3>
+          </div>
+          
+          <!-- Detail Struk -->
+          <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-left text-xs space-y-2">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
+              <span class="text-slate-500 font-medium">Pemesan:</span> 
+              <strong id="invNamaPemesan" class="text-slate-800 text-right">-</strong>
+            </div>
 
-async function kirimPesanan() {
-  const nama = document.getElementById('pesanNama').value.trim();
-  const note = document.getElementById('pesanNote').value.trim();
-  const totalHargaRaw = parseInt(document.getElementById('labelTotalHarga').getAttribute('data-raw')) || 0;
+            <div class="space-y-1 border-b border-slate-100 pb-2">
+              <span class="text-slate-500 font-medium block">Jadwal Mabar:</span> 
+              <div id="invJadwal" class="font-bold text-slate-800 text-[11px] leading-relaxed bg-white p-2 rounded-xl border border-slate-200 break-words whitespace-pre-line">-</div>
+            </div>
 
-  if (!nama) return alert('Nama pemesan harus diisi!');
-  if (totalHargaRaw <= 0) return alert('Pilih minimal 1 menu!');
+            <div>
+              <span class="text-slate-500 font-medium block mb-1">Rincian Menu:</span>
+              <div id="invDetailMenu" class="font-mono text-[11px] text-slate-700 whitespace-pre-line bg-white p-2 rounded-xl border border-slate-200 max-h-24 overflow-y-auto">-</div>
+            </div>
 
-  let detailRincian = [];
-  menuParsedGlobal.forEach(m => { if (m.qty > 0) detailRincian.push(`${m.nama} (${m.qty}x)`); });
-  
-  let detailString = detailRincian.join(', ');
-  if (note) {
-    detailString += ` | Note: "${note}"`;
-  }
+            <div class="pt-1 flex justify-between items-center text-sm bg-blue-50/80 p-2.5 rounded-xl border border-blue-100">
+              <span class="font-bold text-slate-700 text-xs">Total Tagihan (+Kode Unik):</span>
+              <span id="invTotalTagihan" class="font-extrabold text-blue-700 font-mono text-sm">Rp 0</span>
+            </div>
+          </div>
 
-  const btn = document.getElementById('btnKirimPesan');
-  btn.innerText = 'Memproses...';
-  btn.disabled = true;
+          <p class="text-[10px] text-slate-500 leading-relaxed">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.</p>
+          
+          <!-- QRIS Container -->
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 inline-block shadow-2xs space-y-2 w-full">
+            <img src="qris.png" alt="QRIS" class="mx-auto w-44 h-44 object-contain rounded-xl border border-slate-100">
+            <span class="text-[10px] font-bold text-slate-600 block">BCA 0083677071 a.n Andi</span>
+          </div>
+        </div>
 
-  try {
-    const response = await fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({ 
-        action: 'register_pesanan', 
-        namaPemesan: nama, 
-        namaLapak: lapakDipilih, 
-        detailPesanan: detailString, 
-        totalHarga: totalHargaRaw, 
-        jadwalId: jadwalDipilih, 
-        jadwalInfo: infoJadwalDipilih 
-      })
-    });
-    
-    const result = await response.json();
-    tutupModalPesan();
+        <!-- Tombol Aksi di Dalam Card Modal -->
+        <div class="space-y-2 pt-2 border-t border-slate-100">
+          <button onclick="downloadResiGambar()" id="btnDownloadImg" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-2xl transition shadow-xs flex items-center justify-center gap-1.5">
+            📥 Download Resi (Gambar PNG)
+          </button>
+          <button onclick="selesaiBayarPesanan()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-2xl transition shadow-md">
+            Tutup & Selesai
+          </button>
+        </div>
 
-    try {
-      if (typeof kirimTelegramJualan === 'function') {
-        await kirimTelegramJualan(nama, lapakDipilih, infoJadwalDipilih, detailString, (result ? result.totalTagihan : totalHargaRaw));
-      }
-    } catch (errTelegram) { console.warn("Telegram warning:", errTelegram); }
+      </div>
+    </div>
+  </main>
 
-    const finalTagihan = (result && result.totalTagihan) ? result.totalTagihan : totalHargaRaw;
-
-    document.getElementById('invNamaLapak').innerText = `Lapak: ${lapakDipilih}`;
-    document.getElementById('invNamaPemesan').innerText = nama;
-    document.getElementById('invJadwal').innerText = infoJadwalDipilih;
-    document.getElementById('invDetailMenu').innerText = detailString;
-    document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(finalTagihan);
-    
-    document.getElementById('modalInvoicePesanan').classList.remove('hidden');
-  } catch (e) { 
-    alert('Gagal mengirim pesanan.'); 
-  } finally {
-    btn.innerText = 'Pesan & Bayar';
-    btn.disabled = false;
-  }
-}
-
-function selesaiBayarPesanan() { 
-  document.getElementById('modalInvoicePesanan').classList.add('hidden'); 
-  window.location.reload(); 
-}
-
-async function daftarJualan() {
-  const namaPenjual = document.getElementById('namaPenjual').value.trim();
-  const whatsapp = document.getElementById('whatsappPenjual').value.trim();
-  if(!namaPenjual || !whatsapp) return alert('Nama brand dan WhatsApp harus diisi!');
-
-  let hasilMenuGabung = [];
-  let totalMenuCount = 0;
-
-  const katCards = document.querySelectorAll('.kategori-card');
-  for (let card of katCards) {
-    const namaKat = card.querySelector('.kategori-nama').value.trim();
-    if (!namaKat) return alert('Nama kategori tidak boleh kosong!');
-
-    hasilMenuGabung.push(`📁 ${namaKat}`);
-
-    const menuRows = card.querySelectorAll('.menu-row');
-    for (let row of menuRows) {
-      const m = row.querySelector('.menu-nama').value.trim();
-      const d = row.querySelector('.menu-deskripsi').value.trim();
-      const h = row.querySelector('.menu-harga').value.trim();
-      if (m && h) {
-        hasilMenuGabung.push(`• ${m} (Rp ${parseInt(h).toLocaleString('id-ID')})`);
-        if (d) hasilMenuGabung.push(` └ ${d}`);
-        totalMenuCount++;
-      }
-    }
-  }
-
-  if (totalMenuCount === 0) return alert('Minimal masukkan 1 menu beserta harganya!');
-
-  try {
-    const response = await fetch(GAS_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'register_jualan', namaPenjual, menuJualan: hasilMenuGabung.join('\n'), whatsapp })
-    });
-    if ((await response.json()).status === 'success') {
-      alert('Pendaftaran mitra berhasil! Menunggu penugasan jadwal dari Admin.');
-      gantiTab('pesan');
-      loadDataJualanPage();
-    }
-  } catch (e) { alert('Gagal daftar lapak.'); }
-}
-
-document.addEventListener('DOMContentLoaded', loadDataJualanPage);
+  <!-- PANGGIL LOGIKA JS TERPISAH -->
+  <script src="jualan.js"></script>
+</body>
+</html>
