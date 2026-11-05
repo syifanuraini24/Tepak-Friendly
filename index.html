@@ -262,6 +262,12 @@
         tutupModalDaftar();
 
         if (result.status === 'success') {
+
+          // Kirim notifikasi ke Telegram menggunakan fungsi dari telegram.js
+          if (typeof kirimTelegram === 'function') {
+            kirimTelegram(nama, jadwalDipilihInfo, result.totalTagihan);
+          }
+
           document.getElementById('invMabarJudul').innerText = `Tiket: ${jadwalDipilihId}`;
           document.getElementById('invMabarNama').innerText = nama;
           document.getElementById('invMabarInfo').innerText = jadwalDipilihInfo;
