@@ -188,7 +188,7 @@ async function loadDataAdminJualan() {
           <div class="flex justify-between items-start">
             <div>
               <span class="font-bold text-slate-900 text-sm">🛍️ ${l.namaPenjual}</span>
-              <span class="block text-[10px] text-slate-500">WA: ${l.whatsapp}</span>
+              <span class="block text-[10px] text-slate-500">Email: ${l.emailPenjual || 'Belum diatur'}</span>
             </div>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isDisetujui ? 'bg-emerald-50 text-emerald-700 border' : 'bg-blue-50 text-blue-700 border'}">${l.status || 'Pending'}</span>
           </div>
@@ -205,7 +205,7 @@ async function loadDataAdminJualan() {
           
           <div class="flex gap-2 pt-1 border-t border-slate-200">
             ${!isDisetujui ? `<button onclick="aksiAccLapak(${l.rowIndex}, this)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-2 rounded-lg transition">ACC Mitra 🟢</button>` : ''}
-            <button onclick="bukaModalEditIndex(${idx})" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] py-2 rounded-lg">Edit Menu</button>
+            <button onclick="bukaModalEditIndex(${idx})" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] py-2 rounded-lg">Edit Menu/Email</button>
             <button onclick="aksiKonfirmasiJualan(${l.rowIndex})" class="bg-rose-50 text-rose-600 border font-bold text-[10px] px-3 py-2 rounded-lg">Hapus</button>
           </div>
         </div>`;
@@ -309,12 +309,42 @@ function aksiKonfirmasiJualan(rowIndex) {
 
 function tutupModalKonfirmasi() { document.getElementById('modalKonfirmasi').classList.add('hidden'); }
 
+// --- CLOSE ORDER & KIRIM EMAIL ---
+function bukaModalCloseOrder() {
+  document.getElementById('modalCloseOrder').classList.remove('hidden');
+}
+
+function tutupModalCloseOrder() {
+  document.getElementById('modalCloseOrder').classList.add('hidden');
+}
+
+async function eksekusiCloseOrderDanKirimEmail() {
+  tutupModalCloseOrder();
+  showToast('Memproses close order & mengirim rekap email...');
+
+  try {
+    const response = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'close_order_and_send_email' })
+    });
+    const result = await response.json();
+    if (result.status === 'success') {
+      showToast('Berhasil! Rekap pesanan terkirim ke email penjual.');
+      loadDataAdminJualan();
+    } else {
+      throw new Error(result.message || 'Gagal mengirim email.');
+    }
+  } catch (e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
 function bukaModalEditIndex(arrayIndex) {
   const l = cacheLapakData[arrayIndex];
   if (!l) return;
   document.getElementById('editRowIndex').value = l.rowIndex;
   document.getElementById('editNamaPenjual').value = l.namaPenjual || '';
-  document.getElementById('editWhatsapp').value = l.whatsapp || '';
+  document.getElementById('editEmailPenjual').value = l.emailPenjual || '';
   buildEditFormFromText(l.menuJualan || '');
   document.getElementById('modalEditLapak').classList.remove('hidden');
 }
@@ -404,7 +434,7 @@ function editTambahBarisMenu(btn) {
       <input type="text" placeholder="Deskripsi" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded-lg text-[10px] text-slate-500 edit-menu-deskripsi">
     </div>
     <input type="number" placeholder="Harga" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs edit-menu-harga self-start">
-    <button type="button" onclick="this.closest('.edit-menu-row').remove(); updateEditCounters();" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border self-start">✕</button>
+    <button type="button" onclick="this.closest('.edit-log-row').remove(); updateEditCounters();" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border self-start">✕</button>
   `;
   menuContainer.appendChild(div);
   updateEditCounters();
@@ -415,8 +445,8 @@ function tutupModalEdit() { document.getElementById('modalEditLapak').classList.
 async function simpanEditLapak() {
   const rowIndex = document.getElementById('editRowIndex').value;
   const namaPenjual = document.getElementById('editNamaPenjual').value.trim();
-  const whatsapp = document.getElementById('editWhatsapp').value.trim();
-  if (!namaPenjual || !whatsapp) return showToast('Nama dan WhatsApp wajib diisi!', 'error');
+  const emailPenjual = document.getElementById('editEmailPenjual').value.trim();
+  if (!namaPenjual || !emailPenjual) return showToast('Nama dan Email Penjual wajib diisi!', 'error');
 
   let hasilMenuGabung = [];
   const katCards = document.querySelectorAll('#editContainerKategori .edit-kategori-card');
@@ -437,11 +467,11 @@ async function simpanEditLapak() {
   try {
     await fetch(GAS_URL, {
       method: 'POST',
-      body: JSON.stringify({ action: 'edit_jualan', rowIndex, namaPenjual, whatsapp, menuJualan: hasilMenuGabung.join('\n') })
+      body: JSON.stringify({ action: 'edit_jualan', rowIndex, namaPenjual, emailPenjual, menuJualan: hasilMenuGabung.join('\n') })
     });
     tutupModalEdit();
     refreshDataAdmin();
-    showToast('Perubahan menu berhasil disimpan!');
+    showToast('Perubahan lapak & email berhasil disimpan!');
   } catch (e) { 
     showToast('Gagal menyimpan perubahan.', 'error'); 
   }
