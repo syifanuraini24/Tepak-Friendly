@@ -246,7 +246,7 @@
               </div>
               <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border whitespace-pre-line font-mono max-h-28 overflow-y-auto">${l.menuJualan}</div>
               <div class="flex gap-2 pt-1 border-t border-slate-200">
-                ${!isDisetujui ? `<button onclick="aksiAccLapak(${l.rowIndex})" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-3 py-2 rounded-lg">ACC Mitra 🟢</button>` : ''}
+                ${!isDisetujui ? `<button onclick="aksiAccLapak(${l.rowIndex}, this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-3 py-2 rounded-lg transition">ACC Mitra 🟢</button>` : ''}
                 <button onclick="bukaModalEditIndex(${idx})" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] py-2 rounded-lg">Edit Menu</button>
                 <button onclick="aksiKonfirmasiJualan(${l.rowIndex})" class="bg-rose-50 text-rose-600 border font-bold text-[10px] px-3 py-2 rounded-lg">Hapus</button>
               </div>
@@ -255,14 +255,24 @@
       } catch (e) { console.error(e); }
     }
 
-    async function aksiAccLapak(rowIndex) {
+    async function aksiAccLapak(rowIndex, btnElement) {
+      if(btnElement) {
+        btnElement.innerText = 'Memproses...';
+        btnElement.disabled = true;
+      }
       try {
         await fetch(GAS_URL, {
           method: 'POST',
           body: JSON.stringify({ action: 'update_jualan_status', rowIndex, status: 'Disetujui 🟢' })
         });
-        refreshDataAdmin();
-      } catch (e) { alert('Gagal ACC lapak.'); }
+        await loadDataAdminJualan();
+      } catch (e) { 
+        alert('Gagal ACC lapak.'); 
+        if(btnElement) {
+          btnElement.innerText = 'ACC Mitra 🟢';
+          btnElement.disabled = false;
+        }
+      }
     }
 
     function aksiKonfirmasiPesanan(rowIndex, tipe) {
@@ -271,7 +281,7 @@
       document.getElementById('btnKonfirmasiYa').onclick = async function() {
         tutupModalKonfirmasi();
         await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: tipe === 'acc' ? 'update_pesanan_status' : 'delete_pesanan', rowIndex }) });
-        refreshDataAdmin();
+        loadDataAdmin();
       };
       modal.classList.remove('hidden');
     }
@@ -282,7 +292,7 @@
       document.getElementById('btnKonfirmasiYa').onclick = async function() {
         tutupModalKonfirmasi();
         await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_jualan', rowIndex }) });
-        refreshDataAdmin();
+        loadDataAdmin();
       };
       modal.classList.remove('hidden');
     }
