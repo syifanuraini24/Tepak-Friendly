@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tepak Friendly - Jadwal & Pendaftaran Mabar</title>
+  <title id="pageTitle">Tepak Friendly - Jadwal & Pendaftaran Mabar</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="icon" type="image/png" href="logo.png">
   <script src="config.js"></script>
@@ -45,7 +45,7 @@
     <!-- MODAL PENDAFTARAN MABAR -->
     <div id="modalDaftar"
       class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
-      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto">
+      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3">
         <h3 id="modalJadwalTitle" class="font-bold text-sm text-slate-900 mb-1">Daftar Mabar</h3>
         <p class="text-[11px] text-slate-500 mb-3" id="modalJadwalSub">-</p>
 
@@ -98,6 +98,17 @@
           & Selesai</button>
       </div>
     </div>
+
+    <!-- MODAL CUSTOM NOTIFIKASI -->
+    <div id="customModal"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 text-center">
+        <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Notifikasi</h3>
+        <p id="modalDesc" class="text-xs text-slate-600">-</p>
+        <button onclick="tutupCustomModal()"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition">OK</button>
+      </div>
+    </div>
   </main>
 
   <!-- FLOATING BOTTOM NAVIGATION BAR -->
@@ -121,6 +132,15 @@
     const GAS_URL = CONFIG.GAS_URL;
     let jadwalDipilihGlobal = null;
 
+    function showCustomMsg(title, desc) {
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalDesc').innerText = desc;
+      document.getElementById('customModal').classList.remove('hidden');
+    }
+    function tutupCustomModal() {
+      document.getElementById('customModal').classList.add('hidden');
+    }
+
     async function loadDataIndex() {
       try {
         const response = await fetch(GAS_URL);
@@ -128,13 +148,11 @@
         const container = document.getElementById('containerJadwal');
         container.innerHTML = '';
 
-        // Filter HANYA jadwal yang statusnya Aktif
         const listJadwal = (data.jadwal || []).filter(j => {
           const statusJ = j.status ? j.status.toString().trim().toLowerCase() : 'aktif';
           return statusJ === 'aktif';
         });
 
-        // URUTKAN JADWAL: Berdasarkan Tanggal & Jam terdekat secara kronologis
         listJadwal.sort((a, b) => {
           let dateA = a.tanggal ? new Date(a.tanggal) : new Date(0);
           let dateB = b.tanggal ? new Date(b.tanggal) : new Date(0);
@@ -153,7 +171,6 @@
           const pemainJadwal = listPemain.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
           const sisaSlot = parseInt(j.kuota) - pemainJadwal.length;
 
-          // Format Tampilan Tanggal Cantik (Cth: Rabu, 11 November 2026)
           const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-';
 
           let listPemainHtml = '';
@@ -173,7 +190,6 @@
             });
           }
 
-          // Gabungkan Info GOR dan Tanggal untuk dikirim ke modal pendaftaran
           const infoLengkap = `${displayTanggal} - ${j.infoRaw}`;
 
           container.innerHTML += `
@@ -200,12 +216,32 @@
                 </ul>
               </div>
 
-              <button onclick="bukaModalDaftar('${j.id}', \`${infoLengkap}\`, ${j.htm})" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">
-                + Daftar Mabar Ini
-              </button>
+              <div class="flex gap-2">
+                <button onclick="bukaModalDaftar('${j.id}', \`${infoLengkap}\`, ${j.htm})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">
+                  + Daftar Mabar Ini
+                </button>
+                <button onclick="shareJadwal('${j.id}', \`${j.infoRaw}\`, '${displayTanggal}', '${j.jam}')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-2.5 rounded-xl border border-emerald-200 transition" title="Bagikan Link Jadwal">
+                  🔗 Share
+                </button>
+              </div>
             </div>`;
         });
       } catch (e) { console.error("Error loadDataIndex:", e); }
+    }
+
+    // Fungsi Share Link Jadwal
+    function shareJadwal(id, infoGor, tanggal, jam) {
+      const currentUrl = window.location.origin + window.location.pathname;
+      const shareUrl = `${currentUrl}?jadwal=${id}`;
+      const teksShare = `🏸 *Yuk Gabung Mabar Tepak Friendly!* 🏸\n\n📍 *${infoGor}*\n🗓️ ${tanggal}\n⏰ ${jam}\n\nKlik link di bawah untuk langsung mendaftar:\n${shareUrl}`;
+
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(teksShare).then(() => {
+          showCustomMsg("Berhasil Disalin!", "Link & detail jadwal berhasil disalin ke clipboard. Silakan paste ke WhatsApp!");
+        });
+      } else {
+        prompt("Salin link jadwal berikut:", shareUrl);
+      }
     }
 
     function bukaModalDaftar(id, info, htm) {
@@ -223,7 +259,7 @@
       const nama = document.getElementById('namaPemain').value.trim();
       const email = document.getElementById('emailPemain').value.trim();
 
-      if (!nama) return alert('Nama pemain harus diisi!');
+      if (!nama) return showCustomMsg("Perhatian", "Nama pemain harus diisi!");
 
       const btn = document.getElementById('btnKirimDaftar');
       const oldText = btn.innerText;
@@ -260,7 +296,7 @@
 
       } catch (e) {
         console.error("Error kirimDaftarMabar:", e);
-        alert('Gagal mendaftar mabar.');
+        showCustomMsg("Error", "Gagal mendaftar mabar.");
       } finally {
         btn.innerText = oldText;
         btn.disabled = false;
@@ -272,8 +308,26 @@
       loadDataIndex();
     }
 
+    // Auto load data dan deteksi parameter URL ?jadwal=...
     document.addEventListener('DOMContentLoaded', () => {
-      loadDataIndex();
+      loadDataIndex().then(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetJadwalId = urlParams.get('jadwal');
+
+        if (targetJadwalId) {
+          fetch(GAS_URL).then(res => res.json()).then(data => {
+            const jadwalDitemukan = (data.jadwal || []).find(j => String(j.id) === String(targetJadwalId));
+            if (jadwalDitemukan) {
+              const displayTgl = jadwalDitemukan.tanggal ? new Date(jadwalDitemukan.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+              const infoLengkap = `${displayTgl} - ${jadwalDitemukan.infoRaw}`;
+
+              bukaModalDaftar(jadwalDitemukan.id, infoLengkap, jadwalDitemukan.htm);
+              document.getElementById('pageTitle').innerText = `Daftar Mabar: ${jadwalDitemukan.infoRaw}`;
+            }
+          });
+        }
+      });
+
       setInterval(loadDataIndex, 5000);
     });
   </script>
