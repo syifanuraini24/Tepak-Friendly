@@ -127,7 +127,6 @@ async function loadDataJualanPage() {
     if (!container) return;
     container.innerHTML = '';
     
-    // Pastikan data.jualan dan data.pesanan ada dan berupa array untuk menghindari error undefined.split/forEach
     const listJualan = Array.isArray(data.jualan) ? data.jualan : [];
     const lapakDisetujui = listJualan.filter(l => l.status && l.status.toString().trim().toLowerCase().includes('disetujui'));
 
@@ -414,7 +413,7 @@ async function daftarJualan() {
       const h = row.querySelector('.menu-harga').value.trim();
       if (m && h) {
         hasilMenuGabung.push(`• ${m} (Rp ${parseInt(h).toLocaleString('id-ID')})`);
-        if (d) hasilMenuGabung.push(`  └ ${d}`);
+        if (d) hasilMenuGabung.push(`   └ ${d}`);
         totalMenuCount++;
       }
     }

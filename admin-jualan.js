@@ -201,10 +201,14 @@ async function loadDataAdminJualan() {
       } else {
         cacheJadwalList.forEach(j => {
           const isChecked = assignedIds.includes(String(j.id)) ? 'checked' : '';
+          
+          // CEK APAKAH JADWAL NONAKTIF
+          const isNonaktif = j.status && j.status.toString().toLowerCase().includes('nonaktif');
+
           checkboxHtml += `
-            <label class="flex items-center gap-2 text-xs py-1 px-2 hover:bg-slate-50 rounded-lg cursor-pointer">
-              <input type="checkbox" value="${j.id}" ${isChecked} class="checkbox-jadwal-${l.rowIndex} rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5">
-              <span class="text-slate-700 font-medium"><strong>[${j.id}]</strong> ${j.info} (${j.jam})</span>
+            <label class="flex items-center gap-2 text-xs py-1 px-2 rounded-lg ${isNonaktif ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-75' : 'hover:bg-slate-50 cursor-pointer'}">
+              <input type="checkbox" value="${j.id}" ${isChecked} ${isNonaktif ? 'disabled' : ''} class="checkbox-jadwal-${l.rowIndex} rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5">
+              <span class="${isNonaktif ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}"><strong>[${j.id}]</strong> ${j.info} (${j.jam}) ${isNonaktif ? ' - (Nonaktif 🔴)' : ''}</span>
             </label>`;
         });
       }
@@ -327,7 +331,8 @@ async function simpanAssignMultipleJadwal(rowIndex, btnElement) {
     selectedIds.push(jId);
     const matched = cacheJadwalList.find(j => String(j.id) === String(jId));
     if (matched) {
-      selectedInfos.push(`${matched.id} - ${matched.info} (${matched.jam})`);
+      selectedInfos.push(`${matched.id}
+${matched.info} (${matched.jam})`);
     } else {
       selectedInfos.push(jId);
     }
@@ -554,7 +559,7 @@ async function simpanEditLapak() {
       const h = row.querySelector('.edit-menu-harga').value.trim();
       if (m && h) {
         hasilMenuGabung.push(`• ${m} (Rp ${parseInt(h).toLocaleString('id-ID')})`);
-        if (d) hasilMenuGabung.push(`  └ ${d}`);
+        if (d) hasilMenuGabung.push(`   └ ${d}`);
       }
     });
   }
