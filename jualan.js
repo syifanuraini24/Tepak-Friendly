@@ -128,10 +128,26 @@ async function loadDataJualanPage() {
     container.innerHTML = '';
     
     const listJualan = Array.isArray(data.jualan) ? data.jualan : [];
-    const lapakDisetujui = listJualan.filter(l => l.status && l.status.toString().trim().toLowerCase().includes('disetujui'));
+    const listJadwal = Array.isArray(data.jadwal) ? data.jadwal : [];
+
+    // Ambil hanya ID jadwal yang statusnya AKTIF (tidak nonaktif)
+    const idJadwalAktif = listJadwal
+      .filter(j => !j.status || !j.status.toString().toLowerCase().includes('nonaktif'))
+      .map(j => String(j.id));
+
+    // Filter lapak yang disetujui DAN terhubung dengan minimal 1 jadwal yang masih aktif
+    const lapakDisetujui = listJualan.filter(l => {
+      const isDisetujui = l.status && l.status.toString().trim().toLowerCase().includes('disetujui');
+      if (!isDisetujui) return false;
+
+      const assignedJadwalIds = (l.jadwalId || '').toString().split(',').map(s => s.trim());
+      const hasActiveSchedule = assignedJadwalIds.some(id => idJadwalAktif.includes(id));
+
+      return hasActiveSchedule;
+    });
 
     if (lapakDisetujui.length === 0) {
-      container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada lapak UMKM yang aktif saat ini.</div>';
+      container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada lapak UMKM yang aktif untuk jadwal mabar saat ini.</div>';
       return;
     }
 
@@ -150,10 +166,11 @@ async function loadDataJualanPage() {
             ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>' 
             : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
           
+          // Nama pembeli disembunyikan/dianonimkan dari publik
           listPesananHtml += `
             <li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
               <div>
-                <span class="font-bold text-slate-800">${idx + 1}. ${p.namaPemesan || '-'}</span>
+                <span class="font-bold text-slate-800">${idx + 1}. Pesanan #${idx + 1}</span>
                 <span class="block text-[10px] text-slate-500 font-mono">${p.detailPesanan || '-'}</span>
               </div>
               <div>${statusBadge}</div>
