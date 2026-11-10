@@ -202,7 +202,7 @@ async function loadDataAdminJualan() {
         cacheJadwalList.forEach(j => {
           const isChecked = assignedIds.includes(String(j.id)) ? 'checked' : '';
           
-          // CEK APAKAH JADWAL NONAKTIF
+          // Cek apakah jadwal berstatus nonaktif (atau lewat)
           const isNonaktif = j.status && j.status.toString().toLowerCase().includes('nonaktif');
 
           checkboxHtml += `
@@ -255,7 +255,6 @@ function cetakSummaryLapak(namaLapak) {
   const printWindow = window.open('', '_blank', 'width=800,height=600');
   const tgl = new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-  // Clone elemen untuk membuang tombol cetak saat diprint
   const cloneCard = lapakCard.cloneNode(true);
   const btns = cloneCard.querySelectorAll('button');
   btns.forEach(b => b.remove());
@@ -331,8 +330,7 @@ async function simpanAssignMultipleJadwal(rowIndex, btnElement) {
     selectedIds.push(jId);
     const matched = cacheJadwalList.find(j => String(j.id) === String(jId));
     if (matched) {
-      selectedInfos.push(`${matched.id}
-${matched.info} (${matched.jam})`);
+      selectedInfos.push(`${matched.id}\n${matched.info} (${matched.jam})`);
     } else {
       selectedInfos.push(jId);
     }
