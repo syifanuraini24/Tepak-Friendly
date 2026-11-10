@@ -298,8 +298,8 @@
         jadwalList.sort((a, b) => {
           let dateA = a.tanggal ? new Date(a.tanggal) : new Date(0);
           let dateB = b.tanggal ? new Date(b.tanggal) : new Date(0);
-          if (dateA - dateB !== 0) return dateA - dateB; // Urut tanggal terdekat
-          return (a.jam || '').localeCompare(b.jam || ''); // Jika tanggal sama, urutkan jam
+          if (dateA - dateB !== 0) return dateA - dateB;
+          return (a.jam || '').localeCompare(b.jam || '');
         });
 
         let countAktif = 0;
@@ -342,8 +342,9 @@
                 </div>
                 <div class="flex items-center gap-1.5 flex-wrap justify-end">
                   <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">Slot: ${pesertaJadwal.length}/${j.kuota}</span>
-                  <button onclick="bukaModalEditJadwal('${j.id}', '${j.tanggal}', \`${j.infoRaw}\`, '${j.jam}', ${j.htm}, ${j.kuota})" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100">✏️ Edit</button>
-                  <button onclick="copyListKeWA('${j.id}', '${j.tanggal}', \`${j.infoRaw}\`, ${j.kuota})" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100">📋 Copy WA</button>
+                  <button onclick="bukaModalEditJadwal('${j.id}', '${j.tanggal}', \`${j.infoRaw}\`, '${j.jam}', ${j.htm}, ${j.kuota})" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" title="Edit Jadwal">✏️ Edit</button>
+                  <button onclick="hapusJadwalMaster('${j.id}')" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100" title="Hapus Jadwal">🗑️ Hapus</button>
+                  <button onclick="copyListKeWA('${j.id}', '${j.tanggal}', \`${j.infoRaw}\`, ${j.kuota})" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100" title="Copy WA">📋 Copy WA</button>
                   <button onclick="toggleStatusJadwal('${j.id}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}', this)" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border ${isNonaktif ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">${isNonaktif ? '🟢 Aktifkan' : '🔴 Nonaktifkan'}</button>
                 </div>
               </div>
@@ -479,6 +480,7 @@
       document.getElementById('modalEditJadwal').classList.remove('hidden');
     }
     function tutupModalEditJadwal() { document.getElementById('modalEditJadwal').classList.add('hidden'); }
+
     async function simpanEditJadwal(btn) {
       const payload = {
         action: 'edit_jadwal',
@@ -494,6 +496,34 @@
       await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
       tutupModalEditJadwal(); alert('Diperbarui!'); loadDataAdmin();
       btn.innerText = 'Simpan'; btn.disabled = false;
+    }
+
+    async function hapusJadwalMaster(jadwalId) {
+      showConfirmModal(
+        "Hapus Jadwal",
+        `Yakin ingin menghapus jadwal [${jadwalId}] secara permanen dari master?`,
+        "Ya, Hapus",
+        "bg-rose-600 hover:bg-rose-700",
+        async () => {
+          try {
+            const response = await fetch(GAS_URL, {
+              method: 'POST',
+              body: JSON.stringify({ action: 'delete_jadwal', id: jadwalId })
+            });
+            const result = await response.json();
+
+            if (result.status === 'success') {
+              alert('Jadwal berhasil dihapus!');
+              loadDataAdmin();
+            } else {
+              throw new Error(result.message || 'Gagal menghapus');
+            }
+          } catch (error) {
+            console.error("Gagal hapus jadwal:", error);
+            alert('Gagal menghapus jadwal: ' + error.message);
+          }
+        }
+      );
     }
   </script>
 </body>
