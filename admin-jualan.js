@@ -1,6 +1,8 @@
 const GAS_URL = CONFIG.GAS_URL;
 let cacheLapakData = [];
 let cacheJadwalList = [];
+let cacheSemuaPesanan = [];
+let currentTabPesanan = 'aktif'; // 'aktif' atau 'history'
 
 // Fungsi Toast Notification
 function showToast(message, type = 'success') {
@@ -98,6 +100,27 @@ async function refreshDataAdmin(btnElement) {
   showToast('Data berhasil diperbarui!');
 }
 
+function gantiTabPesanan(tab) {
+  currentTabPesanan = tab;
+  const btnAktif = document.getElementById('tabPesananAktif');
+  const btnHistory = document.getElementById('tabPesananHistory');
+  const divAktif = document.getElementById('containerPesananAdmin');
+  const divHistory = document.getElementById('containerHistoryAdmin');
+
+  if (tab === 'aktif') {
+    btnAktif.className = 'flex-1 bg-white text-slate-900 font-bold text-xs py-2 rounded-lg shadow-2xs transition';
+    btnHistory.className = 'flex-1 bg-transparent text-slate-500 font-bold text-xs py-2 transition';
+    divAktif.classList.remove('hidden');
+    divHistory.classList.add('hidden');
+  } else {
+    btnHistory.className = 'flex-1 bg-white text-slate-900 font-bold text-xs py-2 rounded-lg shadow-2xs transition';
+    btnAktif.className = 'flex-1 bg-transparent text-slate-500 font-bold text-xs py-2 transition';
+    divHistory.classList.remove('hidden');
+    divAktif.classList.add('hidden');
+  }
+  renderPesananUI();
+}
+
 async function loadDataAdminJualan() {
   try {
     const response = await fetch(GAS_URL);
@@ -105,159 +128,173 @@ async function loadDataAdminJualan() {
     
     cacheJadwalList = data.jadwal || [];
     cacheLapakData = data.jualan || [];
+    cacheSemuaPesanan = data.pesanan || [];
 
-    // Ambil daftar ID jadwal yang statusnya AKTIF (tidak nonaktif)
-    const idJadwalAktif = cacheJadwalList
-      .filter(j => !j.status || !j.status.toString().toLowerCase().includes('nonaktif'))
-      .map(j => String(j.id));
-
-    // 1. Render Pesanan Aktif (Hanya dari jadwal yang masih aktif)
-    const containerPesanan = document.getElementById('containerPesananAdmin');
-    const semuaPesanan = data.pesanan || [];
-    
-    // Filter pesanan: hanya ambil yang jadwalId-nya ada di daftar jadwal aktif
-    const listPesananAktif = semuaPesanan.filter(p => {
-      // Jika pesanan memiliki jadwalId dan terdaftar di jadwal aktif
-      if (p.jadwalId && idJadwalAktif.includes(String(p.jadwalId))) return true;
-      // Cadangan jika jadwalId kosong tapi datanya masih baru/umum
-      return !p.jadwalId; 
-    });
-
-    containerPesanan.innerHTML = '';
-    document.getElementById('badgeTotalPesanan').innerText = `${listPesananAktif.length} Pesanan Aktif`;
-
-    if (listPesananAktif.length === 0) {
-      containerPesanan.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 italic">Belum ada pesanan aktif dari jadwal berjalan.</div>';
-    } else {
-      let groupedPesanan = {};
-      listPesananAktif.forEach(p => {
-        let lapak = p.namaLapak || 'Lainnya';
-        if (!groupedPesanan[lapak]) groupedPesanan[lapak] = [];
-        groupedPesanan[lapak].push(p);
-      });
-
-      for (let lapak in groupedPesanan) {
-        let pesananArray = groupedPesanan[lapak];
-        let totalSemuaLapak = 0;
-        let listItemsHtml = '';
-
-        pesananArray.forEach(p => {
-          totalSemuaLapak += (parseInt(p.totalTagihan) || 0);
-          const statusStr = p.status ? p.status.toString().trim() : '';
-          const isLunas = statusStr.toLowerCase().includes('lunas');
-          const formatHrg = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.totalTagihan || 0);
-          
-          listItemsHtml += `
-            <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-xs space-y-1.5 shadow-2xs">
-              <div class="flex justify-between items-center">
-                <span class="font-extrabold text-slate-900">👤 ${p.namaPemesan || '-'}</span>
-                <span class="font-bold text-slate-700">${formatHrg}</span>
-              </div>
-              <div class="text-[11px] text-slate-600 bg-slate-50 p-1.5 rounded-lg border font-mono">${p.detailPesanan || '-'}</div>
-              <div class="text-[10px] text-blue-600 font-medium">📍 Jadwal: ${p.jadwalInfo || p.jadwalId || '-'}</div>
-              <div class="flex justify-between items-center pt-1">
-                <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${isLunas ? 'bg-emerald-50 text-emerald-700 border' : 'bg-amber-50 text-amber-700 border'}">${p.status || 'Pending 🟡'}</span>
-                <div class="flex gap-1">
-                  ${!isLunas ? `<button onclick="aksiKonfirmasiPesanan(${p.rowIndex}, 'acc')" class="bg-emerald-600 text-white font-bold text-[9px] px-2 py-1 rounded-md">ACC</button>` : ''}
-                  <button onclick="aksiKonfirmasiPesanan(${p.rowIndex}, 'hapus')" class="bg-rose-50 text-rose-600 border font-bold text-[9px] px-2 py-1 rounded-md">Hapus</button>
-                </div>
-              </div>
-            </div>`;
-        });
-
-        const formatTotalSemua = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalSemuaLapak);
-        const lapakEscaped = lapak.replace(/'/g, "\\'");
-
-        containerPesanan.innerHTML += `
-          <div id="card-lapak-${encodeURIComponent(lapak)}" class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2.5">
-            <!-- HEADER LAPAK + TOMBOL SAMPING -->
-            <div class="flex justify-between items-center border-b border-slate-200 pb-2 gap-2">
-              <div class="min-w-0 flex-1">
-                <span class="font-extrabold text-sm text-blue-700 block truncate">🛍️ ${lapak}</span>
-                <span class="block text-[10px] text-slate-500">${pesananArray.length} Pesanan (Total: <strong>${formatTotalSemua}</strong>)</span>
-              </div>
-              
-              <!-- TOMBOL PRINT & CLOSE ORDER -->
-              <div class="flex items-center gap-1.5 shrink-0">
-                <button onclick="cetakSummaryLapak('${lapakEscaped}')" title="Print Rekap Pesanan" 
-                  class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] py-1.5 px-2 rounded-lg transition flex items-center gap-1 shadow-2xs">
-                  🖨️ <span class="hidden sm:inline">Print</span>
-                </button>
-                <button onclick="kirimEmailCloseOrderLapak('${lapakEscaped}', this)" title="Close Order & Send Email" 
-                  class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1.5 px-2 rounded-lg transition flex items-center gap-1 shadow-2xs">
-                  📧 <span class="hidden sm:inline">Close Order</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="space-y-2">
-              ${listItemsHtml}
-            </div>
-          </div>`;
-      }
-    }
-
-    // 2. Render Lapak Mitra
-    const containerLapak = document.getElementById('containerLapakAdmin');
-    containerLapak.innerHTML = '';
-
-    if (cacheLapakData.length === 0) {
-      containerLapak.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 italic">Belum ada pendaftaran mitra.</div>';
-      return;
-    }
-
-    cacheLapakData.forEach((l, idx) => {
-      const isDisetujui = l.status && l.status.toLowerCase().includes('disetujui');
-      const assignedIds = (l.jadwalId || '').toString().split(',').map(s => s.trim());
-
-      let checkboxHtml = '';
-      if (cacheJadwalList.length === 0) {
-        checkboxHtml = '<span class="text-[10px] text-slate-400 italic">Belum ada jadwal mabar dibuat.</span>';
-      } else {
-        cacheJadwalList.forEach(j => {
-          const isChecked = assignedIds.includes(String(j.id)) ? 'checked' : '';
-          const isNonaktif = j.status && j.status.toString().toLowerCase().includes('nonaktif');
-
-          checkboxHtml += `
-            <label class="flex items-center gap-2 text-xs py-1 px-2 rounded-lg ${isNonaktif ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-75' : 'hover:bg-slate-50 cursor-pointer'}">
-              <input type="checkbox" value="${j.id}" ${isChecked} ${isNonaktif ? 'disabled' : ''} class="checkbox-jadwal-${l.rowIndex} rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5">
-              <span class="${isNonaktif ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}"><strong>[${j.id}]</strong> ${j.info} (${j.jam}) ${isNonaktif ? ' - (Nonaktif 🔴)' : ''}</span>
-            </label>`;
-        });
-      }
-
-      const menuTextSafe = (l.menuJualan !== null && l.menuJualan !== undefined) ? String(l.menuJualan) : '';
-
-      containerLapak.innerHTML += `
-        <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2.5">
-          <div class="flex justify-between items-start">
-            <div>
-              <span class="font-bold text-slate-900 text-sm">🛍️ ${l.namaPenjual || 'Mitra'}</span>
-              <span class="block text-[10px] text-slate-500">Email: ${l.emailPenjual || l.whatsapp || '-'}</span>
-            </div>
-            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isDisetujui ? 'bg-emerald-50 text-emerald-700 border' : 'bg-blue-50 text-blue-700 border'}">${l.status || 'Pending'}</span>
-          </div>
-
-          <div class="space-y-1.5 bg-white p-2.5 rounded-xl border border-slate-200">
-            <span class="block text-[10px] font-bold text-slate-600 uppercase tracking-wide">Assign ke Jadwal Mabar (Bisa Pilih Banyak):</span>
-            <div class="max-h-36 overflow-y-auto space-y-0.5 pr-1 border border-slate-100 rounded-lg p-1 bg-slate-50/50">
-              ${checkboxHtml}
-            </div>
-            <button onclick="simpanAssignMultipleJadwal(${l.rowIndex}, this)" class="w-full mt-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] py-2 rounded-lg transition shadow-2xs">Simpan Pilihan Jadwal</button>
-          </div>
-
-          <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border whitespace-pre-line font-mono max-h-28 overflow-y-auto">${menuTextSafe || 'Belum ada menu.'}</div>
-          
-          <div class="flex gap-2 pt-1 border-t border-slate-200">
-            ${!isDisetujui ? `<button onclick="aksiAccLapak(${l.rowIndex}, this)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-2 rounded-lg transition">ACC Mitra 🟢</button>` : ''}
-            <button onclick="bukaModalEditIndex(${idx})" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] py-2 rounded-lg">Edit Menu</button>
-            <button onclick="aksiKonfirmasiJualan(${l.rowIndex})" class="bg-rose-50 text-rose-600 border font-bold text-[10px] px-3 py-2 rounded-lg">Hapus</button>
-          </div>
-        </div>`;
-    });
+    renderPesananUI();
+    renderLapakAdminUI();
   } catch (e) { 
     console.error('Error loading data:', e); 
   }
+}
+
+function renderPesananUI() {
+  const containerPesanan = document.getElementById('containerPesananAdmin');
+  const containerHistory = document.getElementById('containerHistoryAdmin');
+
+  // Ambil daftar ID jadwal aktif & nonaktif
+  const idJadwalAktif = cacheJadwalList
+    .filter(j => !j.status || !j.status.toString().toLowerCase().includes('nonaktif'))
+    .map(j => String(j.id));
+
+  // Pisahkan pesanan menjadi Aktif dan History
+  const listPesananAktif = cacheSemuaPesanan.filter(p => {
+    if (p.jadwalId && idJadwalAktif.includes(String(p.jadwalId))) return true;
+    return !p.jadwalId;
+  });
+
+  const listPesananHistory = cacheSemuaPesanan.filter(p => {
+    if (p.jadwalId && !idJadwalAktif.includes(String(p.jadwalId))) return true;
+    return false;
+  });
+
+  document.getElementById('badgeTotalPesanan').innerText = `${currentTabPesanan === 'aktif' ? listPesananAktif.length : listPesananHistory.length} Pesanan`;
+
+  // Render Tab Aktif
+  renderGroupedPesanan(listPesananAktif, containerPesanan, 'Belum ada pesanan aktif dari jadwal berjalan.');
+  // Render Tab History
+  renderGroupedPesanan(listPesananHistory, containerHistory, 'Belum ada riwayat pesanan dari jadwal yang sudah selesai.');
+}
+
+function renderGroupedPesanan(pesananArrayData, containerTarget, emptyText) {
+  containerTarget.innerHTML = '';
+
+  if (pesananArrayData.length === 0) {
+    containerTarget.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 italic">${emptyText}</div>`;
+    return;
+  }
+
+  let groupedPesanan = {};
+  pesananArrayData.forEach(p => {
+    let lapak = p.namaLapak || 'Lainnya';
+    if (!groupedPesanan[lapak]) groupedPesanan[lapak] = [];
+    groupedPesanan[lapak].push(p);
+  });
+
+  for (let lapak in groupedPesanan) {
+    let pesananArray = groupedPesanan[lapak];
+    let totalSemuaLapak = 0;
+    let listItemsHtml = '';
+
+    pesananArray.forEach(p => {
+      totalSemuaLapak += (parseInt(p.totalTagihan) || 0);
+      const statusStr = p.status ? p.status.toString().trim() : '';
+      const isLunas = statusStr.toLowerCase().includes('lunas');
+      const formatHrg = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(p.totalTagihan || 0);
+      
+      listItemsHtml += `
+        <div class="bg-white p-2.5 rounded-xl border border-slate-200 text-xs space-y-1.5 shadow-2xs">
+          <div class="flex justify-between items-center">
+            <span class="font-extrabold text-slate-900">👤 ${p.namaPemesan || '-'}</span>
+            <span class="font-bold text-slate-700">${formatHrg}</span>
+          </div>
+          <div class="text-[11px] text-slate-600 bg-slate-50 p-1.5 rounded-lg border font-mono">${p.detailPesanan || '-'}</div>
+          <div class="text-[10px] text-blue-600 font-medium">📍 Jadwal: ${p.jadwalInfo || p.jadwalId || '-'}</div>
+          <div class="flex justify-between items-center pt-1">
+            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${isLunas ? 'bg-emerald-50 text-emerald-700 border' : 'bg-amber-50 text-amber-700 border'}">${p.status || 'Pending 🟡'}</span>
+            <div class="flex gap-1">
+              ${!isLunas ? `<button onclick="aksiKonfirmasiPesanan(${p.rowIndex}, 'acc')" class="bg-emerald-600 text-white font-bold text-[9px] px-2 py-1 rounded-md">ACC</button>` : ''}
+              <button onclick="aksiKonfirmasiPesanan(${p.rowIndex}, 'hapus')" class="bg-rose-50 text-rose-600 border font-bold text-[9px] px-2 py-1 rounded-md">Hapus</button>
+            </div>
+          </div>
+        </div>`;
+    });
+
+    const formatTotalSemua = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalSemuaLapak);
+    const lapakEscaped = lapak.replace(/'/g, "\\'");
+
+    containerTarget.innerHTML += `
+      <div id="card-lapak-${encodeURIComponent(lapak)}" class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2.5">
+        <div class="flex justify-between items-center border-b border-slate-200 pb-2 gap-2">
+          <div class="min-w-0 flex-1">
+            <span class="font-extrabold text-sm text-blue-700 block truncate">🛍️ ${lapak}</span>
+            <span class="block text-[10px] text-slate-500">${pesananArray.length} Pesanan (Total: <strong>${formatTotalSemua}</strong>)</span>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="cetakSummaryLapak('${lapakEscaped}')" title="Print Rekap Pesanan" 
+              class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] py-1.5 px-2 rounded-lg transition flex items-center gap-1 shadow-2xs">
+              🖨️ <span class="hidden sm:inline">Print</span>
+            </button>
+            <button onclick="kirimEmailCloseOrderLapak('${lapakEscaped}', this)" title="Close Order & Send Email" 
+              class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-1.5 px-2 rounded-lg transition flex items-center gap-1 shadow-2xs">
+              📧 <span class="hidden sm:inline">Close Order</span>
+            </button>
+          </div>
+        </div>
+        <div class="space-y-2">
+          ${listItemsHtml}
+        </div>
+      </div>`;
+  }
+}
+
+function renderLapakAdminUI() {
+  const containerLapak = document.getElementById('containerLapakAdmin');
+  containerLapak.innerHTML = '';
+
+  if (cacheLapakData.length === 0) {
+    containerLapak.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 italic">Belum ada pendaftaran mitra.</div>';
+    return;
+  }
+
+  cacheLapakData.forEach((l, idx) => {
+    const isDisetujui = l.status && l.status.toLowerCase().includes('disetujui');
+    const assignedIds = (l.jadwalId || '').toString().split(',').map(s => s.trim());
+
+    let checkboxHtml = '';
+    if (cacheJadwalList.length === 0) {
+      checkboxHtml = '<span class="text-[10px] text-slate-400 italic">Belum ada jadwal mabar dibuat.</span>';
+    } else {
+      cacheJadwalList.forEach(j => {
+        const isChecked = assignedIds.includes(String(j.id)) ? 'checked' : '';
+        const isNonaktif = j.status && j.status.toString().toLowerCase().includes('nonaktif');
+
+        checkboxHtml += `
+          <label class="flex items-center gap-2 text-xs py-1 px-2 rounded-lg ${isNonaktif ? 'bg-slate-100 text-slate-400 cursor-not-allowed opacity-75' : 'hover:bg-slate-50 cursor-pointer'}">
+            <input type="checkbox" value="${j.id}" ${isChecked} ${isNonaktif ? 'disabled' : ''} class="checkbox-jadwal-${l.rowIndex} rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5">
+            <span class="${isNonaktif ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}"><strong>[${j.id}]</strong> ${j.info} (${j.jam}) ${isNonaktif ? ' - (Nonaktif 🔴)' : ''}</span>
+          </label>`;
+      });
+    }
+
+    const menuTextSafe = (l.menuJualan !== null && l.menuJualan !== undefined) ? String(l.menuJualan) : '';
+
+    containerLapak.innerHTML += `
+      <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs space-y-2.5">
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="font-bold text-slate-900 text-sm">🛍️ ${l.namaPenjual || 'Mitra'}</span>
+            <span class="block text-[10px] text-slate-500">Email: ${l.emailPenjual || l.whatsapp || '-'}</span>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isDisetujui ? 'bg-emerald-50 text-emerald-700 border' : 'bg-blue-50 text-blue-700 border'}">${l.status || 'Pending'}</span>
+        </div>
+
+        <div class="space-y-1.5 bg-white p-2.5 rounded-xl border border-slate-200">
+          <span class="block text-[10px] font-bold text-slate-600 uppercase tracking-wide">Assign ke Jadwal Mabar (Bisa Pilih Banyak):</span>
+          <div class="max-h-36 overflow-y-auto space-y-0.5 pr-1 border border-slate-100 rounded-lg p-1 bg-slate-50/50">
+            ${checkboxHtml}
+          </div>
+          <button onclick="simpanAssignMultipleJadwal(${l.rowIndex}, this)" class="w-full mt-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] py-2 rounded-lg transition shadow-2xs">Simpan Pilihan Jadwal</button>
+        </div>
+
+        <div class="text-[11px] text-slate-600 bg-white p-2 rounded-lg border whitespace-pre-line font-mono max-h-28 overflow-y-auto">${menuTextSafe || 'Belum ada menu.'}</div>
+        
+        <div class="flex gap-2 pt-1 border-t border-slate-200">
+          ${!isDisetujui ? `<button onclick="aksiAccLapak(${l.rowIndex}, this)" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] py-2 rounded-lg transition">ACC Mitra 🟢</button>` : ''}
+          <button onclick="bukaModalEditIndex(${idx})" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-[10px] py-2 rounded-lg">Edit Menu</button>
+          <button onclick="aksiKonfirmasiJualan(${l.rowIndex})" class="bg-rose-50 text-rose-600 border font-bold text-[10px] px-3 py-2 rounded-lg">Hapus</button>
+        </div>
+      </div>`;
+  });
 }
 
 // 1. Cetak Ringkasan Khusus 1 Lapak
@@ -555,6 +592,7 @@ function tutupModalEdit() {
 
 async function simpanEditLapak() {
   const rowIndex = document.getElementById('editRowIndex').value;
+  nowrowIndex = parseInt(rowIndex);
   const namaPenjual = document.getElementById('editNamaPenjual').value.trim();
   const emailPenjual = document.getElementById('editEmailPenjual').value.trim();
   if (!namaPenjual || !emailPenjual) return showToast('Nama dan Email wajib diisi!', 'error');
