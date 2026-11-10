@@ -155,18 +155,28 @@ async function loadDataJualanPage() {
 
     lapakDisetujui.forEach(l => {
       const namaPenjual = l.namaPenjual || '';
-      const pesananLapak = semuaPesanan.filter(p => p.namaLapak && p.namaLapak.trim().toLowerCase() === namaPenjual.trim().toLowerCase());
+      
+      // Filter pesanan: Hanya tampilkan pesanan dari jadwal yang aktif saja
+      const pesananLapak = semuaPesanan.filter(p => {
+        const matchLapak = p.namaLapak && p.namaLapak.trim().toLowerCase() === namaPenjual.trim().toLowerCase();
+        if (!matchLapak) return false;
+
+        if (p.jadwalId) {
+          return idJadwalAktif.includes(String(p.jadwalId).trim());
+        }
+        return true;
+      });
 
       let listPesananHtml = '';
       if (pesananLapak.length === 0) {
-        listPesananHtml = '<div class="text-[11px] text-slate-400 italic py-1 text-center">Belum ada pesanan di lapak ini.</div>';
+        listPesananHtml = '<div class="text-[11px] text-slate-400 italic py-1 text-center">Belum ada pesanan aktif di lapak ini.</div>';
       } else {
         pesananLapak.forEach((p, idx) => {
           const statusBadge = p.status && p.status.includes('Lunas') 
             ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>' 
             : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
           
-          // Nama pembeli disembunyikan/dianonimkan dari publik
+          // Nama pemesan disembunyikan / dianonimkan demi privasi publik
           listPesananHtml += `
             <li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
               <div>
