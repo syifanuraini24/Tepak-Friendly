@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,22 +7,19 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="config.js"></script>
 </head>
-
 <body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-24">
 
   <!-- Header Minimalis -->
   <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-3 shadow-2xs">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
-        <img src="logo.png" alt="Logo Tepak Friendly"
-          class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
+        <img src="logo.png" alt="Logo Tepak Friendly" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
         <div>
           <h1 class="text-xs font-extrabold tracking-tight text-slate-900 leading-tight">Tepak Friendly</h1>
           <p class="text-[9px] text-slate-500 font-medium">Lapak & Jajanan UMKM</p>
         </div>
       </div>
-      <span
-        class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+      <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         Live Order
       </span>
@@ -31,15 +27,13 @@
   </header>
 
   <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
-
+    
     <!-- Top Action Buttons -->
     <div class="grid grid-cols-2 gap-2">
-      <button onclick="bukaModalPesan()"
-        class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 px-3 rounded-2xl shadow-sm transition flex items-center justify-center gap-1.5">
+      <button onclick="bukaModalPesan()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 px-3 rounded-2xl shadow-sm transition flex items-center justify-center gap-1.5">
         <span>🛍️</span> Lihat Lapak & Pesan
       </button>
-      <button onclick="bukaModalMitra()"
-        class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-xs py-2.5 px-3 rounded-2xl shadow-2xs transition flex items-center justify-center gap-1.5">
+      <button onclick="bukaModalMitra()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-xs py-2.5 px-3 rounded-2xl shadow-2xs transition flex items-center justify-center gap-1.5">
         <span>➕</span> Daftar Mitra
       </button>
     </div>
@@ -48,21 +42,18 @@
     <div class="space-y-3">
       <div class="flex justify-between items-center px-1">
         <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">Daftar Lapak UMKM Aktif</h2>
-        <span
-          class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-md border border-emerald-100 flex items-center gap-1">
+        <span class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-md border border-emerald-100 flex items-center gap-1">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live Order
         </span>
       </div>
 
       <div id="containerLapak" class="space-y-3">
-        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-          Memuat data lapak...</div>
+        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200 shadow-2xs">Memuat data lapak...</div>
       </div>
     </div>
 
     <!-- MODAL PILIH LAPAK & MENU -->
-    <div id="modalPesan"
-      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
+    <div id="modalPesan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
       <div class="bg-white rounded-3xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-4">
         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
           <h3 class="font-extrabold text-slate-900 text-sm">Pesan Jajanan UMKM</h3>
@@ -72,52 +63,43 @@
         <div class="space-y-3">
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Pilih Lapak UMKM</label>
-            <select id="selectLapak" onchange="pilihLapak()"
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition font-medium">
+            <select id="selectLapak" onchange="pilihLapak()" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition font-medium">
               <option value="">-- Pilih Lapak --</option>
             </select>
           </div>
 
-          <div id="infoJadwalLapakContainer"
-            class="hidden bg-blue-50/70 border border-blue-100 p-2.5 rounded-xl text-[11px] text-blue-900 space-y-1">
+          <div id="infoJadwalLapakContainer" class="hidden bg-blue-50/70 border border-blue-100 p-2.5 rounded-xl text-[11px] text-blue-900 space-y-1">
             <span class="font-bold block">📍 Jadwal Terhubung:</span>
             <span id="infoJadwalLapakText" class="text-slate-700 block">-</span>
           </div>
 
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemesan</label>
-            <input type="text" id="pesanNama" placeholder="Cth: Budi"
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
+            <input type="text" id="pesanNama" placeholder="Cth: Budi" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
           </div>
 
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Email (Opsional untuk E-Ticket)</label>
-            <input type="email" id="pesanEmail" placeholder="email@gmail.com"
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
+            <input type="email" id="pesanEmail" placeholder="email@gmail.com" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
           </div>
 
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Menu Tersedia di Lapak Ini</label>
-            <div id="containerMenuPilihan"
-              class="border border-slate-200 rounded-xl p-2.5 bg-slate-50 max-h-44 overflow-y-auto space-y-2 text-xs">
+            <div id="containerMenuPilihan" class="border border-slate-200 rounded-xl p-2.5 bg-slate-50 max-h-44 overflow-y-auto space-y-2 text-xs">
               <span class="text-slate-400 italic">Pilih lapak terlebih dahulu...</span>
             </div>
           </div>
         </div>
 
         <div class="flex gap-2 pt-2 border-t border-slate-100">
-          <button onclick="tutupModalPesan()"
-            class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
-          <button onclick="kirimPesanJajanan()" id="btnKirimPesanan"
-            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition">Buat
-            Pesanan</button>
+          <button onclick="tutupModalPesan()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
+          <button onclick="kirimPesanJajanan()" id="btnKirimPesanan" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition">Buat Pesanan</button>
         </div>
       </div>
     </div>
 
     <!-- MODAL PENDAFTARAN MITRA UMKM -->
-    <div id="modalMitra"
-      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
+    <div id="modalMitra" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
       <div class="bg-white rounded-3xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-4">
         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
           <h3 class="font-extrabold text-slate-900 text-sm">Daftar Jadi Mitra UMKM</h3>
@@ -127,81 +109,64 @@
         <div class="space-y-3">
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Tenant / UMKM</label>
-            <input type="text" id="mitraNama" placeholder="Cth: Dimsum Enak"
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
+            <input type="text" id="mitraNama" placeholder="Cth: Dimsum Enak" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
           </div>
 
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Email / Kontak</label>
-            <input type="text" id="mitraEmail" placeholder="email@gmail.com atau No WA"
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
+            <input type="text" id="mitraEmail" placeholder="email@gmail.com atau No WA" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Pilih Jadwal Mabar yang Ingin
-              Disinggahi</label>
-            <div id="containerPilihanJadwalMitra"
-              class="border border-slate-200 rounded-xl p-2.5 bg-slate-50 max-h-36 overflow-y-auto space-y-2 text-xs">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Pilih Jadwal Mabar yang Ingin Disinggahi</label>
+            <div id="containerPilihanJadwalMitra" class="border border-slate-200 rounded-xl p-2.5 bg-slate-50 max-h-36 overflow-y-auto space-y-2 text-xs">
               <span class="text-slate-400 italic">Memuat jadwal...</span>
             </div>
           </div>
 
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Daftar Menu & Harga</label>
-            <textarea id="mitraMenu" rows="3" placeholder="Cth: Dimsum Mix - 25000, Es Teh - 5000"
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition"></textarea>
+            <textarea id="mitraMenu" rows="3" placeholder="Cth: Dimsum Mix - 25000, Es Teh - 5000" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition"></textarea>
           </div>
         </div>
 
         <div class="flex gap-2 pt-2 border-t border-slate-100">
-          <button onclick="tutupModalMitra()"
-            class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
-          <button onclick="kirimDaftarMitra()" id="btnKirimMitra"
-            class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition">Daftar
-            Mitra</button>
+          <button onclick="tutupModalMitra()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
+          <button onclick="kirimDaftarMitra()" id="btnKirimMitra" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition">Daftar Mitra</button>
         </div>
       </div>
     </div>
 
     <!-- MODAL INVOICE PEMBAYARAN JAJANAN -->
-    <div id="modalInvoiceJajanan"
-      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
+    <div id="modalInvoiceJajanan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
       <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-3">
-        <div
-          class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-          Pesanan Berhasil Dibuat</div>
+        <div class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Pesanan Berhasil Dibuat</div>
         <h3 class="font-extrabold text-slate-900 text-base" id="invTenantJudul">Tenant Jajanan</h3>
-
+        
         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-left text-xs space-y-1.5">
-          <div class="flex justify-between"><span class="text-slate-500">Total Tagihan (+Kode Unik):</span> <strong
-              id="invTotalTagihanJajanan" class="text-blue-600 text-sm font-extrabold">Rp 0</strong></div>
+          <div class="flex justify-between"><span class="text-slate-500">Total Tagihan (+Kode Unik):</span> <strong id="invTotalTagihanJajanan" class="text-blue-600 text-sm font-extrabold">Rp 0</strong></div>
         </div>
 
         <p class="text-[11px] text-slate-500">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.</p>
-
+        
         <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 inline-block">
           <img src="qris.png" alt="QRIS" class="mx-auto w-48 h-48 object-contain mb-1 rounded-lg bg-white p-1 border">
           <span class="text-[10px] text-slate-500 block">BCA 0083677071 a.n Andi</span>
         </div>
 
-        <button onclick="tutupModalInvoiceJajanan()"
-          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup
-          & Selesai</button>
+        <button onclick="tutupModalInvoiceJajanan()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup & Selesai</button>
       </div>
     </div>
   </main>
 
   <!-- FLOATING BOTTOM NAVIGATION BAR -->
   <nav aria-label="Navigasi Utama" class="fixed bottom-4 left-0 right-0 z-40 px-4">
-    <div
-      class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
-      <a href="index"
-        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
+    <div class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
+      <a href="index" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
         <span class="text-base leading-none mb-0.5">🏸</span>
         <span>Mabar</span>
       </a>
-      <a href="jualan"
-        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-blue-600 text-white font-bold text-[10px] shadow-xs transition">
+      <a href="jualan" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-blue-600 text-white font-bold text-[10px] shadow-xs transition">
         <span class="text-base leading-none mb-0.5">🛍️</span>
         <span>Jajanan</span>
       </a>
@@ -250,16 +215,16 @@
 
         globalDataLapak.forEach((l, index) => {
           const pesananTenant = (data.pesanan || []).filter(p => p.tenant === l.tenant && p.status && !p.status.includes('Dihapus'));
-
+          
           let listPesananHtml = '';
           if (pesananTenant.length === 0) {
             listPesananHtml = '<div class="text-[11px] text-slate-400 italic py-1 text-center">Belum ada pesanan masuk.</div>';
           } else {
             pesananTenant.forEach((p, idx) => {
-              const badge = p.status.includes('Lunas')
-                ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>'
+              const badge = p.status.includes('Lunas') 
+                ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>' 
                 : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
-
+              
               listPesananHtml += `
                 <li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
                   <div>
@@ -281,7 +246,7 @@
             } else {
               menuListHtml = `<li>${l.menu}</li>`;
             }
-          } catch (e) {
+          } catch(e) {
             menuListHtml = `<li>${l.menu || 'Menu tersedia'}</li>`;
           }
 
@@ -395,7 +360,7 @@
           } else {
             containerMenu.innerHTML = `<span class="text-slate-600">${lapakObj.menu}</span>`;
           }
-        } catch (e) {
+        } catch(e) {
           containerMenu.innerHTML = `<span class="text-slate-600">${lapakObj.menu || 'Menu tidak tersedia'}</span>`;
         }
       }
@@ -518,5 +483,4 @@
     });
   </script>
 </body>
-
 </html>
