@@ -294,6 +294,14 @@
         const jadwalList = data.jadwal || [];
         const pemainList = data.pemain || [];
 
+        // URUTKAN JADWAL: Berdasarkan Tanggal & Jam secara kronologis
+        jadwalList.sort((a, b) => {
+          let dateA = a.tanggal ? new Date(a.tanggal) : new Date(0);
+          let dateB = b.tanggal ? new Date(b.tanggal) : new Date(0);
+          if (dateA - dateB !== 0) return dateA - dateB; // Urut tanggal terdekat
+          return (a.jam || '').localeCompare(b.jam || ''); // Jika tanggal sama, urutkan jam
+        });
+
         let countAktif = 0;
         let countNonaktif = 0;
 
@@ -322,8 +330,8 @@
               </li>`;
           });
 
-          // Tampilan tanggal format ramah
-          const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) : '-';
+          // TAMPILAN TANGGAL: Format lengkap "Rabu, 11 November 2026"
+          const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-';
 
           const cardHtml = `
             <div class="border ${isNonaktif ? 'border-slate-200 bg-slate-50/50 grayscale-[20%]' : 'border-emerald-100 bg-white shadow-sm'} rounded-2xl p-4 space-y-3 transition-all">
@@ -392,7 +400,7 @@
       fetch(GAS_URL).then(res => res.json()).then(data => {
         const pesertaJadwal = (data.pemain || []).filter(p => p.jadwalId === jadwalId && p.status && !p.status.includes('Dihapus'));
         let teksWA = `🏸 *REKAP PESERTA MABAR* 🏸\n`;
-        const displayTgl = tanggal ? new Date(tanggal).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+        const displayTgl = tanggal ? new Date(tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
         teksWA += `📍 *${infoRaw}* | 🗓️ ${displayTgl} \n`;
         teksWA += `👥 Slot Terisi: ${pesertaJadwal.length}/${kuota}\n\n`;
         if (pesertaJadwal.length === 0) teksWA += `_Belum ada peserta terdaftar._`;
