@@ -100,18 +100,15 @@
     </div>
   </main>
 
-  <!-- FLOATING BOTTOM NAVIGATION BAR (Navigasi Melayang) -->
+  <!-- FLOATING BOTTOM NAVIGATION BAR -->
   <nav aria-label="Navigasi Utama" class="fixed bottom-4 left-0 right-0 z-40 px-4">
     <div
       class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
-      <!-- Menu Mabar (Aktif) -->
       <a href="index"
         class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-blue-600 text-white font-bold text-[10px] shadow-xs transition">
         <span class="text-base leading-none mb-0.5">🏸</span>
         <span>Mabar</span>
       </a>
-
-      <!-- Menu Jajanan UMKM (Bersih tanpa .html) -->
       <a href="jualan"
         class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
         <span class="text-base leading-none mb-0.5">🛍️</span>
@@ -131,11 +128,20 @@
         const container = document.getElementById('containerJadwal');
         container.innerHTML = '';
 
-        // Filter HANYA jadwal yang statusnya Aktif (atau kosong/tidak diset)
+        // Filter HANYA jadwal yang statusnya Aktif
         const listJadwal = (data.jadwal || []).filter(j => {
           const statusJ = j.status ? j.status.toString().trim().toLowerCase() : 'aktif';
           return statusJ === 'aktif';
         });
+
+        // URUTKAN JADWAL: Berdasarkan Tanggal & Jam terdekat secara kronologis
+        listJadwal.sort((a, b) => {
+          let dateA = a.tanggal ? new Date(a.tanggal) : new Date(0);
+          let dateB = b.tanggal ? new Date(b.tanggal) : new Date(0);
+          if (dateA - dateB !== 0) return dateA - dateB;
+          return (a.jam || '').localeCompare(b.jam || '');
+        });
+
         const listPemain = data.pemain || [];
 
         if (listJadwal.length === 0) {
@@ -146,6 +152,9 @@
         listJadwal.forEach(j => {
           const pemainJadwal = listPemain.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
           const sisaSlot = parseInt(j.kuota) - pemainJadwal.length;
+
+          // Format Tampilan Tanggal Cantik (Cth: Rabu, 11 November 2026)
+          const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-';
 
           let listPemainHtml = '';
           if (pemainJadwal.length === 0) {
@@ -164,12 +173,16 @@
             });
           }
 
+          // Gabungkan Info GOR dan Tanggal untuk dikirim ke modal pendaftaran
+          const infoLengkap = `${displayTanggal} - ${j.infoRaw}`;
+
           container.innerHTML += `
             <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
               <div class="flex justify-between items-start">
                 <div>
                   <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">[${j.id}]</span>
-                  <h3 class="font-bold text-sm text-slate-900 mt-1">${j.info}</h3>
+                  <h3 class="font-bold text-sm text-slate-900 mt-1">${j.infoRaw}</h3>
+                  <p class="text-[11px] text-slate-500 mt-0.5 font-medium">🗓️ ${displayTanggal}</p>
                   <p class="text-[11px] text-slate-500">🕒 ${j.jam} | HTM: Rp ${parseInt(j.htm).toLocaleString('id-ID')}</p>
                 </div>
                 <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${sisaSlot > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
@@ -187,7 +200,7 @@
                 </ul>
               </div>
 
-              <button onclick="bukaModalDaftar('${j.id}', \`${j.info}\`, ${j.htm})" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">
+              <button onclick="bukaModalDaftar('${j.id}', \`${infoLengkap}\`, ${j.htm})" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">
                 + Daftar Mabar Ini
               </button>
             </div>`;
@@ -259,7 +272,6 @@
       loadDataIndex();
     }
 
-    // Auto-refresh data setiap 5 detik agar status Lunas dari admin langsung tampil real-time
     document.addEventListener('DOMContentLoaded', () => {
       loadDataIndex();
       setInterval(loadDataIndex, 5000);
