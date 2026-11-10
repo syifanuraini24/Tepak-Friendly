@@ -39,8 +39,6 @@
 
     <!-- Panel Utama Admin -->
     <div id="adminPanel" class="hidden space-y-5">
-
-      <!-- Top Action Bar -->
       <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
         <span class="text-xs font-semibold text-slate-600">Sesi Aktif Admin</span>
         <div class="flex gap-2">
@@ -67,43 +65,61 @@
 
       <!-- Tambah Jadwal Baru -->
       <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
-        <h2 class="font-bold text-xs text-slate-800 uppercase tracking-wide">➕ Tambah Jadwal Mabar Baru</h2>
+        <h2 class="font-bold text-xs text-slate-800 uppercase tracking-wide">➕ Tambah Jadwal Baru</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
           <input type="text" id="addId" placeholder="ID Jadwal (Cth: Mabar-03)"
             class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <input type="text" id="addInfo" placeholder="Lokasi / Info (Cth: Gor Karapitan)"
-            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <input type="date" id="addTanggal"
+            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-500">
+          <input type="text" id="addInfo" placeholder="Lokasi GOR (Cth: Gor Karapitan)"
+            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 sm:col-span-2">
           <input type="text" id="addJam" placeholder="Jam Main (Cth: 11:30 - 14:00)"
             class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <input type="number" id="addHtm" placeholder="HTM (Cth: 27000 / 0 gratis)"
-            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <input type="number" id="addKuota" placeholder="Kuota Peserta (Cth: 8)"
-            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white sm:col-span-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <div class="flex gap-2">
+            <input type="number" id="addHtm" placeholder="HTM (Rp)"
+              class="flex-1 p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="number" id="addKuota" placeholder="Kuota"
+              class="w-1/3 p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
         </div>
         <button onclick="tambahJadwalBaru(this)"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-sm">
-          Simpan Jadwal Baru ke Master
-        </button>
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-sm">Simpan
+          Jadwal Baru</button>
       </div>
 
-      <!-- Summary Kuota & List Peserta per Jadwal -->
-      <div class="space-y-2.5">
-        <h2 class="font-bold text-xs text-slate-800 uppercase tracking-wide">📋 Rekap Peserta & Kuota per Jadwal</h2>
-        <div id="summaryJadwalList" class="space-y-3">
-          <div class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Memuat rekap jadwal...
+      <!-- Kategori Jadwal -->
+      <div class="space-y-6">
+        <!-- Jadwal Aktif -->
+        <div class="space-y-2.5">
+          <h2
+            class="font-bold text-xs text-emerald-700 uppercase tracking-wide bg-emerald-50 py-1.5 px-3 rounded-lg border border-emerald-100 inline-block">
+            🟢 Jadwal Mabar Aktif</h2>
+          <div id="jadwalAktifList" class="space-y-3">
+            <div class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Memuat rekap jadwal...
+            </div>
+          </div>
+        </div>
+
+        <!-- Jadwal Nonaktif -->
+        <div class="space-y-2.5 pt-4 border-t border-slate-100">
+          <h2
+            class="font-bold text-xs text-slate-500 uppercase tracking-wide bg-slate-100 py-1.5 px-3 rounded-lg border border-slate-200 inline-block">
+            🔴 Jadwal Selesai / Nonaktif</h2>
+          <div id="jadwalNonaktifList" class="space-y-3">
+            <div class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Memuat rekap jadwal...
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Konfirmasi Pembayaran Menunggu -->
-      <div class="space-y-2.5 pt-2 border-t border-slate-100">
+      <div class="space-y-2.5 pt-6 border-t border-slate-100">
         <h2 class="font-bold text-xs text-slate-800 uppercase tracking-wide">⏳ Konfirmasi Pembayaran Peserta</h2>
         <ul id="listMenunggu" class="space-y-2.5">
           <li class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Memuat data konfirmasi...
           </li>
         </ul>
       </div>
-
     </div>
   </div>
 
@@ -122,7 +138,7 @@
     </div>
   </div>
 
-  <!-- Modal Edit Nominal Tagihan -->
+  <!-- Modal Edit Nominal -->
   <div id="modalEditNominal"
     class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 space-y-3">
@@ -131,13 +147,61 @@
       <input type="hidden" id="editRowIndexInput">
       <div>
         <label class="block text-[11px] font-bold text-slate-600 mb-1">Nominal Baru (Rp)</label>
-        <input type="number" id="inputNominalBaru" placeholder="Cth: 35000"
+        <input type="number" id="inputNominalBaru"
           class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
       </div>
       <div class="flex gap-2 pt-2">
         <button onclick="tutupModalEditNominal()"
           class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
         <button onclick="simpanNominalBaru(this)"
+          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Edit Jadwal -->
+  <div id="modalEditJadwal"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+      <h3 class="font-bold text-sm text-slate-900">✏️ Edit Jadwal Mabar</h3>
+      <p class="text-[10px] text-slate-500 bg-slate-100 px-2 py-1 rounded font-mono inline-block"
+        id="editJadwalLabelId">-</p>
+      <input type="hidden" id="editJadwalId">
+      <div class="space-y-2">
+        <div class="grid grid-cols-2 gap-2">
+          <div class="col-span-2">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Tanggal</label>
+            <input type="date" id="editJadwalTanggal"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div class="col-span-2">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Lokasi / GOR</label>
+            <input type="text" id="editJadwalInfo"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Jam Main</label>
+          <input type="text" id="editJadwalJam"
+            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">HTM (Rp)</label>
+            <input type="number" id="editJadwalHtm"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Kuota</label>
+            <input type="number" id="editJadwalKuota"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="tutupModalEditJadwal()"
+          class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+        <button onclick="simpanEditJadwal(this)"
           class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Simpan</button>
       </div>
     </div>
@@ -148,57 +212,31 @@
     const GAS_URL = CONFIG.GAS_URL;
     const SESSION_DURATION = 6 * 60 * 60 * 1000;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      cekSesiLogin();
-    });
+    document.addEventListener('DOMContentLoaded', () => { cekSesiLogin(); });
 
     function cekSesiLogin() {
       const loginTime = localStorage.getItem('tepak_admin_login_time');
-      if (loginTime) {
-        const selisihWaktu = new Date().getTime() - parseInt(loginTime);
-        if (selisihWaktu < SESSION_DURATION) {
-          document.getElementById('loginSection').classList.add('hidden');
-          document.getElementById('adminPanel').classList.remove('hidden');
-          document.getElementById('statusOnline').classList.remove('hidden');
-          loadDataAdmin();
-          return;
-        }
-      }
-      logout(false);
+      if (loginTime && (new Date().getTime() - parseInt(loginTime)) < SESSION_DURATION) {
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('adminPanel').classList.remove('hidden');
+        document.getElementById('statusOnline').classList.remove('hidden');
+        loadDataAdmin();
+      } else { logout(false); }
     }
 
     async function login() {
       const pass = document.getElementById('passInput').value;
-      if (!pass) return alert('Masukkan password terlebih dahulu!');
-
+      if (!pass) return alert('Masukkan password!');
       const btnLogin = document.querySelector('#loginSection button');
-      btnLogin.innerText = 'Memeriksa...';
-      btnLogin.disabled = true;
-
+      btnLogin.innerText = 'Memeriksa...'; btnLogin.disabled = true;
       try {
-        const response = await fetch(GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'login_admin', password: pass })
-        });
+        const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'login_admin', password: pass }) });
         const result = await response.json();
-
         if (result.status === 'success') {
           localStorage.setItem('tepak_admin_login_time', new Date().getTime().toString());
-          document.getElementById('loginSection').classList.add('hidden');
-          document.getElementById('adminPanel').classList.remove('hidden');
-          document.getElementById('statusOnline').classList.remove('hidden');
-          loadDataAdmin();
-        } else {
-          alert('Password salah!');
-          btnLogin.innerText = 'Masuk Dashboard';
-          btnLogin.disabled = false;
-        }
-      } catch (error) {
-        console.error("Gagal login:", error);
-        alert('Terjadi kesalahan koneksi.');
-        btnLogin.innerText = 'Masuk Dashboard';
-        btnLogin.disabled = false;
-      }
+          cekSesiLogin();
+        } else { alert('Password salah!'); btnLogin.innerText = 'Masuk Dashboard'; btnLogin.disabled = false; }
+      } catch (error) { alert('Terjadi kesalahan koneksi.'); btnLogin.innerText = 'Masuk Dashboard'; btnLogin.disabled = false; }
     }
 
     function logout(pesanAlert = true) {
@@ -207,270 +245,169 @@
       document.getElementById('statusOnline').classList.add('hidden');
       document.getElementById('loginSection').classList.remove('hidden');
       document.getElementById('passInput').value = '';
-      const btnLogin = document.querySelector('#loginSection button');
-      btnLogin.innerText = 'Masuk Dashboard';
-      btnLogin.disabled = false;
       if (pesanAlert) alert('Berhasil logout.');
     }
 
     function showConfirmModal(title, desc, confirmButtonText, confirmButtonClass, onConfirm) {
       const modal = document.getElementById('customModal');
-      const titleEl = document.getElementById('modalTitle');
-      const descEl = document.getElementById('modalDesc');
+      document.getElementById('modalTitle').innerText = title;
+      document.getElementById('modalDesc').innerText = desc;
       const btnConfirm = document.getElementById('modalBtnConfirm');
-      const btnCancel = document.getElementById('modalBtnCancel');
-
-      titleEl.innerText = title;
-      descEl.innerText = desc;
       btnConfirm.innerText = confirmButtonText;
       btnConfirm.className = `flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white ${confirmButtonClass}`;
-
       modal.classList.remove('hidden');
 
       const newBtnConfirm = btnConfirm.cloneNode(true);
-      const newBtnCancel = btnCancel.cloneNode(true);
+      const newBtnCancel = document.getElementById('modalBtnCancel').cloneNode(true);
       btnConfirm.parentNode.replaceChild(newBtnConfirm, btnConfirm);
-      btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+      document.getElementById('modalBtnCancel').parentNode.replaceChild(newBtnCancel, document.getElementById('modalBtnCancel'));
 
-      document.getElementById('modalBtnConfirm').addEventListener('click', () => {
-        modal.classList.add('hidden');
-        onConfirm();
-      });
-
-      document.getElementById('modalBtnCancel').addEventListener('click', () => {
-        modal.classList.add('hidden');
-      });
+      newBtnConfirm.addEventListener('click', () => { modal.classList.add('hidden'); onConfirm(); });
+      newBtnCancel.addEventListener('click', () => { modal.classList.add('hidden'); });
     }
 
     async function loadDataAdmin() {
       const list = document.getElementById('listMenunggu');
-      const summaryJadwalDiv = document.getElementById('summaryJadwalList');
+      const divAktif = document.getElementById('jadwalAktifList');
+      const divNonaktif = document.getElementById('jadwalNonaktifList');
+
       list.innerHTML = '<li class="text-center text-xs text-slate-400 py-4">Memuat data...</li>';
+      divAktif.innerHTML = '';
+      divNonaktif.innerHTML = '';
 
       try {
         const response = await fetch(GAS_URL);
         const data = await response.json();
         list.innerHTML = '';
-        summaryJadwalDiv.innerHTML = '';
 
         const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
-
-        let totalLunasNum = 0;
-        let totalPendingNum = 0;
+        let totalLunasNum = 0, totalPendingNum = 0;
 
         (data.pemain || []).forEach(item => {
           const nominal = parseInt(item.tagihan || 0);
-          if (item.status && item.status.includes('Lunas')) {
-            totalLunasNum += nominal;
-          } else if (item.status && item.status.includes('Menunggu')) {
-            totalPendingNum += nominal;
-          }
+          if (item.status && item.status.includes('Lunas')) totalLunasNum += nominal;
+          else if (item.status && item.status.includes('Menunggu')) totalPendingNum += nominal;
         });
-
         document.getElementById('totalDanaLunas').innerText = formatRp.format(totalLunasNum);
         document.getElementById('totalDanaPending').innerText = formatRp.format(totalPendingNum);
 
         const jadwalList = data.jadwal || [];
         const pemainList = data.pemain || [];
 
-        if (jadwalList.length === 0) {
-          summaryJadwalDiv.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Belum ada jadwal mabar.</div>';
-        } else {
-          jadwalList.forEach(j => {
-            const pesertaJadwal = pemainList.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
-            const lunasCount = pesertaJadwal.filter(p => p.status.includes('Lunas')).length;
-            const pendingCount = pesertaJadwal.filter(p => p.status.includes('Menunggu')).length;
-            const isNonaktif = j.status && j.status.toString().toLowerCase().includes('nonaktif');
+        let countAktif = 0;
+        let countNonaktif = 0;
 
-            let listNamaHtml = '';
-            if (pesertaJadwal.length === 0) {
-              listNamaHtml = '<li class="text-slate-400 italic text-[11px] py-2 text-center">Belum ada peserta terdaftar.</li>';
-            } else {
-              pesertaJadwal.forEach((p, idx) => {
-                const isLunas = p.status.includes('Lunas');
-                const nominalTagihan = formatRp.format(p.tagihan || 0);
-                listNamaHtml += `
-                  <li class="py-1.5 px-2.5 border-b border-slate-100 last:border-b-0 flex justify-between items-center text-xs" data-row="${p.rowIndex}">
-                    <div>
-                      <span class="font-bold text-slate-800">${idx + 1}. ${p.nama}</span>
-                      <span class="block text-[10px] text-slate-400">${p.email || '-'}</span>
-                    </div>
-                    <div class="text-right flex items-center gap-2">
-                      <div>
-                        <span class="block font-mono font-semibold text-slate-700">${nominalTagihan}</span>
-                        <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isLunas ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${p.status}</span>
-                      </div>
-                      <div class="flex gap-1">
-                        <button onclick="bukaModalEditNominal(${p.rowIndex}, '${p.nama}', ${p.tagihan || 0})" class="bg-slate-100 hover:bg-slate-200 text-slate-600 p-1.5 rounded-lg border border-slate-200 transition" title="Edit Nominal">
-                          ✏️
-                        </button>
-                        <button onclick="hapusPemainDariRekap(${p.rowIndex}, this)" class="bg-rose-50 hover:bg-rose-100 text-rose-600 p-1.5 rounded-lg border border-slate-200 transition" title="Hapus Peserta">
-                          🗑️
-                        </button>
-                      </div>
-                    </div>
-                  </li>`;
-              });
-            }
+        jadwalList.forEach(j => {
+          const pesertaJadwal = pemainList.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
+          const lunasCount = pesertaJadwal.filter(p => p.status.includes('Lunas')).length;
+          const pendingCount = pesertaJadwal.filter(p => p.status.includes('Menunggu')).length;
+          const isNonaktif = j.status && j.status.toString().toLowerCase().includes('nonaktif');
 
-            summaryJadwalDiv.innerHTML += `
-              <div class="border ${isNonaktif ? 'border-rose-200 bg-rose-50/20' : 'border-slate-200 bg-white'} rounded-2xl p-4 shadow-xs space-y-3">
-                <div class="flex justify-between items-start border-b border-slate-100 pb-2">
+          let listNamaHtml = pesertaJadwal.length === 0 ? '<li class="text-slate-400 italic text-[11px] py-2 text-center">Belum ada peserta.</li>' : '';
+          pesertaJadwal.forEach((p, idx) => {
+            const isLunas = p.status.includes('Lunas');
+            listNamaHtml += `
+              <li class="py-1.5 px-2.5 border-b border-slate-100 last:border-b-0 flex justify-between items-center text-xs">
+                <div><span class="font-bold text-slate-800">${idx + 1}. ${p.nama}</span></div>
+                <div class="text-right flex items-center gap-2">
                   <div>
-                    <span class="text-[10px] bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-md border">${j.id}</span>
-                    <h3 class="font-bold text-sm text-slate-900 mt-1">${j.info} ${isNonaktif ? '<span class="text-rose-600 font-bold text-xs">(Nonaktif)</span>' : ''}</h3>
+                    <span class="block font-mono font-semibold text-slate-700">${formatRp.format(p.tagihan || 0)}</span>
+                    <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isLunas ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${p.status}</span>
                   </div>
-                  <div class="flex items-center gap-1.5 flex-wrap justify-end">
-                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                      Kuota: ${pesertaJadwal.length}/${j.kuota}
-                    </span>
-                    <button onclick="copyListKeWA('${j.id}', \`${j.info}\`, ${j.kuota})" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 transition" title="Salin List ke WhatsApp">
-                      📋 Copy WA
-                    </button>
-                    <button onclick="toggleStatusJadwal('${j.id}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}', this)" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border transition ${isNonaktif ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100'}">
-                      ${isNonaktif ? '🟢 Aktifkan' : '🔴 Nonaktifkan'}
-                    </button>
+                  <div class="flex gap-1">
+                    <button onclick="bukaModalEditNominal(${p.rowIndex}, '${p.nama}', ${p.tagihan || 0})" class="bg-slate-100 p-1.5 rounded-lg border">✏️</button>
+                    <button onclick="hapusPemainDariRekap(${p.rowIndex}, this)" class="bg-rose-50 text-rose-600 p-1.5 rounded-lg border">🗑️</button>
                   </div>
                 </div>
-                
-                <div class="text-xs text-slate-500 flex justify-between bg-slate-50 p-2 rounded-xl border border-slate-100">
-                  <span>⏰ ${j.jam}</span>
-                  <span>HTM Dasar: Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</span>
-                </div>
-
-                <div class="rounded-xl border border-slate-200 overflow-hidden">
-                  <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200">Daftar Peserta & Tagihan:</div>
-                  <ul class="divide-y divide-slate-100 max-h-40 overflow-y-auto">
-                    ${listNamaHtml}
-                  </ul>
-                </div>
-
-                <div class="flex justify-between items-center pt-1 text-[11px] text-slate-600 border-t border-slate-100">
-                  <span>🟢 Lunas: <strong>${lunasCount}</strong> peserta</span>
-                  <span>🟡 Pending: <strong>${pendingCount}</strong> peserta</span>
-                </div>
-              </div>`;
+              </li>`;
           });
-        }
+
+          // Tampilan tanggal format ramah
+          const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) : '-';
+
+          const cardHtml = `
+            <div class="border ${isNonaktif ? 'border-slate-200 bg-slate-50/50 grayscale-[20%]' : 'border-emerald-100 bg-white shadow-sm'} rounded-2xl p-4 space-y-3 transition-all">
+              <div class="flex justify-between items-start border-b border-slate-100 pb-2">
+                <div>
+                  <span class="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-md border">${j.id}</span>
+                  <h3 class="font-bold text-sm text-slate-900 mt-1">${j.infoRaw}</h3>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">Slot: ${pesertaJadwal.length}/${j.kuota}</span>
+                  <button onclick="bukaModalEditJadwal('${j.id}', '${j.tanggal}', \`${j.infoRaw}\`, '${j.jam}', ${j.htm}, ${j.kuota})" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100">✏️ Edit</button>
+                  <button onclick="copyListKeWA('${j.id}', '${j.tanggal}', \`${j.infoRaw}\`, ${j.kuota})" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100">📋 Copy WA</button>
+                  <button onclick="toggleStatusJadwal('${j.id}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}', this)" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border ${isNonaktif ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">${isNonaktif ? '🟢 Aktifkan' : '🔴 Nonaktifkan'}</button>
+                </div>
+              </div>
+              <div class="text-xs text-slate-600 flex justify-between bg-slate-50 p-2 rounded-xl border border-slate-100 font-medium">
+                <span>🗓️ ${displayTanggal} &nbsp; ⏰ ${j.jam}</span>
+                <span>HTM: Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</span>
+              </div>
+              <div class="rounded-xl border border-slate-200 overflow-hidden">
+                <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200">Daftar Peserta:</div>
+                <ul class="divide-y divide-slate-100 max-h-40 overflow-y-auto">${listNamaHtml}</ul>
+              </div>
+            </div>`;
+
+          if (isNonaktif) {
+            divNonaktif.innerHTML += cardHtml;
+            countNonaktif++;
+          } else {
+            divAktif.innerHTML += cardHtml;
+            countAktif++;
+          }
+        });
+
+        if (countAktif === 0) divAktif.innerHTML = '<div class="text-center text-xs text-slate-400 py-4">Belum ada jadwal aktif.</div>';
+        if (countNonaktif === 0) divNonaktif.innerHTML = '<div class="text-center text-xs text-slate-400 py-4">Belum ada history jadwal.</div>';
 
         const pendingList = pemainList.filter(item => item.status && item.status.includes('Menunggu'));
-
         if (pendingList.length === 0) {
           list.innerHTML = '<li class="text-center text-emerald-700 text-xs font-bold p-4 bg-emerald-50 rounded-2xl border border-emerald-100">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
-          return;
-        }
-
-        const waktuSekarang = new Date().getTime();
-        const batasWaktuMs = 2 * 60 * 60 * 1000;
-
-        pendingList.forEach(item => {
-          const tagihanRp = formatRp.format(item.tagihan || 0);
-          const waktuDaftar = new Date(item.timestamp || new Date());
-          const jamDaftarString = waktuDaftar.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-
-          const waktuBerlakuSampai = waktuDaftar.getTime() + batasWaktuMs;
-          const sisaMs = waktuBerlakuSampai - waktuSekarang;
-
-          let sisaWaktuTeks = '';
-          let warnaSisa = 'text-slate-500';
-
-          if (sisaMs > 0) {
-            const totalMenit = Math.floor(sisaMs / (1000 * 60));
-            const jamSisa = Math.floor(totalMenit / 60);
-            const menitSisa = totalMenit % 60;
-            sisaWaktuTeks = jamSisa > 0 ? `Sisa waktu: ${jamSisa}j ${menitSisa}m` : `Sisa waktu: ${menitSisa} mdt lagi`;
-            if (totalMenit < 30) warnaSisa = 'text-rose-600 font-bold animate-pulse';
-          } else {
-            sisaWaktuTeks = '⚠️ Kedaluwarsa (> 2 jam)';
-            warnaSisa = 'text-rose-600 font-bold';
-          }
-
-          list.innerHTML += `
-            <li class="p-3.5 border border-amber-200 bg-amber-50/40 rounded-2xl flex flex-col space-y-2.5 text-xs shadow-xs" data-row="${item.rowIndex}" data-nominal="${item.tagihan || 0}">
-              <div class="flex justify-between items-start">
-                <div>
-                  <strong class="text-slate-900 text-sm block">${item.nama}</strong>
-                  <span class="text-slate-500">📧 ${item.email || '-'}</span><br>
-                  <span class="font-mono text-blue-700 font-bold bg-white px-2 py-0.5 border border-blue-100 rounded-md mt-1 inline-block">${tagihanRp}</span>
-                </div>
-                <div class="flex gap-1.5">
-                  <button onclick="accPemain(${item.rowIndex}, this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-xl transition shadow-xs">
-                    ACC Lunas
-                  </button>
-                  <button onclick="hapusPemain(${item.rowIndex}, this)" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-xl transition shadow-xs">
-                    Hapus
-                  </button>
-                </div>
-              </div>
-              <div class="text-[11px] text-slate-600 border-t border-amber-100 pt-2 flex flex-col gap-0.5">
-                <span>📍 <strong>[${item.jadwalId}]</strong> ${item.jadwalInfo}</span>
-                <span>⏰ Daftar: <strong>${jamDaftarString}</strong> | <span class="${warnaSisa}">${sisaWaktuTeks}</span></span>
-              </div>
-            </li>`;
-        });
-      } catch (error) {
-        console.error("Gagal memuat data dari GAS:", error);
-        list.innerHTML = '<li class="text-center text-rose-600 text-xs py-4 bg-rose-50 rounded-2xl border">Gagal memuat data. Periksa koneksi atau URL GAS.</li>';
-      }
-    }
-
-    // Fungsi Copy List Peserta ke WhatsApp
-    function copyListKeWA(jadwalId, jadwalInfo, kuota) {
-      fetch(GAS_URL)
-        .then(res => res.json())
-        .then(data => {
-          const pemainList = data.pemain || [];
-          const pesertaJadwal = pemainList.filter(p => p.jadwalId === jadwalId && p.status && !p.status.includes('Dihapus'));
-
-          let teksWA = `🏸 *REKAP PESERTA MABAR* 🏸\n`;
-          teksWA += `📍 *${jadwalInfo}* (${jadwalId})\n`;
-          teksWA += `👥 Slot Terisi: ${pesertaJadwal.length}/${kuota}\n\n`;
-
-          if (pesertaJadwal.length === 0) {
-            teksWA += `_Belum ada peserta terdaftar._`;
-          } else {
-            pesertaJadwal.forEach((p, idx) => {
-              const statusEmoji = p.status.includes('Lunas') ? 'Lunas 🟢' : 'Pending 🟡';
-              teksWA += `${idx + 1}. ${p.nama} (${statusEmoji})\n`;
-            });
-          }
-
-          teksWA += `\n_Yuk yang mau gabung silakan amankan slotnya!_`;
-
-          navigator.clipboard.writeText(teksWA).then(() => {
-            alert(`List peserta [${jadwalId}] berhasil disalin! Silakan paste di WhatsApp.`);
-          }).catch(err => {
-            console.error('Gagal menyalin:', err);
-            alert('Gagal menyalin teks ke clipboard.');
-          });
-        })
-        .catch(err => {
-          console.error('Gagal mengambil data:', err);
-          alert('Gagal memuat data terbaru.');
-        });
-    }
-
-    async function toggleStatusJadwal(jadwalId, statusBaru, btnElement) {
-      btnElement.innerText = 'Memproses...';
-      btnElement.disabled = true;
-
-      try {
-        const response = await fetch(GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'toggle_status_jadwal', jadwalId, statusBaru })
-        });
-        const result = await response.json();
-
-        if (result.status === 'success') {
-          loadDataAdmin();
         } else {
-          throw new Error(result.message || 'Gagal mengubah status');
+          pendingList.forEach(item => {
+            const tagihanRp = formatRp.format(item.tagihan || 0);
+            list.innerHTML += `
+              <li class="p-3.5 border border-amber-200 bg-amber-50/40 rounded-2xl flex flex-col space-y-2.5 text-xs">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <strong class="text-slate-900 text-sm block">${item.nama}</strong>
+                    <span class="font-mono text-blue-700 font-bold bg-white px-2 py-0.5 border border-blue-100 rounded-md mt-1 inline-block">${tagihanRp}</span>
+                  </div>
+                  <div class="flex gap-1.5">
+                    <button onclick="accPemain(${item.rowIndex}, this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-xl">ACC Lunas</button>
+                    <button onclick="hapusPemain(${item.rowIndex}, this)" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-xl">Hapus</button>
+                  </div>
+                </div>
+                <div class="text-[11px] text-slate-600 border-t border-amber-100 pt-2 flex flex-col gap-0.5">
+                  <span>📍 <strong>[${item.jadwalId}]</strong> ${item.jadwalInfo}</span>
+                </div>
+              </li>`;
+          });
         }
-      } catch (error) {
-        console.error("Gagal toggle status:", error);
-        alert('Gagal mengubah status jadwal: ' + error.message);
+      } catch (error) { list.innerHTML = '<li class="text-center text-rose-600 text-xs py-4">Gagal memuat data.</li>'; }
+    }
+
+    function copyListKeWA(jadwalId, tanggal, infoRaw, kuota) {
+      fetch(GAS_URL).then(res => res.json()).then(data => {
+        const pesertaJadwal = (data.pemain || []).filter(p => p.jadwalId === jadwalId && p.status && !p.status.includes('Dihapus'));
+        let teksWA = `🏸 *REKAP PESERTA MABAR* 🏸\n`;
+        const displayTgl = tanggal ? new Date(tanggal).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' }) : '';
+        teksWA += `📍 *${infoRaw}* | 🗓️ ${displayTgl} \n`;
+        teksWA += `👥 Slot Terisi: ${pesertaJadwal.length}/${kuota}\n\n`;
+        if (pesertaJadwal.length === 0) teksWA += `_Belum ada peserta terdaftar._`;
+        else pesertaJadwal.forEach((p, idx) => { teksWA += `${idx + 1}. ${p.nama} (${p.status.includes('Lunas') ? 'Lunas 🟢' : 'Pending 🟡'})\n`; });
+        teksWA += `\n_Yuk amankan slotnya!_`;
+        navigator.clipboard.writeText(teksWA).then(() => alert(`List tersalin!`));
+      });
+    }
+
+    async function toggleStatusJadwal(jadwalId, statusBaru, btn) {
+      btn.innerText = 'Memproses...'; btn.disabled = true;
+      try {
+        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'toggle_status_jadwal', jadwalId, statusBaru }) });
         loadDataAdmin();
-      }
+      } catch (e) { alert('Gagal'); loadDataAdmin(); }
     }
 
     function bukaModalEditNominal(rowIndex, nama, currentTagihan) {
@@ -479,157 +416,76 @@
       document.getElementById('inputNominalBaru').value = currentTagihan;
       document.getElementById('modalEditNominal').classList.remove('hidden');
     }
-
-    function tutupModalEditNominal() {
-      document.getElementById('modalEditNominal').classList.add('hidden');
-    }
-
-    async function simpanNominalBaru(btnElement) {
+    function tutupModalEditNominal() { document.getElementById('modalEditNominal').classList.add('hidden'); }
+    async function simpanNominalBaru(btn) {
       const rowIndex = document.getElementById('editRowIndexInput').value;
       const nominalBaru = document.getElementById('inputNominalBaru').value.trim();
-
-      if (!nominalBaru || isNaN(nominalBaru)) {
-        return alert('Masukkan nominal angka yang valid!');
-      }
-
-      btnElement.innerText = 'Menyimpan...';
-      btnElement.disabled = true;
-
-      try {
-        const response = await fetch(GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'update_tagihan',
-            rowIndex: parseInt(rowIndex),
-            tagihanBaru: parseInt(nominalBaru)
-          })
-        });
-        const result = await response.json();
-
-        if (result.status === 'success') {
-          tutupModalEditNominal();
-          loadDataAdmin();
-        } else {
-          throw new Error(result.message || 'Gagal menyimpan');
-        }
-      } catch (error) {
-        console.error("Gagal edit tagihan:", error);
-        alert('Gagal memperbarui nominal: ' + error.message);
-      } finally {
-        btnElement.innerText = 'Simpan';
-        btnElement.disabled = false;
-      }
+      btn.innerText = '...'; btn.disabled = true;
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_tagihan', rowIndex: parseInt(rowIndex), tagihanBaru: parseInt(nominalBaru) }) });
+      tutupModalEditNominal(); loadDataAdmin(); btn.innerText = 'Simpan'; btn.disabled = false;
     }
 
     async function tambahJadwalBaru(btn) {
-      const id = document.getElementById('addId').value.trim();
-      const info = document.getElementById('addInfo').value.trim();
-      const jam = document.getElementById('addJam').value.trim();
-      const htm = document.getElementById('addHtm').value.trim();
-      const kuota = document.getElementById('addKuota').value.trim();
-
-      if (!id || !info || !jam || htm === '' || !kuota) {
-        return alert('Semua kolom form tambah jadwal harus diisi!');
-      }
-
-      btn.innerText = 'Menyimpan...';
-      btn.disabled = true;
-
-      try {
-        const response = await fetch(GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'add_jadwal', id: id, info: info, jam: jam, htm: htm, kuota: kuota })
-        });
-        const result = await response.json();
-
-        if (result.status === 'success') {
-          alert('Jadwal baru berhasil ditambahkan!');
-          document.getElementById('addId').value = '';
-          document.getElementById('addInfo').value = '';
-          document.getElementById('addJam').value = '';
-          document.getElementById('addHtm').value = '';
-          document.getElementById('addKuota').value = '';
-          await loadDataAdmin();
-        } else {
-          throw new Error(result.message);
-        }
-      } catch (error) {
-        console.error("Gagal tambah jadwal:", error);
-        alert('Gagal menambahkan jadwal: ' + error.message);
-      } finally {
-        btn.innerText = 'Simpan Jadwal Baru ke Master';
-        btn.disabled = false;
-      }
+      const payload = {
+        action: 'add_jadwal',
+        id: document.getElementById('addId').value.trim(),
+        tanggal: document.getElementById('addTanggal').value.trim(),
+        info: document.getElementById('addInfo').value.trim(),
+        jam: document.getElementById('addJam').value.trim(),
+        htm: document.getElementById('addHtm').value.trim(),
+        kuota: document.getElementById('addKuota').value.trim()
+      };
+      if (!payload.id || !payload.tanggal || !payload.info || !payload.jam || payload.htm === '' || !payload.kuota) return alert('Lengkapi form!');
+      btn.innerText = 'Menyimpan...'; btn.disabled = true;
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+      alert('Tersimpan!'); loadDataAdmin();
+      ['addId', 'addTanggal', 'addInfo', 'addJam', 'addHtm', 'addKuota'].forEach(id => document.getElementById(id).value = '');
+      btn.innerText = 'Simpan Jadwal Baru'; btn.disabled = false;
     }
 
-    async function accPemain(rowIndex, btnElement) {
-      showConfirmModal(
-        "Konfirmasi Pembayaran",
-        "Konfirmasi pemain ini sudah bayar dan kirim email e-ticket lunas?",
-        "Ya, ACC Lunas",
-        "bg-emerald-600 hover:bg-emerald-700",
-        async () => {
-          btnElement.innerText = 'Memproses...';
-          btnElement.disabled = true;
-
-          try {
-            const response = await fetch(GAS_URL, {
-              method: 'POST',
-              body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex })
-            });
-            const result = await response.json();
-
-            if (result.status === 'updated' || result.status === 'success') {
-              loadDataAdmin();
-            } else {
-              throw new Error(result.message);
-            }
-          } catch (error) {
-            alert('Gagal mengupdate status: ' + error.message);
-            btnElement.innerText = 'ACC Lunas';
-            btnElement.disabled = false;
-          }
-        }
-      );
-    }
-
-    async function hapusPemain(rowIndex, btnElement) {
-      showConfirmModal(
-        "Hapus Peserta",
-        "Yakin ingin menghapus peserta ini? Slot kuota akan langsung terbuka kembali.",
-        "Ya, Hapus",
-        "bg-rose-600 hover:bg-rose-700",
-        async () => {
-          btnElement.innerText = 'Menghapus...';
-          btnElement.disabled = true;
-
-          try {
-            const response = await fetch(GAS_URL, {
-              method: 'POST',
-              body: JSON.stringify({ action: 'delete_row', rowIndex: rowIndex })
-            });
-            const result = await response.json();
-
-            if (result.status === 'deleted' || result.status === 'success') {
-              loadDataAdmin();
-            } else {
-              throw new Error(result.message);
-            }
-          } catch (error) {
-            alert('Gagal menghapus data: ' + error.message);
-            btnElement.innerText = 'Hapus';
-            btnElement.disabled = false;
-          }
-        }
-      );
-    }
-
-    function hapusPemainDariRekap(rowIndex, btnElement) {
-      hapusPemain(rowIndex, {
-        closest: () => btnElement.closest('li'),
-        innerText: '',
-        disabled: false
+    async function accPemain(rowIndex, btn) {
+      showConfirmModal("Konfirmasi", "ACC Lunas?", "Ya", "bg-emerald-600", async () => {
+        btn.innerText = '...'; btn.disabled = true;
+        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex }) });
+        loadDataAdmin();
       });
+    }
+
+    async function hapusPemain(rowIndex, btn) {
+      showConfirmModal("Hapus", "Yakin hapus?", "Ya", "bg-rose-600", async () => {
+        btn.innerText = '...'; btn.disabled = true;
+        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_row', rowIndex: rowIndex }) });
+        loadDataAdmin();
+      });
+    }
+    function hapusPemainDariRekap(rowIndex, btnElement) { hapusPemain(rowIndex, { innerText: '', disabled: false }); }
+
+    function bukaModalEditJadwal(id, tanggal, info, jam, htm, kuota) {
+      document.getElementById('editJadwalLabelId').innerText = `${id}`;
+      document.getElementById('editJadwalId').value = id;
+      document.getElementById('editJadwalTanggal').value = tanggal;
+      document.getElementById('editJadwalInfo').value = info;
+      document.getElementById('editJadwalJam').value = jam;
+      document.getElementById('editJadwalHtm').value = htm;
+      document.getElementById('editJadwalKuota').value = kuota;
+      document.getElementById('modalEditJadwal').classList.remove('hidden');
+    }
+    function tutupModalEditJadwal() { document.getElementById('modalEditJadwal').classList.add('hidden'); }
+    async function simpanEditJadwal(btn) {
+      const payload = {
+        action: 'edit_jadwal',
+        id: document.getElementById('editJadwalId').value,
+        tanggal: document.getElementById('editJadwalTanggal').value,
+        info: document.getElementById('editJadwalInfo').value,
+        jam: document.getElementById('editJadwalJam').value,
+        htm: document.getElementById('editJadwalHtm').value,
+        kuota: document.getElementById('editJadwalKuota').value
+      };
+      if (!payload.tanggal || !payload.info || !payload.jam || payload.htm === '' || !payload.kuota) return alert('Lengkapi form edit!');
+      btn.innerText = 'Menyimpan...'; btn.disabled = true;
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+      tutupModalEditJadwal(); alert('Diperbarui!'); loadDataAdmin();
+      btn.innerText = 'Simpan'; btn.disabled = false;
     }
   </script>
 </body>
