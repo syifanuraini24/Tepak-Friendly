@@ -3,7 +3,9 @@
   const GAS_URL = CONFIG.GAS_URL;
   const SESSION_DURATION = 6 * 60 * 60 * 1000;
 
-  document.addEventListener('DOMContentLoaded', () => { cekSesiLogin(); });
+  document.addEventListener('DOMContentLoaded', () => {
+    cekSesiLogin();
+  });
 
   function cekSesiLogin() {
     const loginTime = localStorage.getItem('tepak_admin_login_time');
@@ -12,7 +14,9 @@
       document.getElementById('adminPanel').classList.remove('hidden');
       document.getElementById('statusOnline').classList.remove('hidden');
       loadDataAdmin();
-    } else { logout(false); }
+    } else {
+      logout(false);
+    }
   }
 
   async function login() {
@@ -21,9 +25,14 @@
 
     const btnLogin = document.querySelector('#loginSection button');
     const oldText = btnLogin.innerText;
-    btnLogin.innerText = 'Memeriksa...'; btnLogin.disabled = true;
+    btnLogin.innerText = 'Memeriksa...';
+    btnLogin.disabled = true;
+
     try {
-      const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'login_admin', password: pass }) });
+      const response = await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'login_admin', password: pass })
+      });
       const result = await response.json();
       if (result.status === 'success') {
         localStorage.setItem('tepak_admin_login_time', new Date().getTime().toString());
@@ -57,7 +66,7 @@
     document.getElementById('modalDesc').innerText = desc;
     const btnConfirm = document.getElementById('modalBtnConfirm');
     btnConfirm.innerText = confirmButtonText;
-    btnConfirm.className = `flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white ${confirmButtonClass}`;
+    btnConfirm.className = "flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white " + confirmButtonClass;
     modal.classList.remove('hidden');
 
     const newBtnConfirm = btnConfirm.cloneNode(true);
@@ -75,7 +84,7 @@
     document.getElementById('modalDesc').innerText = desc;
     const btnConfirm = document.getElementById('modalBtnConfirm');
     btnConfirm.innerText = "OK";
-    btnConfirm.className = `flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white bg-blue-600 hover:bg-blue-700`;
+    btnConfirm.className = "flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white bg-blue-600 hover:bg-blue-700";
 
     const btnCancel = document.getElementById('modalBtnCancel');
     btnCancel.classList.add('hidden');
@@ -90,7 +99,6 @@
     });
   }
 
-  // LOAD DATA SECARA HALUS (TANPA REFRESH HALAMAN)
   async function loadDataAdmin() {
     const list = document.getElementById('listMenunggu');
     const divAktif = document.getElementById('jadwalAktifList');
@@ -236,13 +244,15 @@
 
   async function toggleStatusJadwal(jadwalId, statusBaru, btn) {
     const oldText = btn.innerText;
-    btn.innerText = '...'; btn.disabled = true;
+    btn.innerText = '...';
+    btn.disabled = true;
     try {
       await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'toggle_status_jadwal', jadwalId, statusBaru }) });
-      await loadDataAdmin(); // Update data secara halus tanpa refresh
+      await loadDataAdmin();
     } catch (e) {
       showCustomWarning("Gagal", "Gagal mengubah status jadwal.");
-      btn.innerText = oldText; btn.disabled = false;
+      btn.innerText = oldText;
+      btn.disabled = false;
     }
   }
 
@@ -253,7 +263,9 @@
     document.getElementById('modalEditNominal').classList.remove('hidden');
   }
 
-  function tutupModalEditNominal() { document.getElementById('modalEditNominal').classList.add('hidden'); }
+  function tutupModalEditNominal() {
+    document.getElementById('modalEditNominal').classList.add('hidden');
+  }
 
   async function simpanNominalBaru(btn) {
     const rowIndex = document.getElementById('editRowIndexInput').value;
@@ -261,13 +273,15 @@
     if (!nominalBaru || isNaN(nominalBaru)) return showCustomWarning("Validasi", "Masukkan nominal angka yang valid!");
 
     const oldText = btn.innerText;
-    btn.innerText = 'Menyimpan...'; btn.disabled = true;
+    btn.innerText = 'Menyimpan...';
+    btn.disabled = true;
 
     await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_tagihan', rowIndex: parseInt(rowIndex), tagihanBaru: parseInt(nominalBaru) }) });
     tutupModalEditNominal();
-    await loadDataAdmin(); // Reload halus
+    await loadDataAdmin();
 
-    btn.innerText = oldText; btn.disabled = false;
+    btn.innerText = oldText;
+    btn.disabled = false;
   }
 
   async function tambahJadwalBaru(btn) {
@@ -284,36 +298,38 @@
       return showCustomWarning("Form Belum Lengkap", "Harap isi semua kolom form tambah jadwal!");
     }
     const oldText = btn.innerText;
-    btn.innerText = 'Menyimpan...'; btn.disabled = true;
+    btn.innerText = 'Menyimpan...';
+    btn.disabled = true;
 
     await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-    await loadDataAdmin(); // Reload halus
+    await loadDataAdmin();
 
     ['addId', 'addTanggal', 'addInfo', 'addJam', 'addHtm', 'addKuota'].forEach(id => document.getElementById(id).value = '');
-    btn.innerText = oldText; btn.disabled = false;
+    btn.innerText = oldText;
+    btn.disabled = false;
   }
 
   async function accPemain(rowIndex, btn) {
     showConfirmModal("Konfirmasi Pembayaran", "Konfirmasi pemain ini sudah bayar dan ubah status jadi Lunas?", "Ya, ACC Lunas", "bg-emerald-600 hover:bg-emerald-700", async () => {
-      const oldText = btn.innerText;
-      btn.innerText = '...'; btn.disabled = true;
-
+      btn.innerText = '...';
+      btn.disabled = true;
       await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex }) });
-      await loadDataAdmin(); // Reload halus
+      await loadDataAdmin();
     });
   }
 
   async function hapusPemain(rowIndex, btn) {
     showConfirmModal("Hapus Peserta", "Yakin ingin menghapus peserta ini dari daftar?", "Ya, Hapus", "bg-rose-600 hover:bg-rose-700", async () => {
-      const oldText = btn.innerText;
-      btn.innerText = '...'; btn.disabled = true;
-
+      btn.innerText = '...';
+      btn.disabled = true;
       await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_row', rowIndex: rowIndex }) });
-      await loadDataAdmin(); // Reload halus
+      await loadDataAdmin();
     });
   }
 
-  function hapusPemainDariRekap(rowIndex, btnElement) { hapusPemain(rowIndex, { innerText: '', disabled: false }); }
+  function hapusPemainDariRekap(rowIndex, btnElement) {
+    hapusPemain(rowIndex, { innerText: '', disabled: false });
+  }
 
   function bukaModalEditJadwal(id, tanggal, info, jam, htm, kuota) {
     document.getElementById('editJadwalLabelId').innerText = `${id}`;
@@ -326,7 +342,9 @@
     document.getElementById('modalEditJadwal').classList.remove('hidden');
   }
 
-  function tutupModalEditJadwal() { document.getElementById('modalEditJadwal').classList.add('hidden'); }
+  function tutupModalEditJadwal() {
+    document.getElementById('modalEditJadwal').classList.add('hidden');
+  }
 
   async function simpanEditJadwal(btn) {
     const payload = {
@@ -342,13 +360,15 @@
       return showCustomWarning("Form Belum Lengkap", "Harap lengkapi semua kolom form edit jadwal!");
     }
     const oldText = btn.innerText;
-    btn.innerText = 'Menyimpan...'; btn.disabled = true;
+    btn.innerText = 'Menyimpan...';
+    btn.disabled = true;
 
     await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
     tutupModalEditJadwal();
-    await loadDataAdmin(); // Reload halus
+    await loadDataAdmin();
 
-    btn.innerText = oldText; btn.disabled = false;
+    btn.innerText = oldText;
+    btn.disabled = false;
   }
 
   async function hapusJadwalMaster(jadwalId) {
@@ -366,7 +386,7 @@
           const result = await response.json();
 
           if (result.status === 'success') {
-            await loadDataAdmin(); // Reload halus tanpa hard refresh
+            await loadDataAdmin();
           } else {
             throw new Error(result.message || 'Gagal menghapus');
           }
