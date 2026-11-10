@@ -106,17 +106,31 @@ async function loadDataAdminJualan() {
     cacheJadwalList = data.jadwal || [];
     cacheLapakData = data.jualan || [];
 
-    // 1. Render Pesanan Dikelompokkan Per Lapak
-    const containerPesanan = document.getElementById('containerPesananAdmin');
-    const listPesanan = data.pesanan || [];
-    containerPesanan.innerHTML = '';
-    document.getElementById('badgeTotalPesanan').innerText = `${listPesanan.length} Pesanan`;
+    // Ambil daftar ID jadwal yang statusnya AKTIF (tidak nonaktif)
+    const idJadwalAktif = cacheJadwalList
+      .filter(j => !j.status || !j.status.toString().toLowerCase().includes('nonaktif'))
+      .map(j => String(j.id));
 
-    if (listPesanan.length === 0) {
-      containerPesanan.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 italic">Belum ada pesanan masuk.</div>';
+    // 1. Render Pesanan Aktif (Hanya dari jadwal yang masih aktif)
+    const containerPesanan = document.getElementById('containerPesananAdmin');
+    const semuaPesanan = data.pesanan || [];
+    
+    // Filter pesanan: hanya ambil yang jadwalId-nya ada di daftar jadwal aktif
+    const listPesananAktif = semuaPesanan.filter(p => {
+      // Jika pesanan memiliki jadwalId dan terdaftar di jadwal aktif
+      if (p.jadwalId && idJadwalAktif.includes(String(p.jadwalId))) return true;
+      // Cadangan jika jadwalId kosong tapi datanya masih baru/umum
+      return !p.jadwalId; 
+    });
+
+    containerPesanan.innerHTML = '';
+    document.getElementById('badgeTotalPesanan').innerText = `${listPesananAktif.length} Pesanan Aktif`;
+
+    if (listPesananAktif.length === 0) {
+      containerPesanan.innerHTML = '<div class="text-center text-xs text-slate-400 py-4 italic">Belum ada pesanan aktif dari jadwal berjalan.</div>';
     } else {
       let groupedPesanan = {};
-      listPesanan.forEach(p => {
+      listPesananAktif.forEach(p => {
         let lapak = p.namaLapak || 'Lainnya';
         if (!groupedPesanan[lapak]) groupedPesanan[lapak] = [];
         groupedPesanan[lapak].push(p);
@@ -140,6 +154,7 @@ async function loadDataAdminJualan() {
                 <span class="font-bold text-slate-700">${formatHrg}</span>
               </div>
               <div class="text-[11px] text-slate-600 bg-slate-50 p-1.5 rounded-lg border font-mono">${p.detailPesanan || '-'}</div>
+              <div class="text-[10px] text-blue-600 font-medium">📍 Jadwal: ${p.jadwalInfo || p.jadwalId || '-'}</div>
               <div class="flex justify-between items-center pt-1">
                 <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${isLunas ? 'bg-emerald-50 text-emerald-700 border' : 'bg-amber-50 text-amber-700 border'}">${p.status || 'Pending 🟡'}</span>
                 <div class="flex gap-1">
@@ -162,7 +177,7 @@ async function loadDataAdminJualan() {
                 <span class="block text-[10px] text-slate-500">${pesananArray.length} Pesanan (Total: <strong>${formatTotalSemua}</strong>)</span>
               </div>
               
-              <!-- TOMBOL PRINT & CLOSE ORDER DI SEBELAH NAMA LAPAK -->
+              <!-- TOMBOL PRINT & CLOSE ORDER -->
               <div class="flex items-center gap-1.5 shrink-0">
                 <button onclick="cetakSummaryLapak('${lapakEscaped}')" title="Print Rekap Pesanan" 
                   class="bg-slate-800 hover:bg-slate-900 text-white font-bold text-[10px] py-1.5 px-2 rounded-lg transition flex items-center gap-1 shadow-2xs">
@@ -201,8 +216,6 @@ async function loadDataAdminJualan() {
       } else {
         cacheJadwalList.forEach(j => {
           const isChecked = assignedIds.includes(String(j.id)) ? 'checked' : '';
-          
-          // Cek apakah jadwal berstatus nonaktif (atau lewat)
           const isNonaktif = j.status && j.status.toString().toLowerCase().includes('nonaktif');
 
           checkboxHtml += `
