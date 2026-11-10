@@ -1,208 +1,518 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lapak UMKM & Pesan Jajanan - Tepak Friendly</title>
+  <title>Lapak & Jajanan UMKM - Tepak Friendly</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="icon" type="image/png" href="logo.png">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="config.js"></script>
-  <script src="telegram.js"></script>
 </head>
-<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
 
-  <!-- HEADER -->
-  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-24">
+
+  <!-- Header Minimalis -->
+  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-3 shadow-2xs">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
-        <img src="logo.png" alt="Logo Tepak Friendly" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
+        <img src="logo.png" alt="Logo Tepak Friendly"
+          class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
         <div>
-          <h1 class="text-sm font-extrabold tracking-tight text-slate-900 leading-tight">Lapak UMKM</h1>
-          <p class="text-[9px] text-slate-500 font-medium">Tepak Friendly Jajanan</p>
+          <h1 class="text-xs font-extrabold tracking-tight text-slate-900 leading-tight">Tepak Friendly</h1>
+          <p class="text-[9px] text-slate-500 font-medium">Lapak & Jajanan UMKM</p>
         </div>
       </div>
-      <a href="index" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1">
-        <span>←</span> Mabar
-      </a>
+      <span
+        class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        Live Order
+      </span>
     </div>
   </header>
 
-  <!-- MAIN CONTAINER -->
   <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
-    
-    <!-- NAVIGATION TABS -->
-    <div class="flex gap-2 bg-white p-1 rounded-2xl border border-slate-200 shadow-xs">
-      <button onclick="gantiTab('pesan')" id="tabPesan" class="flex-1 bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition">🛍️ Lihat Lapak & Pesan</button>
-      <button onclick="gantiTab('daftar')" id="tabDaftar" class="flex-1 bg-transparent text-slate-600 font-bold text-xs py-2.5 rounded-xl transition">➕ Daftar Mitra</button>
-    </div>
-    
-    <!-- SECTION LIHAT LAPAK -->
-    <div id="sectionPesan" class="space-y-3">
-      <div class="flex justify-between items-center px-1">
-        <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">Daftar Lapak UMKM Aktif</h2>
-        <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-          LIVE ORDER
-        </span>
-      </div>
-      <div id="containerLapakPublik" class="space-y-3.5">
-        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat data lapak...</div>
-      </div>
-    </div>
 
-    <!-- SECTION PENDAFTARAN MITRA -->
-    <div id="sectionDaftar" class="hidden bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 space-y-4">
-      <div>
-        <h2 class="font-bold text-sm text-slate-900 mb-1">Form Pendaftaran Mitra UMKM</h2>
-        <p class="text-[11px] text-slate-500">Atur kategori dan menu jualanmu (Maks. 6 Kategori & Total 30 Menu).</p>
-      </div>
-      
-      <div class="space-y-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Nama Brand / Penjual</label>
-          <input type="text" id="namaPenjual" placeholder="Cth: Es Teh & Snack Mantul" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-slate-600 mb-1">Email Aktif</label>
-          <input type="text" id="emailPenjual" placeholder="Cth: 081234567890" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
-        </div>
-      </div>
-
-      <div class="space-y-3 pt-2 border-t border-slate-100">
-        <div class="flex justify-between items-center">
-          <label class="text-xs font-bold text-slate-800">📁 Kategori & Menu Jualan</label>
-          <span id="counterKategori" class="text-[10px] text-slate-400 font-semibold">1/6 Kategori</span>
-        </div>
-
-        <div id="containerKategori" class="space-y-3">
-          <div class="kategori-card bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
-            <div class="flex gap-2 items-center">
-              <input type="text" placeholder="Nama Kategori (Cth: Minuman)" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl text-xs font-bold text-blue-700 kategori-nama">
-              <button type="button" onclick="hapusKategori(this)" class="bg-rose-50 text-rose-600 font-bold text-xs p-2.5 rounded-xl border border-rose-200 hidden btn-hapus-kat">✕</button>
-            </div>
-            
-            <div class="space-y-2 container-menu-item pl-2 border-l-2 border-blue-200">
-              <div class="flex gap-2 menu-row items-center">
-                <div class="w-3/5 space-y-1">
-                  <input type="text" placeholder="Nama Menu" class="w-full p-2 border border-slate-200 bg-white rounded-lg text-xs menu-nama">
-                  <input type="text" placeholder="Deskripsi singkat" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded-lg text-[10px] text-slate-500 menu-deskripsi">
-                </div>
-                <input type="number" placeholder="Harga (Rp)" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-harga self-start">
-                <button type="button" onclick="hapusMenuRow(this)" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border border-rose-200 self-start">✕</button>
-              </div>
-            </div>
-
-            <button type="button" onclick="tambahBarisMenu(this)" class="w-full bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-lg transition border border-slate-200 shadow-2xs">
-              + Tambah Menu di Kategori Ini
-            </button>
-          </div>
-        </div>
-
-        <button type="button" onclick="tambahKategori()" id="btnTambahKat" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition shadow-xs">
-          + Tambah Kategori Lain (Maks. 6)
-        </button>
-      </div>
-
-      <button onclick="daftarJualan()" id="btnSubmitJualan" class="w-full mt-4 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl transition shadow-md shadow-orange-200">
-        Kirim Pendaftaran Mitra
+    <!-- Top Action Buttons -->
+    <div class="grid grid-cols-2 gap-2">
+      <button onclick="bukaModalPesan()"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 px-3 rounded-2xl shadow-sm transition flex items-center justify-center gap-1.5">
+        <span>🛍️</span> Lihat Lapak & Pesan
+      </button>
+      <button onclick="bukaModalMitra()"
+        class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-xs py-2.5 px-3 rounded-2xl shadow-2xs transition flex items-center justify-center gap-1.5">
+        <span>➕</span> Daftar Mitra
       </button>
     </div>
 
-    <!-- MODAL PESAN INTERAKTIF -->
-    <div id="modalPesan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-3 overflow-y-auto">
-      <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3 border border-slate-100 my-auto">
-        <h3 id="modalLapakTitle" class="font-bold text-sm text-slate-900 mb-1">Pesan Makanan</h3>
-        <p class="text-[11px] text-slate-500">Pilih menu dan tulis catatan khusus jika ada.</p>
-        
+    <!-- DAFTAR LAPAK UMKM AKTIF -->
+    <div class="space-y-3">
+      <div class="flex justify-between items-center px-1">
+        <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">Daftar Lapak UMKM Aktif</h2>
+        <span
+          class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-md border border-emerald-100 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live Order
+        </span>
+      </div>
+
+      <div id="containerLapak" class="space-y-3">
+        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200 shadow-2xs">
+          Memuat data lapak...</div>
+      </div>
+    </div>
+
+    <!-- MODAL PILIH LAPAK & MENU -->
+    <div id="modalPesan"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
+      <div class="bg-white rounded-3xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <h3 class="font-extrabold text-slate-900 text-sm">Pesan Jajanan UMKM</h3>
+          <button onclick="tutupModalPesan()" class="text-slate-400 hover:text-slate-600 font-bold text-xs">✕</button>
+        </div>
+
         <div class="space-y-3">
           <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Pilih Lapak UMKM</label>
+            <select id="selectLapak" onchange="pilihLapak()"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition font-medium">
+              <option value="">-- Pilih Lapak --</option>
+            </select>
+          </div>
+
+          <div id="infoJadwalLapakContainer"
+            class="hidden bg-blue-50/70 border border-blue-100 p-2.5 rounded-xl text-[11px] text-blue-900 space-y-1">
+            <span class="font-bold block">📍 Jadwal Terhubung:</span>
+            <span id="infoJadwalLapakText" class="text-slate-700 block">-</span>
+          </div>
+
+          <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemesan</label>
-            <input type="text" id="pesanNama" placeholder="Nama kamu..." class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50">
+            <input type="text" id="pesanNama" placeholder="Cth: Budi"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Daftar Menu</label>
-            <div id="containerMenuInteraktif" class="space-y-3 bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-48 overflow-y-auto"></div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Email (Opsional untuk E-Ticket)</label>
+            <input type="email" id="pesanEmail" placeholder="email@gmail.com"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
           </div>
 
           <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Catatan Pesanan / Note (Opsional)</label>
-            <input type="text" id="pesanNote" placeholder="Cth: Jangan pakai es, kuah pisah..." class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
-          </div>
-
-          <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex justify-between items-center">
-            <span class="text-xs font-bold text-blue-900">Total Harga:</span>
-            <span id="labelTotalHarga" class="text-sm font-extrabold text-blue-700" data-raw="0">Rp 0</span>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Menu Tersedia di Lapak Ini</label>
+            <div id="containerMenuPilihan"
+              class="border border-slate-200 rounded-xl p-2.5 bg-slate-50 max-h-44 overflow-y-auto space-y-2 text-xs">
+              <span class="text-slate-400 italic">Pilih lapak terlebih dahulu...</span>
+            </div>
           </div>
         </div>
-        
-        <div class="flex gap-2 pt-2">
-          <button onclick="tutupModalPesan()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-          <button onclick="kirimPesanan()" id="btnKirimPesan" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Pesan & Bayar</button>
+
+        <div class="flex gap-2 pt-2 border-t border-slate-100">
+          <button onclick="tutupModalPesan()"
+            class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
+          <button onclick="kirimPesanJajanan()" id="btnKirimPesanan"
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition">Buat
+            Pesanan</button>
         </div>
       </div>
     </div>
 
-    <!-- MODAL INVOICE PESANAN (FIXED: RESPONSIF HP & KODE RAPI) -->
-    <div id="modalInvoicePesanan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-3 overflow-y-auto">
-      <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 my-auto text-center space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
-        
-        <!-- Area Resi yang di-download -->
-        <div id="areaStrukResi" class="space-y-3.5 bg-white p-1">
-          <!-- Header Invoice -->
-          <div class="border-b border-slate-100 pb-3 space-y-1">
-            <span class="inline-block bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wider">Invoice Pesanan</span>
-            <h3 class="font-extrabold text-slate-900 text-base mt-1" id="invNamaLapak">Pesan ke Lapak</h3>
+    <!-- MODAL PENDAFTARAN MITRA UMKM -->
+    <div id="modalMitra"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
+      <div class="bg-white rounded-3xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <h3 class="font-extrabold text-slate-900 text-sm">Daftar Jadi Mitra UMKM</h3>
+          <button onclick="tutupModalMitra()" class="text-slate-400 hover:text-slate-600 font-bold text-xs">✕</button>
+        </div>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Tenant / UMKM</label>
+            <input type="text" id="mitraNama" placeholder="Cth: Dimsum Enak"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
           </div>
-          
-          <!-- Detail Struk -->
-          <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-left text-xs space-y-2">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
-              <span class="text-slate-500 font-medium">Pemesan:</span> 
-              <strong id="invNamaPemesan" class="text-slate-800 text-right">-</strong>
-            </div>
 
-            <div class="space-y-1 border-b border-slate-100 pb-2">
-              <span class="text-slate-500 font-medium block">Jadwal Mabar:</span> 
-              <div id="invJadwal" class="font-bold text-slate-800 text-[11px] leading-relaxed bg-white p-2 rounded-xl border border-slate-200 break-words whitespace-pre-line">-</div>
-            </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Email / Kontak</label>
+            <input type="text" id="mitraEmail" placeholder="email@gmail.com atau No WA"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
+          </div>
 
-            <div>
-              <span class="text-slate-500 font-medium block mb-1">Rincian Menu:</span>
-              <div id="invDetailMenu" class="font-mono text-[11px] text-slate-700 whitespace-pre-line bg-white p-2 rounded-xl border border-slate-200 max-h-24 overflow-y-auto">-</div>
-            </div>
-
-            <div class="pt-1 flex justify-between items-center text-sm bg-blue-50/80 p-2.5 rounded-xl border border-blue-100">
-              <span class="font-bold text-slate-700 text-xs">Total Tagihan (+Kode Unik):</span>
-              <span id="invTotalTagihan" class="font-extrabold text-blue-700 font-mono text-sm">Rp 0</span>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Pilih Jadwal Mabar yang Ingin
+              Disinggahi</label>
+            <div id="containerPilihanJadwalMitra"
+              class="border border-slate-200 rounded-xl p-2.5 bg-slate-50 max-h-36 overflow-y-auto space-y-2 text-xs">
+              <span class="text-slate-400 italic">Memuat jadwal...</span>
             </div>
           </div>
 
-          <p class="text-[10px] text-slate-500 leading-relaxed">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.</p>
-          
-          <!-- QRIS Container -->
-          <div class="bg-white p-3 rounded-2xl border border-slate-200 inline-block shadow-2xs space-y-2 w-full">
-            <img src="qris.png" alt="QRIS" class="mx-auto w-44 h-44 object-contain rounded-xl border border-slate-100">
-            <span class="text-[10px] font-bold text-slate-600 block">BCA 0083677071 a.n Andi</span>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Daftar Menu & Harga</label>
+            <textarea id="mitraMenu" rows="3" placeholder="Cth: Dimsum Mix - 25000, Es Teh - 5000"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition"></textarea>
           </div>
         </div>
 
-        <!-- Tombol Aksi di Dalam Card Modal -->
-        <div class="space-y-2 pt-2 border-t border-slate-100">
-          <button onclick="downloadResiGambar()" id="btnDownloadImg" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-2xl transition shadow-xs flex items-center justify-center gap-1.5">
-            📥 Download Resi (Gambar PNG)
-          </button>
-          <button onclick="selesaiBayarPesanan()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-2xl transition shadow-md">
-            Tutup & Selesai
-          </button>
+        <div class="flex gap-2 pt-2 border-t border-slate-100">
+          <button onclick="tutupModalMitra()"
+            class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
+          <button onclick="kirimDaftarMitra()" id="btnKirimMitra"
+            class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition">Daftar
+            Mitra</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL INVOICE PEMBAYARAN JAJANAN -->
+    <div id="modalInvoiceJajanan"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
+      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-3">
+        <div
+          class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+          Pesanan Berhasil Dibuat</div>
+        <h3 class="font-extrabold text-slate-900 text-base" id="invTenantJudul">Tenant Jajanan</h3>
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-left text-xs space-y-1.5">
+          <div class="flex justify-between"><span class="text-slate-500">Total Tagihan (+Kode Unik):</span> <strong
+              id="invTotalTagihanJajanan" class="text-blue-600 text-sm font-extrabold">Rp 0</strong></div>
         </div>
 
+        <p class="text-[11px] text-slate-500">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.</p>
+
+        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 inline-block">
+          <img src="qris.png" alt="QRIS" class="mx-auto w-48 h-48 object-contain mb-1 rounded-lg bg-white p-1 border">
+          <span class="text-[10px] text-slate-500 block">BCA 0083677071 a.n Andi</span>
+        </div>
+
+        <button onclick="tutupModalInvoiceJajanan()"
+          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup
+          & Selesai</button>
       </div>
     </div>
   </main>
 
-  <!-- PANGGIL LOGIKA JS TERPISAH -->
-  <script src="jualan.js"></script>
+  <!-- FLOATING BOTTOM NAVIGATION BAR -->
+  <nav aria-label="Navigasi Utama" class="fixed bottom-4 left-0 right-0 z-40 px-4">
+    <div
+      class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
+      <a href="index"
+        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
+        <span class="text-base leading-none mb-0.5">🏸</span>
+        <span>Mabar</span>
+      </a>
+      <a href="jualan"
+        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-blue-600 text-white font-bold text-[10px] shadow-xs transition">
+        <span class="text-base leading-none mb-0.5">🛍️</span>
+        <span>Jajanan</span>
+      </a>
+    </div>
+  </nav>
+
+  <script>
+    const GAS_URL = CONFIG.GAS_URL;
+    let globalDataLapak = [];
+    let globalJadwalList = [];
+
+    async function loadDataJualan() {
+      try {
+        const response = await fetch(GAS_URL);
+        const data = await response.json();
+        const container = document.getElementById('containerLapak');
+        container.innerHTML = '';
+
+        globalDataLapak = data.jualan || [];
+        globalJadwalList = data.jadwal || [];
+
+        const selectLapak = document.getElementById('selectLapak');
+        selectLapak.innerHTML = '<option value="">-- Pilih Lapak --</option>';
+        globalDataLapak.forEach(l => {
+          selectLapak.innerHTML += `<option value="${l.tenant}">${l.tenant} (Jadwal: ${l.jadwalId || '-'})</option>`;
+        });
+
+        const containerJadwalMitra = document.getElementById('containerPilihanJadwalMitra');
+        containerJadwalMitra.innerHTML = '';
+        if (globalJadwalList.length === 0) {
+          containerJadwalMitra.innerHTML = '<span class="text-slate-400 italic">Tidak ada jadwal tersedia.</span>';
+        } else {
+          globalJadwalList.forEach(j => {
+            containerJadwalMitra.innerHTML += `
+              <label class="flex items-center gap-2 p-1.5 bg-white rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50">
+                <input type="checkbox" name="jadwalMitra" value="${j.id}" class="rounded text-blue-600 focus:ring-blue-500">
+                <span class="font-bold text-slate-800">[${j.id}]</span> <span class="text-slate-600">${j.info}</span>
+              </label>`;
+          });
+        }
+
+        if (globalDataLapak.length === 0) {
+          container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada lapak UMKM terdaftar saat ini.</div>';
+          return;
+        }
+
+        globalDataLapak.forEach((l, index) => {
+          const pesananTenant = (data.pesanan || []).filter(p => p.tenant === l.tenant && p.status && !p.status.includes('Dihapus'));
+
+          let listPesananHtml = '';
+          if (pesananTenant.length === 0) {
+            listPesananHtml = '<div class="text-[11px] text-slate-400 italic py-1 text-center">Belum ada pesanan masuk.</div>';
+          } else {
+            pesananTenant.forEach((p, idx) => {
+              const badge = p.status.includes('Lunas')
+                ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>'
+                : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
+
+              listPesananHtml += `
+                <li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
+                  <div>
+                    <strong class="text-slate-800 block">${idx + 1}. Pesanan #${idx + 1}</strong>
+                    <span class="text-[10px] text-slate-500">${p.menu}</span>
+                  </div>
+                  <div>${badge}</div>
+                </li>`;
+            });
+          }
+
+          let menuListHtml = '';
+          try {
+            const menuArr = typeof l.menu === 'string' ? JSON.parse(l.menu) : l.menu;
+            if (Array.isArray(menuArr)) {
+              menuArr.forEach(m => {
+                menuListHtml += `<li>• ${m.nama} (Rp ${parseInt(m.harga).toLocaleString('id-ID')})</li>`;
+              });
+            } else {
+              menuListHtml = `<li>${l.menu}</li>`;
+            }
+          } catch (e) {
+            menuListHtml = `<li>${l.menu || 'Menu tersedia'}</li>`;
+          }
+
+          const uniqueRiwayatId = `riwayatPesanan_${index}`;
+
+          container.innerHTML += `
+            <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
+              <div class="flex justify-between items-start">
+                <div>
+                  <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">🛍️ Tenant UMKM</span>
+                  <h3 class="font-bold text-sm text-slate-900 mt-1">${l.tenant}</h3>
+                  <p class="text-[11px] text-slate-500 mt-0.5">Jadwal: ${l.jadwalInfo || l.jadwalId || '-'}</p>
+                </div>
+              </div>
+
+              <div class="rounded-xl border border-slate-200 bg-slate-50/50 p-2.5 text-xs space-y-1">
+                <span class="font-bold text-slate-700 block">Menu Tersedia:</span>
+                <ul class="list-disc list-inside text-slate-600 space-y-0.5 text-[11px]">
+                  ${menuListHtml}
+                </ul>
+              </div>
+
+              <!-- TOMBOL TOGGLE SEMBUNYIKAN / TAMPILKAN RIWAYAT PESANAN -->
+              <div class="space-y-1.5 pt-1">
+                <div class="flex justify-between items-center bg-slate-50 px-2.5 py-1.5 rounded-xl border border-slate-100">
+                  <span class="text-[11px] font-bold text-slate-700">📋 Daftar Pesanan Masuk (${pesananTenant.length})</span>
+                  <button onclick="toggleRiwayatPesanan('${uniqueRiwayatId}', this)" class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition">
+                    👁️ Sembunyikan Riwayat
+                  </button>
+                </div>
+                <div id="${uniqueRiwayatId}" class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                  <ul class="divide-y divide-slate-100 max-h-36 overflow-y-auto p-1.5 space-y-1">
+                    ${listPesananHtml}
+                  </ul>
+                </div>
+              </div>
+            </div>`;
+        });
+      } catch (e) {
+        console.error("Error loadDataJualan:", e);
+      }
+    }
+
+    // Fungsi Toggle Sembunyikan / Tampilkan Riwayat Pesanan
+    function toggleRiwayatPesanan(elementId, btn) {
+      const container = document.getElementById(elementId);
+      if (container.classList.contains('hidden')) {
+        container.classList.remove('hidden');
+        btn.innerText = '👁️ Sembunyikan Riwayat';
+      } else {
+        container.classList.add('hidden');
+        btn.innerText = '👁️ Tampilkan Riwayat';
+      }
+    }
+
+    function bukaModalPesan() {
+      document.getElementById('modalPesan').classList.remove('hidden');
+    }
+
+    function tutupModalPesan() {
+      document.getElementById('modalPesan').classList.add('hidden');
+    }
+
+    function bukaModalMitra() {
+      document.getElementById('modalMitra').classList.remove('hidden');
+    }
+
+    function tutupModalMitra() {
+      document.getElementById('modalMitra').classList.add('hidden');
+    }
+
+    function pilihLapak() {
+      const tenantPilihan = document.getElementById('selectLapak').value;
+      const containerMenu = document.getElementById('containerMenuPilihan');
+      const infoJadwalContainer = document.getElementById('infoJadwalLapakContainer');
+      const infoJadwalText = document.getElementById('infoJadwalLapakText');
+
+      containerMenu.innerHTML = '';
+      if (!tenantPilihan) {
+        containerMenu.innerHTML = '<span class="text-slate-400 italic">Pilih lapak terlebih dahulu...</span>';
+        infoJadwalContainer.classList.add('hidden');
+        return;
+      }
+
+      const lapakObj = globalDataLapak.find(l => l.tenant === tenantPilihan);
+      if (lapakObj) {
+        if (lapakObj.jadwalInfo || lapakObj.jadwalId) {
+          infoJadwalText.innerText = `[${lapakObj.jadwalId}] ${lapakObj.jadwalInfo || ''}`;
+          infoJadwalContainer.classList.remove('hidden');
+        } else {
+          infoJadwalContainer.classList.add('hidden');
+        }
+
+        try {
+          const menuArr = typeof lapakObj.menu === 'string' ? JSON.parse(lapakObj.menu) : lapakObj.menu;
+          if (Array.isArray(menuArr)) {
+            menuArr.forEach((m, idx) => {
+              containerMenu.innerHTML += `
+                <label class="flex items-center justify-between p-2 bg-white rounded-xl border border-slate-200 cursor-pointer hover:bg-slate-50">
+                  <div class="flex items-center gap-2">
+                    <input type="checkbox" name="menuPilihan" value="${m.nama} - Rp ${m.harga}" data-harga="${m.harga}" class="rounded text-blue-600 focus:ring-blue-500">
+                    <span class="font-bold text-slate-800">${m.nama}</span>
+                  </div>
+                  <span class="font-mono font-semibold text-blue-700">Rp ${parseInt(m.harga).toLocaleString('id-ID')}</span>
+                </label>`;
+            });
+          } else {
+            containerMenu.innerHTML = `<span class="text-slate-600">${lapakObj.menu}</span>`;
+          }
+        } catch (e) {
+          containerMenu.innerHTML = `<span class="text-slate-600">${lapakObj.menu || 'Menu tidak tersedia'}</span>`;
+        }
+      }
+    }
+
+    async function kirimPesanJajanan() {
+      const tenant = document.getElementById('selectLapak').value;
+      const nama = document.getElementById('pesanNama').value.trim();
+      const email = document.getElementById('pesanEmail').value.trim();
+
+      if (!tenant) return alert('Silakan pilih lapak UMKM terlebih dahulu!');
+      if (!nama) return alert('Nama pemesan harus diisi!');
+
+      const checkboxes = document.querySelectorAll('input[name="menuPilihan"]:checked');
+      if (checkboxes.length === 0) return alert('Pilih minimal 1 menu pesanan!');
+
+      let selectedMenus = [];
+      let totalHarga = 0;
+      checkboxes.forEach(cb => {
+        selectedMenus.push(cb.value);
+        totalHarga += parseInt(cb.getAttribute('data-harga') || 0);
+      });
+
+      const menuString = selectedMenus.join(', ');
+      const btn = document.getElementById('btnKirimPesanan');
+      const oldText = btn.innerText;
+      btn.innerText = 'Memproses...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'register_jualan',
+            tenant: tenant,
+            nama: nama,
+            email: email,
+            menu: menuString,
+            total: totalHarga
+          })
+        });
+
+        const result = await response.json();
+        tutupModalPesan();
+
+        document.getElementById('invTenantJudul').innerText = `Tenant: ${tenant}`;
+        document.getElementById('invTotalTagihanJajanan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(result.totalTagihan || totalHarga);
+        document.getElementById('modalInvoiceJajanan').classList.remove('hidden');
+
+      } catch (e) {
+        console.error("Error kirimPesanJajanan:", e);
+        alert('Gagal membuat pesanan jajanan.');
+      } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+      }
+    }
+
+    async function kirimDaftarMitra() {
+      const namaTenant = document.getElementById('mitraNama').value.trim();
+      const emailTenant = document.getElementById('mitraEmail').value.trim();
+      const menuTenant = document.getElementById('mitraMenu').value.trim();
+
+      if (!namaTenant || !emailTenant || !menuTenant) {
+        return alert('Semua kolom form mitra harus diisi!');
+      }
+
+      const checkedJadwal = document.querySelectorAll('input[name="jadwalMitra"]:checked');
+      if (checkedJadwal.length === 0) {
+        return alert('Pilih minimal 1 jadwal mabar untuk lapak Anda!');
+      }
+
+      let jadwalIds = [];
+      let jadwalInfos = [];
+      checkedJadwal.forEach(cb => {
+        jadwalIds.push(cb.value);
+        const jObj = globalJadwalList.find(j => j.id === cb.value);
+        if (jObj) jadwalInfos.push(`${jObj.id} ${jObj.info}`);
+      });
+
+      const btn = document.getElementById('btnKirimMitra');
+      const oldText = btn.innerText;
+      btn.innerText = 'Memproses...';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'register_mitra',
+            tenant: namaTenant,
+            email: emailTenant,
+            menu: menuTenant,
+            jadwalId: jadwalIds.join(', '),
+            jadwalInfo: jadwalInfos.join(' | ')
+          })
+        });
+
+        const result = await response.json();
+        tutupModalMitra();
+        alert('Pendaftaran mitra berhasil dikirim!');
+        loadDataJualan();
+      } catch (e) {
+        console.error("Error kirimDaftarMitra:", e);
+        alert('Gagal mendaftarkan mitra.');
+      } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+      }
+    }
+
+    function tutupModalInvoiceJajanan() {
+      document.getElementById('modalInvoiceJajanan').classList.add('hidden');
+      loadDataJualan();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDataJualan();
+      setInterval(loadDataJualan, 5000);
+    });
+  </script>
 </body>
+
 </html>
