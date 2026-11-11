@@ -112,14 +112,6 @@
         </div>
       </div>
 
-      <!-- Konfirmasi Pembayaran Menunggu -->
-      <div class="space-y-2.5 pt-6 border-t border-slate-100">
-        <h2 class="font-bold text-xs text-slate-800 uppercase tracking-wide">⏳ Konfirmasi Pembayaran Peserta</h2>
-        <ul id="listMenunggu" class="space-y-2.5">
-          <li class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Memuat data konfirmasi...
-          </li>
-        </ul>
-      </div>
     </div>
   </div>
 
@@ -341,14 +333,12 @@
     }
 
     async function loadDataAdmin() {
-      const list = document.getElementById('listMenunggu');
       const divAktif = document.getElementById('containerJadwalAktif');
       const divNonaktif = document.getElementById('containerJadwalNonaktif');
 
       try {
         const response = await fetch(GAS_URL);
         const data = await response.json();
-        list.innerHTML = '';
         divAktif.innerHTML = '';
         divNonaktif.innerHTML = '';
 
@@ -448,32 +438,8 @@
         if (countAktif === 0) divAktif.innerHTML = '<div class="text-center text-xs text-slate-400 py-4">Belum ada jadwal aktif.</div>';
         if (countNonaktif === 0) divNonaktif.innerHTML = '<div class="text-center text-xs text-slate-400 py-4">Belum ada history jadwal.</div>';
 
-        const pendingList = pemainList.filter(item => item.status && item.status.includes('Menunggu'));
-        if (pendingList.length === 0) {
-          list.innerHTML = '<li class="text-center text-emerald-700 text-xs font-bold p-4 bg-emerald-50 rounded-2xl border border-emerald-100">Tidak ada peserta yang menunggu konfirmasi! 🎉</li>';
-        } else {
-          pendingList.forEach(item => {
-            const tagihanRp = formatRp.format(item.tagihan || 0);
-            list.innerHTML += `
-              <li class="p-3.5 border border-amber-200 bg-amber-50/40 rounded-2xl flex flex-col space-y-2.5 text-xs">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <strong class="text-slate-900 text-sm block">${item.nama}</strong>
-                    <span class="font-mono text-blue-700 font-bold bg-white px-2 py-0.5 border border-blue-100 rounded-md mt-1 inline-block">${tagihanRp}</span>
-                  </div>
-                  <div class="flex gap-1.5">
-                    <button onclick="accPemain(${item.rowIndex}, this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2 rounded-xl transition">ACC Lunas</button>
-                    <button onclick="hapusPemain(${item.rowIndex}, this)" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-3 py-2 rounded-xl transition">Hapus</button>
-                  </div>
-                </div>
-                <div class="text-[11px] text-slate-600 border-t border-amber-100 pt-2 flex flex-col gap-0.5">
-                  <span>📍 <strong>[${item.jadwalId}]</strong> ${item.jadwalInfo}</span>
-                </div>
-              </li>`;
-          });
-        }
       } catch (error) {
-        list.innerHTML = '<li class="text-center text-rose-600 text-xs py-4">Gagal memuat data.</li>';
+        divAktif.innerHTML = '<div class="text-center text-rose-600 text-xs py-4">Gagal memuat data.</div>';
       }
     }
 
@@ -575,26 +541,15 @@
       btn.disabled = false;
     }
 
-    async function accPemain(rowIndex, btn) {
-      showConfirmModal("Konfirmasi Pembayaran", "Konfirmasi pemain ini sudah bayar dan ubah status jadi Lunas?", "Ya, ACC Lunas", "bg-emerald-600 hover:bg-emerald-700", async () => {
-        btn.innerText = '...';
-        btn.disabled = true;
-        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex }) });
-        await loadDataAdmin();
-      });
-    }
-
-    async function hapusPemain(rowIndex, btn) {
+    async function hapusPemain(rowIndex) {
       showConfirmModal("Hapus Peserta", "Yakin ingin menghapus peserta ini dari daftar?", "Ya, Hapus", "bg-rose-600 hover:bg-rose-700", async () => {
-        btn.innerText = '...';
-        btn.disabled = true;
         await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_row', rowIndex: rowIndex }) });
         await loadDataAdmin();
       });
     }
 
     function hapusPemainDariRekap(rowIndex, btnElement) {
-      hapusPemain(rowIndex, { innerText: '', disabled: false });
+      hapusPemain(rowIndex);
     }
 
     function bukaModalEditJadwal(id, tanggal, info, jam, htm, kuota) {
