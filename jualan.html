@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,32 +10,23 @@
   <script src="config.js"></script>
   <script src="telegram.js"></script>
   <style>
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-
 <body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-32">
 
   <!-- HEADER -->
   <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-3 shadow-2xs">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
-        <img src="logo.png" alt="Logo Tepak Friendly"
-          class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
+        <img src="logo.png" alt="Logo Tepak Friendly" class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
         <div>
           <h1 class="text-xs font-extrabold tracking-tight text-slate-900 leading-tight">Lapak UMKM</h1>
           <p class="text-[9px] text-slate-500 font-medium">Tepak Friendly Jajanan</p>
         </div>
       </div>
-      <a href="index"
-        class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1 shadow-2xs">
+      <a href="index" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1 shadow-2xs">
         <span>←</span> Mabar
       </a>
     </div>
@@ -44,30 +34,24 @@
 
   <!-- MAIN CONTAINER -->
   <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
-
+    
     <!-- NAVIGATION TABS -->
     <div class="flex gap-2 bg-white p-1 rounded-2xl border border-slate-200 shadow-xs">
-      <button onclick="gantiTab('pesan')" id="tabPesan"
-        class="flex-1 bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition">🛍️ Lihat Lapak &
-        Pesan</button>
-      <button onclick="gantiTab('daftar')" id="tabDaftar"
-        class="flex-1 bg-transparent text-slate-600 font-bold text-xs py-2.5 rounded-xl transition">➕ Daftar
-        Mitra</button>
+      <button onclick="gantiTab('pesan')" id="tabPesan" class="flex-1 bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl shadow-sm transition">🛍️ Lihat Lapak & Pesan</button>
+      <button onclick="gantiTab('daftar')" id="tabDaftar" class="flex-1 bg-transparent text-slate-600 font-bold text-xs py-2.5 rounded-xl transition">➕ Daftar Mitra</button>
     </div>
-
+    
     <!-- SECTION LIHAT LAPAK -->
     <div id="sectionPesan" class="space-y-3">
       <div class="flex justify-between items-center px-1">
         <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">Daftar Lapak UMKM Aktif</h2>
-        <span
-          class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+        <span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           LIVE ORDER
         </span>
       </div>
       <div id="containerLapakPublik" class="space-y-3.5">
-        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-          Memuat data lapak...</div>
+        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200 shadow-2xs">Memuat data lapak...</div>
       </div>
     </div>
 
@@ -77,17 +61,15 @@
         <h2 class="font-bold text-sm text-slate-900 mb-1">Form Pendaftaran Mitra UMKM</h2>
         <p class="text-[11px] text-slate-500">Atur kategori dan menu jualanmu (Maks. 6 Kategori & Total 30 Menu).</p>
       </div>
-
+      
       <div class="space-y-3">
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">Nama Brand / Penjual</label>
-          <input type="text" id="namaPenjual" placeholder="Cth: Es Teh & Snack Mantul"
-            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
+          <input type="text" id="namaPenjual" placeholder="Cth: Es Teh & Snack Mantul" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">Email Aktif</label>
-          <input type="text" id="emailPenjual" placeholder="Cth: nama@gmail.com"
-            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
+          <input type="text" id="emailPenjual" placeholder="Cth: nama@gmail.com" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
         </div>
       </div>
 
@@ -100,71 +82,57 @@
         <div id="containerKategori" class="space-y-3">
           <div class="kategori-card bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2">
             <div class="flex gap-2 items-center">
-              <input type="text" placeholder="Nama Kategori (Cth: Minuman)"
-                class="w-full p-2.5 border border-slate-200 bg-white rounded-xl text-xs font-bold text-blue-700 kategori-nama">
-              <button type="button" onclick="hapusKategori(this)"
-                class="bg-rose-50 text-rose-600 font-bold text-xs p-2.5 rounded-xl border border-rose-200 hidden btn-hapus-kat">✕</button>
+              <input type="text" placeholder="Nama Kategori (Cth: Minuman)" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl text-xs font-bold text-blue-700 kategori-nama">
+              <button type="button" onclick="hapusKategori(this)" class="bg-rose-50 text-rose-600 font-bold text-xs p-2.5 rounded-xl border border-rose-200 hidden btn-hapus-kat">✕</button>
             </div>
-
+            
             <div class="space-y-2 container-menu-item pl-2 border-l-2 border-blue-200">
               <div class="flex gap-2 menu-row items-center">
                 <div class="w-3/5 space-y-1">
-                  <input type="text" placeholder="Nama Menu"
-                    class="w-full p-2 border border-slate-200 bg-white rounded-lg text-xs menu-nama">
-                  <input type="text" placeholder="Deskripsi singkat"
-                    class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded-lg text-[10px] text-slate-500 menu-deskripsi">
+                  <input type="text" placeholder="Nama Menu" class="w-full p-2 border border-slate-200 bg-white rounded-lg text-xs menu-nama">
+                  <input type="text" placeholder="Deskripsi singkat" class="w-full p-1.5 border border-slate-100 bg-slate-50 rounded-lg text-[10px] text-slate-500 menu-deskripsi">
                 </div>
-                <input type="number" placeholder="Harga (Rp)"
-                  class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-harga self-start">
-                <button type="button" onclick="hapusMenuRow(this)"
-                  class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border border-rose-200 self-start">✕</button>
+                <input type="number" placeholder="Harga (Rp)" class="w-2/5 p-2 border border-slate-200 bg-white rounded-lg text-xs menu-harga self-start">
+                <button type="button" onclick="hapusMenuRow(this)" class="bg-rose-50 text-rose-600 font-bold text-[10px] p-2 rounded-lg border border-rose-200 self-start">✕</button>
               </div>
             </div>
 
-            <button type="button" onclick="tambahBarisMenu(this)"
-              class="w-full bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-lg transition border border-slate-200 shadow-2xs">
+            <button type="button" onclick="tambahBarisMenu(this)" class="w-full bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold py-1.5 px-3 rounded-lg transition border border-slate-200 shadow-2xs">
               + Tambah Menu di Kategori Ini
             </button>
           </div>
         </div>
 
-        <button type="button" onclick="tambahKategori()" id="btnTambahKat"
-          class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition shadow-xs">
+        <button type="button" onclick="tambahKategori()" id="btnTambahKat" class="w-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold py-2.5 px-3 rounded-xl transition shadow-xs">
           + Tambah Kategori Lain (Maks. 6)
         </button>
       </div>
 
-      <button onclick="daftarJualan()" id="btnSubmitJualan"
-        class="w-full mt-4 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl transition shadow-md shadow-orange-200">
+      <button onclick="daftarJualan()" id="btnSubmitJualan" class="w-full mt-4 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-3.5 px-4 rounded-xl transition shadow-md shadow-orange-200">
         Kirim Pendaftaran Mitra
       </button>
     </div>
 
     <!-- MODAL PESAN INTERAKTIF -->
-    <div id="modalPesan"
-      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-3 overflow-y-auto">
-      <div
-        class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3 border border-slate-100 my-auto">
+    <div id="modalPesan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-3 overflow-y-auto">
+      <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3 border border-slate-100 my-auto">
         <h3 id="modalLapakTitle" class="font-bold text-sm text-slate-900 mb-1">Pesan Makanan</h3>
         <p class="text-[11px] text-slate-500">Pilih menu dan tulis catatan khusus jika ada.</p>
-
+        
         <div class="space-y-3">
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemesan</label>
-            <input type="text" id="pesanNama" placeholder="Nama kamu..."
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50">
+            <input type="text" id="pesanNama" placeholder="Nama kamu..." class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50">
           </div>
 
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Daftar Menu</label>
-            <div id="containerMenuInteraktif"
-              class="space-y-3 bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-48 overflow-y-auto"></div>
+            <div id="containerMenuInteraktif" class="space-y-3 bg-slate-50 p-3 rounded-xl border border-slate-200 max-h-48 overflow-y-auto"></div>
           </div>
 
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Catatan Pesanan / Note (Opsional)</label>
-            <input type="text" id="pesanNote" placeholder="Cth: Jangan pakai es, kuah pisah..."
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
+            <input type="text" id="pesanNote" placeholder="Cth: Jangan pakai es, kuah pisah..." class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
           </div>
 
           <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl flex justify-between items-center">
@@ -172,61 +140,48 @@
             <span id="labelTotalHarga" class="text-sm font-extrabold text-blue-700" data-raw="0">Rp 0</span>
           </div>
         </div>
-
+        
         <div class="flex gap-2 pt-2">
-          <button onclick="tutupModalPesan()"
-            class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-          <button onclick="kirimPesanan()" id="btnKirimPesan"
-            class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Pesan
-            & Bayar</button>
+          <button onclick="tutupModalPesan()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+          <button onclick="kirimPesanan()" id="btnKirimPesan" class="flex-1 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Pesan & Bayar</button>
         </div>
       </div>
     </div>
 
     <!-- MODAL INVOICE PESANAN -->
-    <div id="modalInvoicePesanan"
-      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-3 overflow-y-auto">
-      <div
-        class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 my-auto text-center space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
-
+    <div id="modalInvoicePesanan" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-3 overflow-y-auto">
+      <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 my-auto text-center space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
+        
         <div id="areaStrukResi" class="space-y-3.5 bg-white p-1">
           <div class="border-b border-slate-100 pb-3 space-y-1">
-            <span
-              class="inline-block bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wider">Invoice
-              Pesanan</span>
+            <span class="inline-block bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-100 uppercase tracking-wider">Invoice Pesanan</span>
             <h3 class="font-extrabold text-slate-900 text-base mt-1" id="invNamaLapak">Pesan ke Lapak</h3>
           </div>
-
+          
           <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-left text-xs space-y-2">
             <div class="flex justify-between items-center border-b border-slate-100 pb-1.5">
-              <span class="text-slate-500 font-medium">Pemesan:</span>
+              <span class="text-slate-500 font-medium">Pemesan:</span> 
               <strong id="invNamaPemesan" class="text-slate-800 text-right">-</strong>
             </div>
 
             <div class="space-y-1 border-b border-slate-100 pb-2">
-              <span class="text-slate-500 font-medium block">Jadwal Mabar:</span>
-              <div id="invJadwal"
-                class="font-bold text-slate-800 text-[11px] leading-relaxed bg-white p-2 rounded-xl border border-slate-200 break-words whitespace-pre-line">
-                -</div>
+              <span class="text-slate-500 font-medium block">Jadwal Mabar:</span> 
+              <div id="invJadwal" class="font-bold text-slate-800 text-[11px] leading-relaxed bg-white p-2 rounded-xl border border-slate-200 break-words whitespace-pre-line">-</div>
             </div>
 
             <div>
               <span class="text-slate-500 font-medium block mb-1">Rincian Menu:</span>
-              <div id="invDetailMenu"
-                class="font-mono text-[11px] text-slate-700 whitespace-pre-line bg-white p-2 rounded-xl border border-slate-200 max-h-24 overflow-y-auto">
-                -</div>
+              <div id="invDetailMenu" class="font-mono text-[11px] text-slate-700 whitespace-pre-line bg-white p-2 rounded-xl border border-slate-200 max-h-24 overflow-y-auto">-</div>
             </div>
 
-            <div
-              class="pt-1 flex justify-between items-center text-sm bg-blue-50/80 p-2.5 rounded-xl border border-blue-100">
+            <div class="pt-1 flex justify-between items-center text-sm bg-blue-50/80 p-2.5 rounded-xl border border-blue-100">
               <span class="font-bold text-slate-700 text-xs">Total Tagihan (+Kode Unik):</span>
               <span id="invTotalTagihan" class="font-extrabold text-blue-700 font-mono text-sm">Rp 0</span>
             </div>
           </div>
 
-          <p class="text-[10px] text-slate-500 leading-relaxed">Transfer persis hingga 3 digit terakhir untuk verifikasi
-            otomatis.</p>
-
+          <p class="text-[10px] text-slate-500 leading-relaxed">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.</p>
+          
           <div class="bg-white p-3 rounded-2xl border border-slate-200 inline-block shadow-2xs space-y-2 w-full">
             <img src="qris.png" alt="QRIS" class="mx-auto w-44 h-44 object-contain rounded-xl border border-slate-100">
             <span class="text-[10px] font-bold text-slate-600 block">BCA 0083677071 a.n Andi</span>
@@ -234,12 +189,10 @@
         </div>
 
         <div class="space-y-2 pt-2 border-t border-slate-100">
-          <button onclick="downloadResiGambar()" id="btnDownloadImg"
-            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-2xl transition shadow-xs flex items-center justify-center gap-1.5">
+          <button onclick="downloadResiGambar()" id="btnDownloadImg" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 rounded-2xl transition shadow-xs flex items-center justify-center gap-1.5">
             📥 Download Resi (Gambar PNG)
           </button>
-          <button onclick="selesaiBayarPesanan()"
-            class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-2xl transition shadow-md">
+          <button onclick="selesaiBayarPesanan()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-2xl transition shadow-md">
             Tutup & Selesai
           </button>
         </div>
@@ -250,15 +203,12 @@
 
   <!-- FLOATING BOTTOM NAVIGATION BAR -->
   <nav aria-label="Navigasi Utama" class="fixed bottom-4 left-0 right-0 z-40 px-4">
-    <div
-      class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
-      <a href="index"
-        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
+    <div class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
+      <a href="index" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
         <span class="text-base leading-none mb-0.5">🏸</span>
         <span>Mabar</span>
       </a>
-      <a href="jualan"
-        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-orange-600 text-white font-bold text-[10px] shadow-xs transition">
+      <a href="jualan" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-orange-600 text-white font-bold text-[10px] shadow-xs transition">
         <span class="text-base leading-none mb-0.5">🛍️</span>
         <span>Jajanan</span>
       </a>
@@ -266,10 +216,8 @@
   </nav>
 
   <!-- Toast Notification Container -->
-  <div id="toastContainer"
-    class="fixed bottom-20 left-0 right-0 z-50 flex flex-col items-center pointer-events-none px-4 space-y-2"></div>
+  <div id="toastContainer" class="fixed bottom-20 left-0 right-0 z-50 flex flex-col items-center pointer-events-none px-4 space-y-2"></div>
 
   <script src="jualan.js"></script>
 </body>
-
 </html>
