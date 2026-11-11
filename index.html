@@ -4,629 +4,332 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="logo.png">
-  <title>Admin Dashboard - Tepak Friendly</title>
+  <title id="pageTitle">Tepak Friendly - Jadwal & Pendaftaran Mabar</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" type="image/png" href="logo.png">
+  <script src="config.js"></script>
+  <script src="telegram.js"></script>
 </head>
 
-<body class="bg-slate-100 min-h-screen p-4 font-sans text-slate-800 antialiased pb-12">
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-24">
 
-  <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-6">
-
-    <!-- Header Admin -->
-    <div class="flex justify-between items-center border-b border-slate-100 pb-4">
-      <div>
-        <h1 class="text-base font-extrabold text-slate-900">🛠️ Panel Admin Tepak Friendly</h1>
-        <p class="text-[11px] text-slate-500">Kelola jadwal, peserta, dan rekap keuangan mabar</p>
-      </div>
-      <div id="statusOnline"
-        class="hidden flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-100">
-        <span>Online 🟢</span>
-      </div>
-    </div>
-
-    <!-- Bagian Login -->
-    <div id="loginSection" class="max-w-sm mx-auto space-y-3 py-6">
-      <div>
-        <label for="passInput" class="block text-xs font-bold text-slate-600 mb-1">Password Admin</label>
-        <input type="password" id="passInput" placeholder="Masukkan password..."
-          class="w-full p-3 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-      </div>
-      <button onclick="login()"
-        class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Masuk
-        Dashboard</button>
-    </div>
-
-    <!-- Panel Utama Admin -->
-    <div id="adminPanel" class="hidden space-y-5">
-      <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100">
-        <span class="text-xs font-semibold text-slate-600">Sesi Aktif Admin</span>
-        <div class="flex gap-2">
-          <button onclick="loadDataAdmin()"
-            class="bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 transition shadow-xs">🔄
-            Refresh</button>
-          <button onclick="logout()"
-            class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-rose-200 transition">🚪
-            Logout</button>
-        </div>
-      </div>
-
-      <!-- Ringkasan Keuangan -->
-      <div class="grid grid-cols-2 gap-3">
-        <div class="bg-blue-50/60 border border-blue-100 rounded-2xl p-3.5 text-center">
-          <span class="text-[11px] font-bold text-slate-500 block mb-0.5">Total Dana Masuk (Lunas)</span>
-          <span class="text-base font-extrabold text-blue-700 tracking-tight" id="totalDanaLunas">Rp 0</span>
-        </div>
-        <div class="bg-amber-50/60 border border-amber-100 rounded-2xl p-3.5 text-center">
-          <span class="text-[11px] font-bold text-slate-500 block mb-0.5">Potensi Pending</span>
-          <span class="text-base font-extrabold text-amber-600 tracking-tight" id="totalDanaPending">Rp 0</span>
-        </div>
-      </div>
-
-      <!-- Tambah Jadwal Baru -->
-      <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
-        <h2 class="font-bold text-xs text-slate-800 uppercase tracking-wide">➕ Tambah Jadwal Baru</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <input type="text" id="addId" placeholder="ID Jadwal (Cth: Mabar-03)"
-            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <input type="date" id="addTanggal"
-            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-500">
-          <input type="text" id="addInfo" placeholder="Lokasi GOR (Cth: Gor Karapitan)"
-            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 sm:col-span-2">
-          <input type="text" id="addJam" placeholder="Jam Main (Cth: 11:30 - 14:00)"
-            class="p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          <div class="flex gap-2">
-            <input type="number" id="addHtm" placeholder="HTM (Rp)"
-              class="flex-1 p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <input type="number" id="addKuota" placeholder="Kuota"
-              class="w-1/3 p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-          </div>
-        </div>
-        <button onclick="tambahJadwalBaru(this)"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-sm">Simpan
-          Jadwal Baru</button>
-      </div>
-
-      <!-- Kategori Jadwal dengan Sistem Tab Switcher -->
-      <div class="space-y-4">
-        <!-- Tombol Tab Navigasi -->
-        <div class="flex gap-1.5 bg-slate-100 p-1 rounded-xl">
-          <button onclick="gantiTabJadwal('aktif')" id="tabJadwalAktif"
-            class="flex-1 bg-white text-slate-900 font-bold text-xs py-2 rounded-lg shadow-2xs transition">🟢 Jadwal
-            Aktif</button>
-          <button onclick="gantiTabJadwal('nonaktif')" id="tabJadwalNonaktif"
-            class="flex-1 bg-transparent text-slate-500 font-bold text-xs py-2 transition">🔴 Jadwal Selesai /
-            Riwayat</button>
-        </div>
-
-        <!-- Kontainer Jadwal Aktif -->
-        <div id="containerJadwalAktif" class="space-y-3">
-          <div class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Memuat rekap jadwal
-            aktif...</div>
-        </div>
-
-        <!-- Kontainer Jadwal Nonaktif (Hidden Default) -->
-        <div id="containerJadwalNonaktif" class="space-y-3 hidden">
-          <div class="text-center text-xs text-slate-400 py-4 bg-slate-50 rounded-2xl border">Memuat riwayat jadwal...
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Modal Konfirmasi Custom (Tengah Layar) -->
-  <div id="customModal"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 transform transition-all space-y-3">
-      <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Konfirmasi Tindakan</h3>
-      <p id="modalDesc" class="text-xs text-slate-600">Apakah kamu yakin ingin melanjutkan tindakan ini?</p>
-      <div class="flex gap-2 pt-2">
-        <button id="modalBtnCancel"
-          class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition">Batal</button>
-        <button id="modalBtnConfirm" class="flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white">Ya,
-          Lanjutkan</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Edit Nominal -->
-  <div id="modalEditNominal"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 space-y-3">
-      <h3 class="font-bold text-sm text-slate-900">Edit Nominal Tagihan</h3>
-      <p class="text-xs text-slate-500" id="editNamaPesertaLabel">-</p>
-      <input type="hidden" id="editRowIndexInput">
-      <div>
-        <label class="block text-[11px] font-bold text-slate-600 mb-1">Nominal Baru (Rp)</label>
-        <input type="number" id="inputNominalBaru"
-          class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
-      </div>
-      <div class="flex gap-2 pt-2">
-        <button onclick="tutupModalEditNominal()"
-          class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-        <button onclick="simpanNominalBaru(this)"
-          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl">Simpan</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal Edit Jadwal -->
-  <div id="modalEditJadwal"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
-      <h3 class="font-bold text-sm text-slate-900">✏️ Edit Jadwal Mabar</h3>
-      <p class="text-[10px] text-slate-500 bg-slate-100 px-2 py-1 rounded font-mono inline-block"
-        id="editJadwalLabelId">-</p>
-      <input type="hidden" id="editJadwalId">
-      <div class="space-y-2">
-        <div class="grid grid-cols-2 gap-2">
-          <div class="col-span-2">
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Tanggal</label>
-            <input type="date" id="editJadwalTanggal"
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          </div>
-          <div class="col-span-2">
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Lokasi / GOR</label>
-            <input type="text" id="editJadwalInfo"
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          </div>
-        </div>
+  <!-- Header Minimalis -->
+  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-3 shadow-2xs">
+    <div class="max-w-md mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2.5">
+        <img src="logo.png" alt="Logo Tepak Friendly"
+          class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
         <div>
-          <label class="block text-[11px] font-bold text-slate-600 mb-1">Jam Main</label>
-          <input type="text" id="editJadwalJam"
-            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">HTM (Rp)</label>
-            <input type="number" id="editJadwalHtm"
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Kuota</label>
-            <input type="number" id="editJadwalKuota"
-              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-          </div>
+          <h1 class="text-xs font-extrabold tracking-tight text-slate-900 leading-tight">Tepak Friendly</h1>
+          <p class="text-[9px] text-slate-500 font-medium">Jadwal & Mabar Badminton</p>
         </div>
       </div>
-      <div class="flex gap-2 pt-2">
-        <button onclick="tutupModalEditJadwal()"
-          class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-        <button onclick="simpanEditJadwal(this)"
-          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Simpan</button>
+      <span
+        class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        Live Sync
+      </span>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto px-4 mt-4 space-y-4">
+    <!-- JADWAL MABAR CONTAINER -->
+    <div class="space-y-3">
+      <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide px-1">Pilih Jadwal Mabar</h2>
+      <div id="containerJadwal" class="space-y-3">
+        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200 shadow-2xs">
+          Memuat jadwal...</div>
       </div>
     </div>
-  </div>
 
-  <script src="config.js"></script>
+    <!-- MODAL PENDAFTARAN MABAR -->
+    <div id="modalDaftar"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
+      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3">
+        <h3 id="modalJadwalTitle" class="font-bold text-sm text-slate-900 mb-1">Daftar Mabar</h3>
+        <p class="text-[11px] text-slate-500 mb-3" id="modalJadwalSub">-</p>
+
+        <div class="space-y-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemain (Pisahkan dengan koma)</label>
+            <textarea id="namaPemain" rows="2" placeholder="Cth: Budi, Andi, Siti"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition"></textarea>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Email</label>
+            <input type="text" id="emailPemain" placeholder="Email contoh lorem@gmail.com"
+              class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
+          </div>
+        </div>
+
+        <div class="flex gap-2 mt-4">
+          <button onclick="tutupModalDaftar()"
+            class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
+          <button onclick="kirimDaftarMabar()" id="btnKirimDaftar"
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition">Daftar
+            Sekarang</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL INVOICE PEMBAYARAN MABAR -->
+    <div id="modalInvoice"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
+      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-3">
+        <div
+          class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
+          Pendaftaran Berhasil</div>
+        <h3 class="font-extrabold text-slate-900 text-base" id="invJudwalMabar">Jadwal Mabar</h3>
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-left text-xs space-y-1.5">
+          <div class="flex justify-between"><span class="text-slate-500">Total Tagihan (+Kode Unik):</span> <strong
+              id="invTotalTagihan" class="text-blue-600 text-sm font-extrabold">Rp 0</strong></div>
+        </div>
+
+        <p class="text-[11px] text-slate-500">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.</p>
+
+        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 inline-block">
+          <img src="qris.png" alt="QRIS" class="mx-auto w-48 h-48 object-contain mb-1 rounded-lg bg-white p-1 border">
+          <span class="text-[10px] text-slate-500 block">BCA 0083677071 a.n Andi</span>
+        </div>
+
+        <button onclick="tutupModalInvoice()"
+          class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup
+          & Selesai</button>
+      </div>
+    </div>
+
+    <!-- MODAL CUSTOM NOTIFIKASI -->
+    <div id="customModal"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+      <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 text-center">
+        <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Notifikasi</h3>
+        <p id="modalDesc" class="text-xs text-slate-600">-</p>
+        <button onclick="tutupCustomModal()"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition">OK</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- FLOATING BOTTOM NAVIGATION BAR -->
+  <nav aria-label="Navigasi Utama" class="fixed bottom-4 left-0 right-0 z-40 px-4">
+    <div
+      class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
+      <a href="index"
+        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-blue-600 text-white font-bold text-[10px] shadow-xs transition">
+        <span class="text-base leading-none mb-0.5">🏸</span>
+        <span>Mabar</span>
+      </a>
+      <a href="jualan"
+        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
+        <span class="text-base leading-none mb-0.5">🛍️</span>
+        <span>Jajanan</span>
+      </a>
+    </div>
+  </nav>
+
   <script>
     const GAS_URL = CONFIG.GAS_URL;
-    const SESSION_DURATION = 6 * 60 * 60 * 1000;
-    let currentTabJadwal = 'aktif';
+    let jadwalDipilihGlobal = null;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      cekSesiLogin();
-    });
-
-    function gantiTabJadwal(tab) {
-      currentTabJadwal = tab;
-      const btnAktif = document.getElementById('tabJadwalAktif');
-      const btnNonaktif = document.getElementById('tabJadwalNonaktif');
-      const divAktif = document.getElementById('containerJadwalAktif');
-      const divNonaktif = document.getElementById('containerJadwalNonaktif');
-
-      if (tab === 'aktif') {
-        btnAktif.className = 'flex-1 bg-white text-slate-900 font-bold text-xs py-2 rounded-lg shadow-2xs transition';
-        btnNonaktif.className = 'flex-1 bg-transparent text-slate-500 font-bold text-xs py-2 transition';
-        divAktif.classList.remove('hidden');
-        divNonaktif.classList.add('hidden');
-      } else {
-        btnNonaktif.className = 'flex-1 bg-white text-slate-900 font-bold text-xs py-2 rounded-lg shadow-2xs transition';
-        btnAktif.className = 'flex-1 bg-transparent text-slate-500 font-bold text-xs py-2 transition';
-        divNonaktif.classList.remove('hidden');
-        divAktif.classList.add('hidden');
-      }
-    }
-
-    function cekSesiLogin() {
-      const loginTime = localStorage.getItem('tepak_admin_login_time');
-      if (loginTime && (new Date().getTime() - parseInt(loginTime)) < SESSION_DURATION) {
-        const adminPanel = document.getElementById('adminPanel');
-        const statusOnline = document.getElementById('statusOnline');
-        const loginSection = document.getElementById('loginSection');
-
-        if (loginSection) loginSection.classList.add('hidden');
-        if (adminPanel) adminPanel.classList.remove('hidden');
-        if (statusOnline) statusOnline.classList.remove('hidden');
-        loadDataAdmin();
-      } else {
-        logout(false);
-      }
-    }
-
-    async function login() {
-      const pass = document.getElementById('passInput').value;
-      if (!pass) return showCustomWarning("Perhatian", "Masukkan password terlebih dahulu!");
-
-      const btnLogin = document.querySelector('#loginSection button');
-      const oldText = btnLogin.innerText;
-      btnLogin.innerText = 'Memeriksa...';
-      btnLogin.disabled = true;
-
-      try {
-        const response = await fetch(GAS_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'login_admin', password: pass })
-        });
-        const result = await response.json();
-        if (result.status === 'success') {
-          localStorage.setItem('tepak_admin_login_time', new Date().getTime().toString());
-          cekSesiLogin();
-        } else {
-          showCustomWarning("Login Gagal", "Password admin salah!");
-          btnLogin.innerText = oldText;
-          btnLogin.disabled = false;
-        }
-      } catch (error) {
-        showCustomWarning("Koneksi Error", "Terjadi kesalahan koneksi ke server.");
-        btnLogin.innerText = oldText;
-        btnLogin.disabled = false;
-      }
-    }
-
-    function logout(pesanAlert = true) {
-      localStorage.removeItem('tepak_admin_login_time');
-
-      const adminPanel = document.getElementById('adminPanel');
-      const statusOnline = document.getElementById('statusOnline');
-      const loginSection = document.getElementById('loginSection');
-      const passInput = document.getElementById('passInput');
-
-      if (adminPanel) adminPanel.classList.add('hidden');
-      if (statusOnline) statusOnline.classList.add('hidden');
-      if (loginSection) loginSection.classList.remove('hidden');
-      if (passInput) passInput.value = '';
-
-      if (pesanAlert) {
-        showCustomWarning("Keluar Sesi", "Berhasil keluar dari dashboard admin.");
-      }
-    }
-
-    function showConfirmModal(title, desc, confirmButtonText, confirmButtonClass, onConfirm) {
-      const modal = document.getElementById('customModal');
+    function showCustomMsg(title, desc) {
       document.getElementById('modalTitle').innerText = title;
       document.getElementById('modalDesc').innerText = desc;
-      const btnConfirm = document.getElementById('modalBtnConfirm');
-      btnConfirm.innerText = confirmButtonText;
-      btnConfirm.className = "flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white " + confirmButtonClass;
-      modal.classList.remove('hidden');
-
-      const newBtnConfirm = btnConfirm.cloneNode(true);
-      const newBtnCancel = document.getElementById('modalBtnCancel').cloneNode(true);
-      btnConfirm.parentNode.replaceChild(newBtnConfirm, btnConfirm);
-      document.getElementById('modalBtnCancel').parentNode.replaceChild(newBtnCancel, document.getElementById('modalBtnCancel'));
-
-      newBtnConfirm.addEventListener('click', () => { modal.classList.add('hidden'); onConfirm(); });
-      newBtnCancel.addEventListener('click', () => { modal.classList.add('hidden'); });
+      document.getElementById('customModal').classList.remove('hidden');
+    }
+    function tutupCustomModal() {
+      document.getElementById('customModal').classList.add('hidden');
     }
 
-    function showCustomWarning(title, desc) {
-      const modal = document.getElementById('customModal');
-      document.getElementById('modalTitle').innerText = title;
-      document.getElementById('modalDesc').innerText = desc;
-      const btnConfirm = document.getElementById('modalBtnConfirm');
-      btnConfirm.innerText = "OK";
-      btnConfirm.className = "flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white bg-blue-600 hover:bg-blue-700";
-
-      const btnCancel = document.getElementById('modalBtnCancel');
-      btnCancel.classList.add('hidden');
-      modal.classList.remove('hidden');
-
-      const newBtnConfirm = btnConfirm.cloneNode(true);
-      btnConfirm.parentNode.replaceChild(newBtnConfirm, btnConfirm);
-
-      newBtnConfirm.addEventListener('click', () => {
-        modal.classList.add('hidden');
-        btnCancel.classList.remove('hidden');
-      });
-    }
-
-    async function loadDataAdmin() {
-      const divAktif = document.getElementById('containerJadwalAktif');
-      const divNonaktif = document.getElementById('containerJadwalNonaktif');
-
+    async function loadDataIndex() {
       try {
         const response = await fetch(GAS_URL);
         const data = await response.json();
-        divAktif.innerHTML = '';
-        divNonaktif.innerHTML = '';
+        const container = document.getElementById('containerJadwal');
+        container.innerHTML = '';
 
-        const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
-        let totalLunasNum = 0, totalPendingNum = 0;
-
-        (data.pemain || []).forEach(item => {
-          const nominal = parseInt(item.tagihan || 0);
-          if (item.status && item.status.includes('Lunas')) totalLunasNum += nominal;
-          else if (item.status && item.status.includes('Menunggu')) totalPendingNum += nominal;
+        const listJadwal = (data.jadwal || []).filter(j => {
+          const statusJ = j.status ? j.status.toString().trim().toLowerCase() : 'aktif';
+          return statusJ === 'aktif';
         });
-        document.getElementById('totalDanaLunas').innerText = formatRp.format(totalLunasNum);
-        document.getElementById('totalDanaPending').innerText = formatRp.format(totalPendingNum);
 
-        const jadwalList = data.jadwal || [];
-        const pemainList = data.pemain || [];
-
-        jadwalList.sort((a, b) => {
+        listJadwal.sort((a, b) => {
           let dateA = a.tanggal ? new Date(a.tanggal) : new Date(0);
           let dateB = b.tanggal ? new Date(b.tanggal) : new Date(0);
           if (dateA - dateB !== 0) return dateA - dateB;
           return (a.jam || '').localeCompare(b.jam || '');
         });
 
-        let countAktif = 0;
-        let countNonaktif = 0;
+        const listPemain = data.pemain || [];
 
-        jadwalList.forEach(j => {
-          const pesertaJadwal = pemainList.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
-          const isNonaktif = j.status && j.status.toString().toLowerCase().includes('nonaktif');
+        if (listJadwal.length === 0) {
+          container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada jadwal mabar aktif tersedia.</div>';
+          return;
+        }
 
-          let listNamaHtml = pesertaJadwal.length === 0 ? '<li class="text-slate-400 italic text-[11px] py-2 text-center">Belum ada peserta.</li>' : '';
-
-          pesertaJadwal.forEach((p, idx) => {
-            const isLunas = p.status.includes('Lunas');
-
-            // Tombol ACC langsung di sebelah nama peserta jika status belum lunas
-            const actionAccBtn = !isLunas
-              ? `<button onclick="accPemainLangsung(${p.rowIndex}, this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2 py-1 rounded-md transition shadow-2xs">ACC</button>`
-              : '';
-
-            listNamaHtml += `
-              <li class="py-1.5 px-2.5 border-b border-slate-100 last:border-b-0 flex justify-between items-center text-xs gap-2">
-                <div class="min-w-0 flex-1">
-                  <span class="font-bold text-slate-800 block truncate">${idx + 1}. ${p.nama}</span>
-                </div>
-                <div class="text-right flex items-center gap-2 shrink-0">
-                  <div>
-                    <span class="block font-mono font-semibold text-slate-700">${formatRp.format(p.tagihan || 0)}</span>
-                    <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isLunas ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${p.status}</span>
-                  </div>
-                  <div class="flex items-center gap-1">
-                    ${actionAccBtn}
-                    <button onclick="bukaModalEditNominal(${p.rowIndex}, '${p.nama}', ${p.tagihan || 0})" class="bg-slate-100 p-1.5 rounded-lg border hover:bg-slate-200 transition" title="Edit Tagihan">✏️</button>
-                    <button onclick="hapusPemainDariRekap(${p.rowIndex}, this)" class="bg-rose-50 text-rose-600 p-1.5 rounded-lg border hover:bg-rose-100 transition" title="Hapus Peserta">🗑️</button>
-                  </div>
-                </div>
-              </li>`;
-          });
+        listJadwal.forEach(j => {
+          const pemainJadwal = listPemain.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
+          const sisaSlot = parseInt(j.kuota) - pemainJadwal.length;
 
           const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-';
 
-          const cardHtml = `
-            <div class="border ${isNonaktif ? 'border-slate-200 bg-slate-50/50 grayscale-[20%]' : 'border-emerald-100 bg-white shadow-sm'} rounded-2xl p-4 space-y-3 transition-all">
-              <div class="flex justify-between items-start border-b border-slate-100 pb-2">
+          let listPemainHtml = '';
+          if (pemainJadwal.length === 0) {
+            listPemainHtml = '<div class="text-[11px] text-slate-400 italic py-1 text-center">Belum ada pemain terdaftar.</div>';
+          } else {
+            pemainJadwal.forEach((p, idx) => {
+              const badge = p.status.includes('Lunas')
+                ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>'
+                : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
+
+              listPemainHtml += `
+                <li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
+                  <span class="font-bold text-slate-800">${idx + 1}. ${p.nama}</span>
+                  <div>${badge}</div>
+                </li>`;
+            });
+          }
+
+          const infoLengkap = `${displayTanggal} - ${j.infoRaw}`;
+
+          container.innerHTML += `
+            <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
+              <div class="flex justify-between items-start">
                 <div>
-                  <span class="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-md border">${j.id}</span>
+                  <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">[${j.id}]</span>
                   <h3 class="font-bold text-sm text-slate-900 mt-1">${j.infoRaw}</h3>
+                  <p class="text-[11px] text-slate-500 mt-0.5 font-medium">🗓️ ${displayTanggal}</p>
+                  <p class="text-[11px] text-slate-500">🕒 ${j.jam} | HTM: Rp ${parseInt(j.htm).toLocaleString('id-ID')}</p>
                 </div>
-                <div class="flex items-center gap-1.5 flex-wrap justify-end">
-                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">Slot: ${pesertaJadwal.length}/${j.kuota}</span>
-                  <button onclick="bukaModalEditJadwal('${j.id}', '${j.tanggal}', \`${j.infoRaw}\`, '${j.jam}', ${j.htm}, ${j.kuota})" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100 transition" title="Edit Jadwal">✏️ Edit</button>
-                  <button onclick="hapusJadwalMaster('${j.id}')" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 transition" title="Hapus Jadwal">🗑️ Hapus</button>
-                  <button onclick="copyListKeWA('${j.id}', '${j.tanggal}', \`${j.infoRaw}\`, ${j.kuota})" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100 transition" title="Copy WA">📋 Copy WA</button>
-                  <button onclick="toggleStatusJadwal('${j.id}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}', this)" class="text-[10px] font-bold px-2.5 py-1 rounded-xl border transition ${isNonaktif ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 hover:bg-rose-100'}">${isNonaktif ? '🟢 Aktifkan' : '🔴 Nonaktifkan'}</button>
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${sisaSlot > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
+                  ${sisaSlot > 0 ? `Sisa Slot: ${sisaSlot}` : 'Full'}
+                </span>
+              </div>
+
+              <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center">
+                  <span>👥 Pemain Terdaftar</span>
+                  <span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">${pemainJadwal.length}/${j.kuota}</span>
                 </div>
+                <ul class="divide-y divide-slate-100 max-h-36 overflow-y-auto p-1.5 space-y-1">
+                  ${listPemainHtml}
+                </ul>
               </div>
-              <div class="text-xs text-slate-600 flex justify-between bg-slate-50 p-2 rounded-xl border border-slate-100 font-medium">
-                <span>🗓️ ${displayTanggal} &nbsp; ⏰ ${j.jam}</span>
-                <span>HTM: Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</span>
-              </div>
-              <div class="rounded-xl border border-slate-200 overflow-hidden">
-                <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200">Daftar Peserta:</div>
-                <ul class="divide-y divide-slate-100 max-h-40 overflow-y-auto">${listNamaHtml}</ul>
+
+              <div class="flex gap-2">
+                <button onclick="bukaModalDaftar('${j.id}', \`${infoLengkap}\`, ${j.htm})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">
+                  + Daftar Mabar Ini
+                </button>
+                <button onclick="shareJadwal('${j.id}', \`${j.infoRaw}\`, '${displayTanggal}', '${j.jam}')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-2.5 rounded-xl border border-emerald-200 transition" title="Bagikan Link Jadwal">
+                  🔗 Share
+                </button>
               </div>
             </div>`;
-
-          if (isNonaktif) {
-            divNonaktif.innerHTML += cardHtml;
-            countNonaktif++;
-          } else {
-            divAktif.innerHTML += cardHtml;
-            countAktif++;
-          }
         });
+      } catch (e) { console.error("Error loadDataIndex:", e); }
+    }
 
-        if (countAktif === 0) divAktif.innerHTML = '<div class="text-center text-xs text-slate-400 py-4">Belum ada jadwal aktif.</div>';
-        if (countNonaktif === 0) divNonaktif.innerHTML = '<div class="text-center text-xs text-slate-400 py-4">Belum ada history jadwal.</div>';
+    // Fungsi Share Link Jadwal
+    function shareJadwal(id, infoGor, tanggal, jam) {
+      const currentUrl = window.location.origin + window.location.pathname;
+      const shareUrl = `${currentUrl}?jadwal=${id}`;
+      const teksShare = `🏸 *Yuk Gabung Mabar Tepak Friendly!* 🏸\n\n📍 *${infoGor}*\n🗓️ ${tanggal}\n⏰ ${jam}\n\nKlik link di bawah untuk langsung mendaftar:\n${shareUrl}`;
 
-      } catch (error) {
-        divAktif.innerHTML = '<div class="text-center text-rose-600 text-xs py-4">Gagal memuat data.</div>';
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(teksShare).then(() => {
+          showCustomMsg("Berhasil Disalin!", "Link & detail jadwal berhasil disalin ke clipboard. Silakan paste ke WhatsApp!");
+        });
+      } else {
+        prompt("Salin link jadwal berikut:", shareUrl);
       }
     }
 
-    // Fungsi ACC langsung dari list peserta di dalam kartu jadwal (sekaligus memicu kirim email konfirmasi di backend)
-    async function accPemainLangsung(rowIndex, btn) {
+    function bukaModalDaftar(id, info, htm) {
+      jadwalDipilihGlobal = { id, info, htm };
+      document.getElementById('modalJadwalTitle').innerText = `Daftar: ${info}`;
+      document.getElementById('modalJadwalSub').innerText = `HTM: Rp ${parseInt(htm).toLocaleString('id-ID')} per orang`;
+      document.getElementById('namaPemain').value = '';
+      document.getElementById('emailPemain').value = '';
+      document.getElementById('modalDaftar').classList.remove('hidden');
+    }
+
+    function tutupModalDaftar() { document.getElementById('modalDaftar').classList.add('hidden'); }
+
+    async function kirimDaftarMabar() {
+      const nama = document.getElementById('namaPemain').value.trim();
+      const email = document.getElementById('emailPemain').value.trim();
+
+      if (!nama) return showCustomMsg("Perhatian", "Nama pemain harus diisi!");
+
+      const btn = document.getElementById('btnKirimDaftar');
       const oldText = btn.innerText;
-      btn.innerText = '...';
+      btn.innerText = 'Memproses...';
       btn.disabled = true;
+
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex })
+          body: JSON.stringify({
+            action: 'register',
+            nama: nama,
+            email: email,
+            jadwalId: jadwalDipilihGlobal.id,
+            jadwalInfo: jadwalDipilihGlobal.info,
+            htm: jadwalDipilihGlobal.htm
+          })
         });
+
         const result = await response.json();
-        if (result.status === 'success') {
-          showCustomWarning("Berhasil", "Status berhasil diubah ke Lunas dan email konfirmasi telah dikirim ke peserta!");
-          await loadDataAdmin();
-        } else {
-          throw new Error(result.message || 'Gagal memperbarui status');
-        }
-      } catch (e) {
-        showCustomWarning("Gagal", "Gagal meng-ACC pembayaran peserta.");
-        btn.innerText = oldText;
-        btn.disabled = false;
-      }
-    }
+        tutupModalDaftar();
 
-    function copyListKeWA(jadwalId, tanggal, infoRaw, kuota) {
-      fetch(GAS_URL).then(res => res.json()).then(data => {
-        const pesertaJadwal = (data.pemain || []).filter(p => p.jadwalId === jadwalId && p.status && !p.status.includes('Dihapus'));
-        let teksWA = `🏸 *REKAP PESERTA MABAR* 🏸\n`;
-        const displayTgl = tanggal ? new Date(tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
-        teksWA += `📍 *${infoRaw}* | 🗓️ ${displayTgl}\n`;
-        teksWA += `👥 Slot Terisi: ${pesertaJadwal.length}/${kuota}\n\n`;
-        if (pesertaJadwal.length === 0) teksWA += `_Belum ada peserta terdaftar._`;
-        else pesertaJadwal.forEach((p, idx) => { teksWA += `${idx + 1}. ${p.nama} (${p.status.includes('Lunas') ? 'Lunas 🟢' : 'Pending 🟡'})\n`; });
-        teksWA += `\n_Yuk amankan slotnya!_`;
-        navigator.clipboard.writeText(teksWA).then(() => {
-          showCustomWarning("Berhasil", "List peserta berhasil disalin ke clipboard!");
-        });
-      });
-    }
-
-    async function toggleStatusJadwal(jadwalId, statusBaru, btn) {
-      const oldText = btn.innerText;
-      btn.innerText = '...';
-      btn.disabled = true;
-      try {
-        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'toggle_status_jadwal', jadwalId, statusBaru }) });
-        await loadDataAdmin();
-      } catch (e) {
-        showCustomWarning("Gagal", "Gagal mengubah status jadwal.");
-        btn.innerText = oldText;
-        btn.disabled = false;
-      }
-    }
-
-    function bukaModalEditNominal(rowIndex, nama, currentTagihan) {
-      document.getElementById('editRowIndexInput').value = rowIndex;
-      document.getElementById('editNamaPesertaLabel').innerText = `Peserta: ${nama}`;
-      document.getElementById('inputNominalBaru').value = currentTagihan;
-      document.getElementById('modalEditNominal').classList.remove('hidden');
-    }
-
-    function tutupModalEditNominal() {
-      document.getElementById('modalEditNominal').classList.add('hidden');
-    }
-
-    async function simpanNominalBaru(btn) {
-      const rowIndex = document.getElementById('editRowIndexInput').value;
-      const nominalBaru = document.getElementById('inputNominalBaru').value.trim();
-      if (!nominalBaru || isNaN(nominalBaru)) return showCustomWarning("Validasi", "Masukkan nominal angka yang valid!");
-
-      const oldText = btn.innerText;
-      btn.innerText = 'Menyimpan...';
-      btn.disabled = true;
-
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_tagihan', rowIndex: parseInt(rowIndex), tagihanBaru: parseInt(nominalBaru) }) });
-      tutupModalEditNominal();
-      await loadDataAdmin();
-
-      btn.innerText = oldText;
-      btn.disabled = false;
-    }
-
-    async function tambahJadwalBaru(btn) {
-      const payload = {
-        action: 'add_jadwal',
-        id: document.getElementById('addId').value.trim(),
-        tanggal: document.getElementById('addTanggal').value.trim(),
-        info: document.getElementById('addInfo').value.trim(),
-        jam: document.getElementById('addJam').value.trim(),
-        htm: document.getElementById('addHtm').value.trim(),
-        kuota: document.getElementById('addKuota').value.trim()
-      };
-      if (!payload.id || !payload.tanggal || !payload.info || !payload.jam || payload.htm === '' || !payload.kuota) {
-        return showCustomWarning("Form Belum Lengkap", "Harap isi semua kolom form tambah jadwal!");
-      }
-      const oldText = btn.innerText;
-      btn.innerText = 'Menyimpan...';
-      btn.disabled = true;
-
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-      await loadDataAdmin();
-
-      ['addId', 'addTanggal', 'addInfo', 'addJam', 'addHtm', 'addKuota'].forEach(id => document.getElementById(id).value = '');
-      btn.innerText = oldText;
-      btn.disabled = false;
-    }
-
-    async function hapusPemain(rowIndex) {
-      showConfirmModal("Hapus Peserta", "Yakin ingin menghapus peserta ini dari daftar?", "Ya, Hapus", "bg-rose-600 hover:bg-rose-700", async () => {
-        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_row', rowIndex: rowIndex }) });
-        await loadDataAdmin();
-      });
-    }
-
-    function hapusPemainDariRekap(rowIndex, btnElement) {
-      hapusPemain(rowIndex);
-    }
-
-    function bukaModalEditJadwal(id, tanggal, info, jam, htm, kuota) {
-      document.getElementById('editJadwalLabelId').innerText = `${id}`;
-      document.getElementById('editJadwalId').value = id;
-      document.getElementById('editJadwalTanggal').value = tanggal;
-      document.getElementById('editJadwalInfo').value = info;
-      document.getElementById('editJadwalJam').value = jam;
-      document.getElementById('editJadwalHtm').value = htm;
-      document.getElementById('editJadwalKuota').value = kuota;
-      document.getElementById('modalEditJadwal').classList.remove('hidden');
-    }
-
-    function tutupModalEditJadwal() {
-      document.getElementById('modalEditJadwal').classList.add('hidden');
-    }
-
-    async function simpanEditJadwal(btn) {
-      const payload = {
-        action: 'edit_jadwal',
-        id: document.getElementById('editJadwalId').value,
-        tanggal: document.getElementById('editJadwalTanggal').value,
-        info: document.getElementById('editJadwalInfo').value,
-        jam: document.getElementById('editJadwalJam').value,
-        htm: document.getElementById('editJadwalHtm').value,
-        kuota: document.getElementById('editJadwalKuota').value
-      };
-      if (!payload.tanggal || !payload.info || !payload.jam || payload.htm === '' || !payload.kuota) {
-        return showCustomWarning("Form Belum Lengkap", "Harap lengkapi semua kolom form edit jadwal!");
-      }
-      const oldText = btn.innerText;
-      btn.innerText = 'Menyimpan...';
-      btn.disabled = true;
-
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-      tutupModalEditJadwal();
-      await loadDataAdmin();
-
-      btn.innerText = oldText;
-      btn.disabled = false;
-    }
-
-    async function hapusJadwalMaster(jadwalId) {
-      showConfirmModal(
-        "Hapus Jadwal",
-        `Yakin ingin menghapus jadwal [${jadwalId}] secara permanen dari master?`,
-        "Ya, Hapus",
-        "bg-rose-600 hover:bg-rose-700",
-        async () => {
-          try {
-            const response = await fetch(GAS_URL, {
-              method: 'POST',
-              body: JSON.stringify({ action: 'delete_jadwal', id: jadwalId })
-            });
-            const result = await response.json();
-
-            if (result.status === 'success') {
-              await loadDataAdmin();
-            } else {
-              throw new Error(result.message || 'Gagal menghapus');
-            }
-          } catch (error) {
-            console.error("Gagal hapus jadwal:", error);
-            showCustomWarning("Error", "Gagal menghapus jadwal: " + error.message);
+        try {
+          if (typeof kirimTelegram === 'function') {
+            await kirimTelegram(nama, jadwalDipilihGlobal.info, (result ? result.totalTagihan : 0));
           }
+        } catch (errTelegram) {
+          console.warn("Telegram warning:", errTelegram);
         }
-      );
+
+        document.getElementById('invJudwalMabar').innerText = jadwalDipilihGlobal.info;
+        document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(result.totalTagihan || 0);
+        document.getElementById('modalInvoice').classList.remove('hidden');
+
+      } catch (e) {
+        console.error("Error kirimDaftarMabar:", e);
+        showCustomMsg("Error", "Gagal mendaftar mabar.");
+      } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+      }
     }
+
+    function tutupModalInvoice() {
+      document.getElementById('modalInvoice').classList.add('hidden');
+      loadDataIndex();
+    }
+
+    // Auto load data dan deteksi parameter URL ?jadwal=...
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDataIndex().then(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetJadwalId = urlParams.get('jadwal');
+
+        if (targetJadwalId) {
+          fetch(GAS_URL).then(res => res.json()).then(data => {
+            const jadwalDitemukan = (data.jadwal || []).find(j => String(j.id) === String(targetJadwalId));
+            if (jadwalDitemukan) {
+              const displayTgl = jadwalDitemukan.tanggal ? new Date(jadwalDitemukan.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+              const infoLengkap = `${displayTgl} - ${jadwalDitemukan.infoRaw}`;
+
+              bukaModalDaftar(jadwalDitemukan.id, infoLengkap, jadwalDitemukan.htm);
+              document.getElementById('pageTitle').innerText = `Daftar Mabar: ${jadwalDitemukan.infoRaw}`;
+            }
+          });
+        }
+      });
+
+      setInterval(loadDataIndex, 5000);
+    });
   </script>
 </body>
 
