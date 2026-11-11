@@ -2,7 +2,6 @@ const GAS_URL = CONFIG.GAS_URL;
 let lapakDipilih = null, jadwalDipilih = null, infoJadwalDipilih = null;
 let menuParsedGlobal = [];
 
-// Fungsi Toast Notification halus di pojok kanan bawah
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
   if (!container) return;
@@ -130,12 +129,23 @@ async function loadDataJualanPage() {
     const listJualan = Array.isArray(data.jualan) ? data.jualan : [];
     const listJadwal = Array.isArray(data.jadwal) ? data.jadwal : [];
 
-    // Ambil hanya ID jadwal yang statusnya AKTIF (tidak nonaktif)
-    const idJadwalAktif = listJadwal
-      .filter(j => !j.status || !j.status.toString().toLowerCase().includes('nonaktif'))
-      .map(j => String(j.id));
+    const jadwalAktifMap = {};
+    const idJadwalAktif = [];
+    
+    listJadwal.forEach(j => {
+      const statusJ = j.status ? j.status.toString().trim().toLowerCase() : 'aktif';
+      const isAktif = !statusJ.includes('nonaktif');
+      jadwalAktifMap[String(j.id).trim()] = {
+        aktif: isAktif,
+        infoRaw: j.infoRaw || j.id,
+        tanggal: j.tanggal,
+        jam: j.jam
+      };
+      if (isAktif) {
+        idJadwalAktif.push(String(j.id).trim());
+      }
+    });
 
-    // Filter lapak yang disetujui DAN terhubung dengan minimal 1 jadwal yang masih aktif
     const lapakDisetujui = listJualan.filter(l => {
       const isDisetujui = l.status && l.status.toString().trim().toLowerCase().includes('disetujui');
       if (!isDisetujui) return false;
@@ -147,7 +157,7 @@ async function loadDataJualanPage() {
     });
 
     if (lapakDisetujui.length === 0) {
-      container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada lapak UMKM yang aktif untuk jadwal mabar saat ini.</div>';
+      container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200 shadow-2xs">Belum ada lapak UMKM yang aktif untuk jadwal mabar saat ini.</div>';
       return;
     }
 
@@ -156,7 +166,6 @@ async function loadDataJualanPage() {
     lapakDisetujui.forEach(l => {
       const namaPenjual = l.namaPenjual || '';
       
-      // Filter pesanan: Hanya tampilkan pesanan dari jadwal yang aktif saja
       const pesananLapak = semuaPesanan.filter(p => {
         const matchLapak = p.namaLapak && p.namaLapak.trim().toLowerCase() === namaPenjual.trim().toLowerCase();
         if (!matchLapak) return false;
@@ -176,7 +185,6 @@ async function loadDataJualanPage() {
             ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>' 
             : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
           
-          // Nama pemesan disembunyikan / dianonimkan demi privasi publik
           listPesananHtml += `
             <li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
               <div>
@@ -191,34 +199,66 @@ async function loadDataJualanPage() {
       const menuAman = l.menuJualan || '';
       const emailAman = l.emailPenjual || l.whatsapp || '-';
 
-      container.innerHTML += `
-        <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
-          <div>
-            <div class="flex justify-between items-start">
-              <h3 class="font-bold text-sm text-slate-900">🛍️ ${namaPenjual}</h3>
-              <span class="text-[10px] bg-blue-50 text-blue-700 font-bold px-2.5 py-0.5 rounded-full border border-blue-100">📍 ${l.jadwalId || 'Umum'}</span>
-            </div>
-            <p class="text-[11px] text-slate-500 mt-0.5">Jadwal: ${l.jadwalInfo || 'Menunggu Penugasan Admin'}</p>
-            <div class="mt-2 text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100 whitespace-pre-line font-mono"><strong>Menu Tersedia:</strong><br>${menuAman}</div>
-          </div>
+      const assignedIds = (l.jadwalId || '').toString().split(',').map(s => s.trim());
+      const activeAssignedIds = assignedIds.filter(id => idJadwalAktif.includes(id));
+      const displayJadwalId = activeAssignedIds.length > 0 ? activeAssignedIds.join(', ') : 'Umum';
 
-          <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-            <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center">
-              <span>📋 Daftar Pesanan Masuk</span>
-              <span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">${pesananLapak.length} Pesanan</span>
-            </div>
-            <ul class="divide-y divide-slate-100 max-h-36 overflow-y-auto p-1.5 space-y-1">
-              ${listPesananHtml}
-            </ul>
-          </div>
+      let filteredJadwalInfo = l.jadwalInfo || 'Menunggu Penugasan Admin';
+      if (l.jadwalInfo && l.jadwalInfo.includes('|')) {
+        const parts = l.jadwalInfo.split('|').map(p => p.trim());
+        const activeParts = parts.filter(part => {
+          return assignedIds.some(id => {
+            if (!idJadwalAktif.includes(id)) return false;
+            const jInfoObj = jadwalAktifMap[id];
+            if (!jInfoObj) return false;
+            return part.includes(id) || (jInfoObj.infoRaw && part.includes(jInfoObj.infoRaw));
+          });
+        });
+        if (activeParts.length > 0) {
+          filteredJadwalInfo = activeParts.join(' | ');
+        }
+      }
 
-          <div class="pt-2 border-t border-slate-100 flex justify-between items-center">
-            <span class="text-[11px] text-slate-400 truncate max-w-[200px]">Email: ${emailAman}</span>
-            <button onclick="bukaModalPesan('${namaPenjual.replace(/'/g, "\\'")}', '${l.jadwalId || 'UMUM'}', '${l.jadwalInfo || 'Mitra UMKM'}', \`${encodeURIComponent(menuAman)}\`)" class="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-xs shrink-0">
-              🛍️ Pesan Menu
-            </button>
+      // Buat card menggunakan DOM element agar aman dari error kutip/escaping teks menu yang panjang
+      const cardDiv = document.createElement('div');
+      cardDiv.className = 'border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3';
+      
+      cardDiv.innerHTML = `
+        <div>
+          <div class="flex justify-between items-start">
+            <h3 class="font-bold text-sm text-slate-900">🛍️ ${namaPenjual}</h3>
+            <span class="text-[10px] bg-blue-50 text-blue-700 font-bold px-2.5 py-0.5 rounded-full border border-blue-100">📍 ${displayJadwalId}</span>
           </div>
+          <p class="text-[11px] text-slate-500 mt-0.5">Jadwal: ${filteredJadwalInfo}</p>
+          <div class="mt-2 text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100 whitespace-pre-line font-mono max-h-48 overflow-y-auto no-scrollbar"><strong>Menu Tersedia:</strong><br></div>
+        </div>
+
+        <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+          <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center">
+            <span>📋 Daftar Pesanan Masuk</span>
+            <span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">${pesananLapak.length} Pesanan</span>
+          </div>
+          <ul class="divide-y divide-slate-100 max-h-36 overflow-y-auto no-scrollbar p-1.5 space-y-1">
+            ${listPesananHtml}
+          </ul>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100 flex justify-between items-center">
+          <span class="text-[11px] text-slate-400 truncate max-w-[200px]">Email: ${emailAman}</span>
+          <button type="button" class="btn-pesan-menu bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3.5 py-2.5 rounded-xl transition shadow-xs shrink-0">
+            🛍️ Pesan Menu
+          </button>
         </div>`;
+
+      // Masukkan teks menu secara aman tanpa takut terpotong karakter kutip
+      cardDiv.querySelector('.font-mono').append(menuAman);
+
+      // Pasang Event Listener langsung ke tombol Pesan Menu (Aman dari error kutip/escaped string)
+      cardDiv.querySelector('.btn-pesan-menu').addEventListener('click', () => {
+        bukaModalPesan(namaPenjual, displayJadwalId, filteredJadwalInfo, menuAman);
+      });
+
+      container.appendChild(cardDiv);
     });
   } catch (e) { 
     console.error("Error loading jualan page:", e); 
@@ -261,13 +301,16 @@ function parseMenuText(rawMenuText) {
   return menus;
 }
 
-function bukaModalPesan(namaLapak, jId, jInfo, menuEncoded) {
-  lapakDipilih = namaLapak; jadwalDipilih = jId; infoJadwalDipilih = jInfo;
+function bukaModalPesan(namaLapak, jId, jInfo, menuTextRaw) {
+  lapakDipilih = namaLapak; 
+  jadwalDipilih = jId; 
+  infoJadwalDipilih = jInfo;
+  
   document.getElementById('modalLapakTitle').innerText = `Pesan ke: ${namaLapak}`;
   document.getElementById('pesanNama').value = '';
   document.getElementById('pesanNote').value = '';
 
-  menuParsedGlobal = parseMenuText(decodeURIComponent(menuEncoded));
+  menuParsedGlobal = parseMenuText(menuTextRaw);
   renderListMenuInteraktif();
   document.getElementById('modalPesan').classList.remove('hidden');
 }
@@ -298,9 +341,9 @@ function renderListMenuInteraktif() {
             <div class="text-[10px] text-blue-600 font-semibold mt-0.5">${formatHrg}</div>
           </div>
           <div class="flex items-center gap-2">
-            <button type="button" onclick="ubahQty(${m.id}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 rounded-md font-bold text-slate-700 flex items-center justify-center">-</button>
+            <button type="button" onclick="ubahQty(${m.id}, -1)" class="w-7 h-7 bg-slate-100 hover:bg-slate-200 rounded-lg font-bold text-slate-700 flex items-center justify-center">-</button>
             <span id="qty_${m.id}" class="font-bold w-4 text-center">${m.qty}</span>
-            <button type="button" onclick="ubahQty(${m.id}, 1)" class="w-6 h-6 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-md font-bold flex items-center justify-center">+</button>
+            <button type="button" onclick="ubahQty(${m.id}, 1)" class="w-7 h-7 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-lg font-bold flex items-center justify-center">+</button>
           </div>
         </div>`;
     });
