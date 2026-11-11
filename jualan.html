@@ -10,23 +10,34 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="config.js"></script>
   <script src="telegram.js"></script>
+  <style>
+    /* Utility untuk menghilangkan scrollbar bawaan tapi tetap bisa digeser */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
 </head>
 
-<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-12">
+<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-32">
 
   <!-- HEADER -->
-  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-2.5 shadow-xs">
+  <header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-3 shadow-2xs">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div class="flex items-center gap-2.5">
         <img src="logo.png" alt="Logo Tepak Friendly"
           class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
         <div>
-          <h1 class="text-sm font-extrabold tracking-tight text-slate-900 leading-tight">Lapak UMKM</h1>
+          <h1 class="text-xs font-extrabold tracking-tight text-slate-900 leading-tight">Lapak UMKM</h1>
           <p class="text-[9px] text-slate-500 font-medium">Tepak Friendly Jajanan</p>
         </div>
       </div>
       <a href="index"
-        class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1">
+        class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-1.5 px-3 rounded-xl transition flex items-center gap-1 shadow-2xs">
         <span>←</span> Mabar
       </a>
     </div>
@@ -50,14 +61,14 @@
       <div class="flex justify-between items-center px-1">
         <h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide">Daftar Lapak UMKM Aktif</h2>
         <span
-          class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-200">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+          class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           LIVE ORDER
         </span>
       </div>
       <div id="containerLapakPublik" class="space-y-3.5">
-        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200">Memuat data
-          lapak...</div>
+        <div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200 shadow-2xs">
+          Memuat data lapak...</div>
       </div>
     </div>
 
@@ -76,7 +87,7 @@
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-600 mb-1">Email Aktif</label>
-          <input type="text" id="emailPenjual" placeholder="Cth: 081234567890"
+          <input type="text" id="emailPenjual" placeholder="Cth: nama@gmail.com"
             class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white focus:outline-none transition">
         </div>
       </div>
@@ -179,7 +190,6 @@
       <div
         class="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-5 my-auto text-center space-y-4 border border-slate-100 max-h-[90vh] overflow-y-auto">
 
-        <!-- Area Resi yang di-download -->
         <div id="areaStrukResi" class="space-y-3.5 bg-white p-1">
           <div class="border-b border-slate-100 pb-3 space-y-1">
             <span
@@ -238,6 +248,27 @@
       </div>
     </div>
   </main>
+
+  <!-- FLOATING BOTTOM NAVIGATION BAR (Konsisten dengan halaman mabar) -->
+  <nav aria-label="Navigasi Utama" class="fixed bottom-4 left-0 right-0 z-40 px-4">
+    <div
+      class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
+      <a href="index"
+        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
+        <span class="text-base leading-none mb-0.5">🏸</span>
+        <span>Mabar</span>
+      </a>
+      <a href="jualan"
+        class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-orange-600 text-white font-bold text-[10px] shadow-xs transition">
+        <span class="text-base leading-none mb-0.5">🛍️</span>
+        <span>Jajanan</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer"
+    class="fixed bottom-20 left-0 right-0 z-50 flex flex-col items-center pointer-events-none px-4 space-y-2"></div>
 
   <script src="jualan.js"></script>
 </body>
