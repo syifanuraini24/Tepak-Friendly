@@ -17,7 +17,7 @@
     <div class="flex justify-between items-center border-b border-slate-100 pb-4">
       <div>
         <h1 class="text-base font-extrabold text-slate-900">🛠️ Panel Admin Tepak Friendly</h1>
-        <p class="text-[11px] text-slate-500">Kelola jadwal, peserta, dan rekap keuangan mabar</p>
+        <p class="text-[11px] text-slate-500">Kelola jadwal, peserta, banner, dan rekap keuangan mabar</p>
       </div>
       <div id="statusOnline"
         class="hidden flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full border border-emerald-100">
@@ -63,7 +63,7 @@
         </div>
       </div>
 
-      <!-- Tambah Jadwal Baru -->
+      <!-- Tambah Jadwal Baru (Termasuk Upload Banner) -->
       <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
         <h2 class="font-bold text-xs text-slate-800 uppercase tracking-wide">➕ Tambah Jadwal Baru</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -80,6 +80,12 @@
               class="flex-1 p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
             <input type="number" id="addKuota" placeholder="Kuota"
               class="w-1/3 p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <!-- Input Upload Banner Baru -->
+          <div class="sm:col-span-2">
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Banner Acara (Opsional)</label>
+            <input type="file" id="addBannerFile" accept="image/*"
+              class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition bg-white border border-slate-200 rounded-xl p-1">
           </div>
         </div>
         <button onclick="tambahJadwalBaru(this)"
@@ -151,10 +157,10 @@
     </div>
   </div>
 
-  <!-- Modal Edit Jadwal -->
+  <!-- Modal Edit Jadwal (Termasuk Ganti/Upload Banner) -->
   <div id="modalEditJadwal"
     class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <h3 class="font-bold text-sm text-slate-900">✏️ Edit Jadwal Mabar</h3>
       <p class="text-[10px] text-slate-500 bg-slate-100 px-2 py-1 rounded font-mono inline-block"
         id="editJadwalLabelId">-</p>
@@ -189,6 +195,12 @@
               class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
         </div>
+        <!-- Input Ganti/Upload Banner di Modal Edit -->
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Ganti Banner (Opsional)</label>
+          <input type="file" id="editBannerFile" accept="image/*"
+            class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition bg-slate-50 border border-slate-200 rounded-xl p-1">
+        </div>
       </div>
       <div class="flex gap-2 pt-2">
         <button onclick="tutupModalEditJadwal()"
@@ -208,6 +220,16 @@
     document.addEventListener('DOMContentLoaded', () => {
       cekSesiLogin();
     });
+
+    // Helper untuk mengubah file gambar menjadi Base64
+    function convertFileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    }
 
     function gantiTabJadwal(tab) {
       currentTabJadwal = tab;
@@ -374,8 +396,6 @@
 
           pesertaJadwal.forEach((p, idx) => {
             const isLunas = p.status.includes('Lunas');
-
-            // Tombol ACC langsung di sebelah nama peserta jika status belum lunas
             const actionAccBtn = !isLunas
               ? `<button onclick="accPemainLangsung(${p.rowIndex}, this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2 py-1 rounded-md transition shadow-2xs">ACC</button>`
               : '';
@@ -401,8 +421,15 @@
 
           const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-';
 
+          // Tampilkan preview banner kecil di panel admin jika ada
+          let bannerPreviewHtml = '';
+          if (j.bannerUrl && j.bannerUrl.trim() !== '') {
+            bannerPreviewHtml = `<div class="mb-2"><img src="${j.bannerUrl}" alt="Banner" class="w-full h-24 object-cover rounded-xl border border-slate-100"></div>`;
+          }
+
           const cardHtml = `
             <div class="border ${isNonaktif ? 'border-slate-200 bg-slate-50/50 grayscale-[20%]' : 'border-emerald-100 bg-white shadow-sm'} rounded-2xl p-4 space-y-3 transition-all">
+              ${bannerPreviewHtml}
               <div class="flex justify-between items-start border-b border-slate-100 pb-2">
                 <div>
                   <span class="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-md border">${j.id}</span>
@@ -443,7 +470,6 @@
       }
     }
 
-    // Fungsi ACC langsung dari list peserta di dalam kartu jadwal
     async function accPemainLangsung(rowIndex, btn) {
       const oldText = btn.innerText;
       btn.innerText = '...';
@@ -516,7 +542,18 @@
       btn.disabled = false;
     }
 
+    // Tambah Jadwal Baru (Termasuk Upload Banner)
     async function tambahJadwalBaru(btn) {
+      const fileInput = document.getElementById('addBannerFile');
+      let bannerBase64 = "";
+      let bannerName = "";
+
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        bannerBase64 = await convertFileToBase64(file);
+        bannerName = file.name;
+      }
+
       const payload = {
         action: 'add_jadwal',
         id: document.getElementById('addId').value.trim(),
@@ -524,11 +561,15 @@
         info: document.getElementById('addInfo').value.trim(),
         jam: document.getElementById('addJam').value.trim(),
         htm: document.getElementById('addHtm').value.trim(),
-        kuota: document.getElementById('addKuota').value.trim()
+        kuota: document.getElementById('addKuota').value.trim(),
+        bannerBase64: bannerBase64,
+        bannerName: bannerName
       };
+
       if (!payload.id || !payload.tanggal || !payload.info || !payload.jam || payload.htm === '' || !payload.kuota) {
         return showCustomWarning("Form Belum Lengkap", "Harap isi semua kolom form tambah jadwal!");
       }
+
       const oldText = btn.innerText;
       btn.innerText = 'Menyimpan...';
       btn.disabled = true;
@@ -536,7 +577,7 @@
       await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
       await loadDataAdmin();
 
-      ['addId', 'addTanggal', 'addInfo', 'addJam', 'addHtm', 'addKuota'].forEach(id => document.getElementById(id).value = '');
+      ['addId', 'addTanggal', 'addInfo', 'addJam', 'addHtm', 'addKuota', 'addBannerFile'].forEach(id => document.getElementById(id).value = '');
       btn.innerText = oldText;
       btn.disabled = false;
     }
@@ -560,6 +601,7 @@
       document.getElementById('editJadwalJam').value = jam;
       document.getElementById('editJadwalHtm').value = htm;
       document.getElementById('editJadwalKuota').value = kuota;
+      document.getElementById('editBannerFile').value = ''; // Reset input file
       document.getElementById('modalEditJadwal').classList.remove('hidden');
     }
 
@@ -567,7 +609,18 @@
       document.getElementById('modalEditJadwal').classList.add('hidden');
     }
 
+    // Simpan Edit Jadwal (Termasuk Ganti Banner)
     async function simpanEditJadwal(btn) {
+      const fileInput = document.getElementById('editBannerFile');
+      let bannerBase64 = "";
+      let bannerName = "";
+
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        bannerBase64 = await convertFileToBase64(file);
+        bannerName = file.name;
+      }
+
       const payload = {
         action: 'edit_jadwal',
         id: document.getElementById('editJadwalId').value,
@@ -575,11 +628,15 @@
         info: document.getElementById('editJadwalInfo').value,
         jam: document.getElementById('editJadwalJam').value,
         htm: document.getElementById('editJadwalHtm').value,
-        kuota: document.getElementById('editJadwalKuota').value
+        kuota: document.getElementById('editJadwalKuota').value,
+        bannerBase64: bannerBase64,
+        bannerName: bannerName
       };
+
       if (!payload.tanggal || !payload.info || !payload.jam || payload.htm === '' || !payload.kuota) {
         return showCustomWarning("Form Belum Lengkap", "Harap lengkapi semua kolom form edit jadwal!");
       }
+
       const oldText = btn.innerText;
       btn.innerText = 'Menyimpan...';
       btn.disabled = true;
