@@ -2,7 +2,6 @@ const GAS_URL = CONFIG.GAS_URL;
 let lapakDipilih = null, jadwalDipilih = null, infoJadwalDipilih = null;
 let menuParsedGlobal = [];
 
-// Fungsi Toast Notification halus di pojok kanan bawah
 function showToast(message, type = 'success') {
   const container = document.getElementById('toastContainer');
   if (!container) return;
@@ -130,7 +129,6 @@ async function loadDataJualanPage() {
     const listJualan = Array.isArray(data.jualan) ? data.jualan : [];
     const listJadwal = Array.isArray(data.jadwal) ? data.jadwal : [];
 
-    // Petakan ID jadwal yang statusnya AKTIF (tidak mengandung kata 'nonaktif')
     const jadwalAktifMap = {};
     const idJadwalAktif = [];
     
@@ -148,7 +146,6 @@ async function loadDataJualanPage() {
       }
     });
 
-    // Filter lapak yang disetujui DAN terhubung dengan minimal 1 jadwal yang masih aktif
     const lapakDisetujui = listJualan.filter(l => {
       const isDisetujui = l.status && l.status.toString().trim().toLowerCase().includes('disetujui');
       if (!isDisetujui) return false;
@@ -202,7 +199,6 @@ async function loadDataJualanPage() {
       const menuAman = l.menuJualan || '';
       const emailAman = l.emailPenjual || l.whatsapp || '-';
 
-      // --- FILTER & HIDE LOKASI / JADWAL YANG SUDAH NONAKTIF ---
       const assignedIds = (l.jadwalId || '').toString().split(',').map(s => s.trim());
       const activeAssignedIds = assignedIds.filter(id => idJadwalAktif.includes(id));
       const displayJadwalId = activeAssignedIds.length > 0 ? activeAssignedIds.join(', ') : 'Umum';
@@ -222,7 +218,6 @@ async function loadDataJualanPage() {
           filteredJadwalInfo = activeParts.join(' | ');
         }
       }
-      // ---------------------------------------------------------
 
       container.innerHTML += `
         <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
