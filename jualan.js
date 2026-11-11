@@ -130,10 +130,23 @@ async function loadDataJualanPage() {
     const listJualan = Array.isArray(data.jualan) ? data.jualan : [];
     const listJadwal = Array.isArray(data.jadwal) ? data.jadwal : [];
 
-    // Ambil hanya ID jadwal yang statusnya AKTIF (tidak nonaktif)
-    const idJadwalAktif = listJadwal
-      .filter(j => !j.status || !j.status.toString().toLowerCase().includes('nonaktif'))
-      .map(j => String(j.id));
+    // Buat map atau daftar ID jadwal yang statusnya AKTIF (tidak mengandung kata 'nonaktif')
+    const jadwalAktifMap = {};
+    const idJadwalAktif = [];
+    
+    listJadwal.forEach(j => {
+      const statusJ = j.status ? j.status.toString().trim().toLowerCase() : 'aktif';
+      const isAktif = !statusJ.includes('nonaktif');
+      jadwalAktifMap[String(j.id).trim()] = {
+        aktif: isAktif,
+        infoRaw: j.infoRaw || j.id,
+        tanggal: j.tanggal,
+        jam: j.jam
+      };
+      if (isAktif) {
+        idJadwalAktif.push(String(j.id).trim());
+      }
+    });
 
     // Filter lapak yang disetujui DAN terhubung dengan minimal 1 jadwal yang masih aktif
     const lapakDisetujui = listJualan.filter(l => {
@@ -176,7 +189,6 @@ async function loadDataJualanPage() {
             ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>' 
             : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
           
-          // Nama pemesan disembunyikan / dianonimkan demi privasi publik
           listPesananHtml += `
             <li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
               <div>
@@ -191,14 +203,42 @@ async function loadDataJualanPage() {
       const menuAman = l.menuJualan || '';
       const emailAman = l.emailPenjual || l.whatsapp || '-';
 
+      // --- FILTER & HIDE LOKASI / JADWAL YANG SUDAH NONAKTIF (ABU-ABU) ---
+      const assignedIds = (l.jadwalId || '').toString().split(',').map(s => s.trim());
+      
+      // Filter hanya ID jadwal yang benar-benar aktif
+      const activeAssignedIds = assignedIds.filter(id => idJadwalAktif.includes(id));
+      const displayJadwalId = activeAssignedIds.length > 0 ? activeAssignedIds.join(', ') : 'Umum';
+
+      // Filter teks jadwal/info agar baris jadwal yang sudah nonaktif di-hide/disaring otomatis
+      let filteredJadwalInfo = l.jadwalInfo || 'Menunggu Penugasan Admin';
+      if (l.jadwalInfo && l.jadwalInfo.includes('|')) {
+        // Jika format gabungan teks jadwal (misal: "Fun Tournament-01 2026-11-08 | Mabar-01 ...")
+        // Kita pecah dan cek apakah bagian tersebut merujuk ke jadwal aktif
+        const parts = l.jadwalInfo.split('|').map(p => p.trim());
+        const activeParts = parts.filter(part => {
+          // Cari apakah ada ID atau nama jadwal aktif di dalam teks bagian ini
+          return assignedIds.some(id => {
+            if (!idJadwalAktif.includes(id)) return false;
+            const jInfoObj = jadwalAktifMap[id];
+            if (!jInfoObj) return false;
+            return part.includes(id) || (jInfoObj.infoRaw && part.includes(jInfoObj.infoRaw));
+          });
+        });
+        if (activeParts.length > 0) {
+          filteredJadwalInfo = activeParts.join(' | ');
+        }
+      }
+      // -----------------------------------------------------------------
+
       container.innerHTML += `
         <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
           <div>
             <div class="flex justify-between items-start">
               <h3 class="font-bold text-sm text-slate-900">🛍️ ${namaPenjual}</h3>
-              <span class="text-[10px] bg-blue-50 text-blue-700 font-bold px-2.5 py-0.5 rounded-full border border-blue-100">📍 ${l.jadwalId || 'Umum'}</span>
+              <span class="text-[10px] bg-blue-50 text-blue-700 font-bold px-2.5 py-0.5 rounded-full border border-blue-100">📍 ${displayJadwalId}</span>
             </div>
-            <p class="text-[11px] text-slate-500 mt-0.5">Jadwal: ${l.jadwalInfo || 'Menunggu Penugasan Admin'}</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Jadwal: ${filteredJadwalInfo}</p>
             <div class="mt-2 text-xs text-slate-700 bg-slate-50 p-2.5 rounded-xl border border-slate-100 whitespace-pre-line font-mono"><strong>Menu Tersedia:</strong><br>${menuAman}</div>
           </div>
 
@@ -214,7 +254,7 @@ async function loadDataJualanPage() {
 
           <div class="pt-2 border-t border-slate-100 flex justify-between items-center">
             <span class="text-[11px] text-slate-400 truncate max-w-[200px]">Email: ${emailAman}</span>
-            <button onclick="bukaModalPesan('${namaPenjual.replace(/'/g, "\\'")}', '${l.jadwalId || 'UMUM'}', '${l.jadwalInfo || 'Mitra UMKM'}', \`${encodeURIComponent(menuAman)}\`)" class="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-xs shrink-0">
+            <button onclick="bukaModalPesan('${namaPenjual.replace(/'/g, "\\'")}', '${displayJadwalId}', '${filteredJadwalInfo.replace(/'/g, "\\'")}', \`${encodeURIComponent(menuAman)}\`)" class="bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow-xs shrink-0">
               🛍️ Pesan Menu
             </button>
           </div>
