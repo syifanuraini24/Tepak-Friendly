@@ -396,6 +396,25 @@
 
           pesertaJadwal.forEach((p, idx) => {
             const isLunas = p.status.includes('Lunas');
+
+            // Hitung sisa waktu 2 jam untuk peserta pending
+            let sisaWaktuHtml = '';
+            if (!isLunas && p.timestamp) {
+              const waktuDaftar = new Date(p.timestamp).getTime();
+              const batasWaktu = waktuDaftar + (2 * 60 * 60 * 1000); // 2 jam
+              const sekarang = new Date().getTime();
+              const selisihMs = batasWaktu - sekarang;
+
+              if (selisihMs > 0) {
+                const sisaMenitTotal = Math.floor(selisihMs / (1000 * 60));
+                const jam = Math.floor(sisaMenitTotal / 60);
+                const menit = sisaMenitTotal % 60;
+                sisaWaktuHtml = `<span class="block text-[9px] font-bold text-rose-500 mt-0.5">⏱️ Sisa: ${jam}j ${menit}m</span>`;
+              } else {
+                sisaWaktuHtml = `<span class="block text-[9px] font-bold text-rose-700 mt-0.5">⚠️ Waktu Habis</span>`;
+              }
+            }
+
             const actionAccBtn = !isLunas
               ? `<button onclick="accPemainLangsung(${p.rowIndex}, this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2 py-1 rounded-md transition shadow-2xs">ACC</button>`
               : '';
@@ -409,6 +428,7 @@
                   <div>
                     <span class="block font-mono font-semibold text-slate-700">${formatRp.format(p.tagihan || 0)}</span>
                     <span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isLunas ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${p.status}</span>
+                    ${sisaWaktuHtml}
                   </div>
                   <div class="flex items-center gap-1">
                     ${actionAccBtn}
@@ -542,7 +562,6 @@
       btn.disabled = false;
     }
 
-    // Tambah Jadwal Baru (Termasuk Upload Banner)
     async function tambahJadwalBaru(btn) {
       const fileInput = document.getElementById('addBannerFile');
       let bannerBase64 = "";
@@ -601,7 +620,7 @@
       document.getElementById('editJadwalJam').value = jam;
       document.getElementById('editJadwalHtm').value = htm;
       document.getElementById('editJadwalKuota').value = kuota;
-      document.getElementById('editBannerFile').value = ''; // Reset input file
+      document.getElementById('editBannerFile').value = '';
       document.getElementById('modalEditJadwal').classList.remove('hidden');
     }
 
@@ -609,7 +628,6 @@
       document.getElementById('modalEditJadwal').classList.add('hidden');
     }
 
-    // Simpan Edit Jadwal (Termasuk Ganti Banner)
     async function simpanEditJadwal(btn) {
       const fileInput = document.getElementById('editBannerFile');
       let bannerBase64 = "";
