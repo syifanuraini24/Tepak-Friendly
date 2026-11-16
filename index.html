@@ -2,373 +2,263 @@
 <html lang="id">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="pageTitle">Tepak Friendly - Jadwal & Pendaftaran Mabar</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="icon" type="image/png" href="logo.png">
-<script src="config.js"></script>
-<script src="telegram.js"></script>
-<style>
-.no-scrollbar::-webkit-scrollbar {
-display: none;
-}
-.no-scrollbar {
--ms-overflow-style: none;
-scrollbar-width: none;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="logo.png">
+    <title>Tepak Friendly - Pendaftaran Mabar & Jualan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-slate-100 min-h-screen font-sans text-slate-800 antialiased pb-32">
+<body class="bg-slate-50 min-h-screen text-slate-800 font-sans antialiased pb-16">
 
-<!-- Header Minimalis -->
-<header class="bg-white/85 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200 px-4 py-3 shadow-2xs">
-<div class="max-w-md mx-auto flex justify-between items-center">
-<div class="flex items-center gap-2.5">
-<img src="logo.png" alt="Logo Tepak Friendly"
-class="w-8 h-8 object-contain rounded-lg shadow-xs border border-slate-100 bg-white">
-<div>
-<h1 class="text-xs font-extrabold tracking-tight text-slate-900 leading-tight">Tepak Friendly</h1>
-<p class="text-[9px] text-slate-500 font-medium">Jadwal & Mabar Badminton</p>
-</div>
-</div>
-<span class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-200">
-<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-Live Sync
-</span>
-</div>
-</header>
+    <div class="max-w-xl mx-auto p-4 space-y-5">
 
-<main class="max-w-md mx-auto px-4 mt-4 space-y-4">
-<!-- JADWAL MABAR CONTAINER -->
-<div class="space-y-3">
-<h2 class="font-bold text-xs text-slate-900 uppercase tracking-wide px-1">Pilih Jadwal Mabar</h2>
-<div id="containerJadwal" class="space-y-3.5">
-<div class="text-center text-slate-400 text-xs py-8 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-Memuat jadwal...</div>
-</div>
-</div>
+        <!-- Header Web -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/80 text-center space-y-2">
+            <h1 class="text-lg font-extrabold text-slate-900 tracking-tight">🏸 Tepak Friendly</h1>
+            <p class="text-xs text-slate-500">Pilih jadwal mabar badminton atau pesan makanan favoritmu di sini!</p>
+            <div class="flex justify-center gap-2 pt-1">
+                <a href="index.html"
+                    class="bg-blue-600 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-xs">Jadwal Mabar</a>
+                <a href="jualan.html"
+                    class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2 rounded-xl transition">Menu
+                    Jualan 🍢</a>
+            </div>
+        </div>
 
-<!-- MODAL PENDAFTARAN MABAR -->
-<div id="modalDaftar"
-class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
-<div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3">
-<h3 id="modalJadwalTitle" class="font-bold text-sm text-slate-900 mb-1">Daftar Mabar</h3>
-<p class="text-[11px] text-slate-500 mb-3" id="modalJadwalSub">-</p>
+        <!-- Daftar Jadwal Mabar -->
+        <div class="space-y-4">
+            <h2 class="font-bold text-xs text-slate-600 uppercase tracking-wide px-1">🗓️ Jadwal Mabar Tersedia</h2>
+            <div id="containerJadwal" class="space-y-4">
+                <div class="text-center text-xs text-slate-400 py-6 bg-white rounded-2xl border">Memuat jadwal mabar...
+                </div>
+            </div>
+        </div>
 
-<div class="space-y-3">
-<div>
-<label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemain (Pisahkan dengan koma)</label>
-<textarea id="namaPemain" rows="2" placeholder="Cth: Budi, Andi, Siti"
-class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition"></textarea>
-</div>
-<div>
-<label class="block text-[11px] font-bold text-slate-600 mb-1">Email (Opsional untuk E-Ticket)</label>
-<input type="text" id="emailPemain" placeholder="Email contoh lorem@gmail.com"
-class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
-</div>
-<div class="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-[11px] text-amber-800 space-y-1">
-<p class="font-bold">⚠️ Batas Waktu Pembayaran (2 Jam)</p>
-<p class="text-[10px] leading-tight">Jika pembayaran & konfirmasi melewati 2 jam, sistem akan menghapus nama secara otomatis dari slot mabar.</p>
-</div>
-</div>
+    </div>
 
-<div class="flex gap-2 mt-4">
-<button onclick="tutupModalDaftar()"
-class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
-<button onclick="kirimDaftarMabar()" id="btnKirimDaftar"
-class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition">Daftar Sekarang</button>
-</div>
-</div>
-</div>
+    <!-- Modal Pendaftaran / Pembayaran (Diperbesar & Nyaman di Mobile) -->
+    <div id="modalPendaftaran"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 overflow-y-auto">
+        <div
+            class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 space-y-5 my-auto max-h-[92vh] overflow-y-auto border border-slate-100">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div>
+                    <h3 class="font-extrabold text-base text-slate-900">Konfirmasi Pendaftaran</h3>
+                    <p class="text-xs text-slate-500" id="modalInfoJadwal">-</p>
+                </div>
+                <button onclick="tutupModal()"
+                    class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs transition">✕</button>
+            </div>
 
-<!-- MODAL INVOICE PEMBAYARAN MABAR -->
-<div id="modalInvoice"
-class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
-<div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-3">
-<div class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
-Pendaftaran Berhasil</div>
-<h3 class="font-extrabold text-slate-900 text-base" id="invJudwalMabar">Jadwal Mabar</h3>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap / Panggilan</label>
+                    <input type="text" id="inputNamaPemain" placeholder="Masukkan nama kamu..."
+                        class="w-full p-3.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium">
+                </div>
 
-<div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-left text-xs space-y-1.5">
-<div class="flex justify-between items-center">
-<span class="text-slate-500">Total Tagihan (+Kode Unik):</span> 
-<div class="text-right">
-<strong id="invTotalTagihan" onclick="salinNominalTagihan()" class="text-blue-600 text-sm font-extrabold cursor-pointer hover:underline" title="Klik untuk salin nominal">Rp 0</strong>
-<span class="block text-[9px] text-slate-400">Klik nominal untuk salin</span>
-</div>
-</div>
-</div>
+                <!-- Kotak Tagihan & QRIS yang Diperbesar -->
+                <div
+                    class="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100/80 rounded-2xl p-4 space-y-4 text-center">
+                    <div>
+                        <span class="text-[11px] font-bold text-blue-600 uppercase tracking-wider block mb-1">Total
+                            Tagihan Transfer (Termasuk Kode Unik)</span>
+                        <div class="flex items-center justify-center gap-2">
+                            <span id="labelTotalTagihan"
+                                class="text-2xl font-extrabold text-blue-900 font-mono tracking-tight">Rp 0</span>
+                            <button onclick="copyTagihan()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg transition shadow-xs">📋
+                                Salin</button>
+                        </div>
+                        <span class="text-[10px] text-slate-500 block mt-1">Harap transfer sesuai nominal persis hingga
+                            3 digit terakhir.</span>
+                    </div>
 
-<p class="text-[11px] text-slate-500">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.</p>
+                    <!-- QRIS Diperbesar agar jelas discan di HP -->
+                    <div class="bg-white p-3 rounded-2xl border border-slate-200 inline-block shadow-sm">
+                        <img src="qris.jpg" alt="QRIS Tepak Friendly"
+                            class="w-56 h-56 object-contain mx-auto rounded-lg">
+                        <span class="block text-[11px] font-bold text-slate-600 mt-2">Scan QRIS menggunakan M-Banking /
+                            E-Wallet</span>
+                    </div>
 
-<div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 inline-block">
-<img src="qris.png" alt="QRIS" class="mx-auto w-48 h-48 object-contain mb-1 rounded-lg bg-white p-1 border">
-<span class="text-[10px] text-slate-500 block">BCA 0083677071 a.n Andi</span>
-</div>
+                    <div class="text-left bg-white/80 p-3.5 rounded-xl border border-slate-200/60 text-xs space-y-1.5">
+                        <p class="font-bold text-slate-800 text-[11px]">🏦 Transfer Bank / Rekening:</p>
+                        <p class="text-slate-600">BCA: <strong class="text-slate-900">1234567890</strong> a.n Syifa Nur
+                            Aini</p>
+                        <p class="text-[10px] text-rose-600 font-semibold pt-1">⚠️ Status pendaftaran otomatis
+                            dibatalkan sistem jika tidak dibayar dalam 2 jam.</p>
+                    </div>
+                </div>
+            </div>
 
-<button onclick="tutupModalInvoice()"
-class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup & Selesai</button>
-</div>
-</div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="tutupModal()"
+                    class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3.5 rounded-xl transition">Batal</button>
+                <button onclick="prosesDaftar(this)"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3.5 rounded-xl transition shadow-md">Kirim
+                    Konfirmasi Pendaftaran</button>
+            </div>
+        </div>
+    </div>
 
-<!-- MODAL CUSTOM NOTIFIKASI -->
-<div id="customModal"
-class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
-<div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 text-center">
-<h3 id="modalTitle" class="font-bold text-sm text-slate-900">Notifikasi</h3>
-<p id="modalDesc" class="text-xs text-slate-600">-</p>
-<button onclick="tutupCustomModal()"
-class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition">OK</button>
-</div>
-</div>
-</main>
+    <!-- Modal Warning / Sukses -->
+    <div id="customModal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 text-center">
+            <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Informasi</h3>
+            <p id="modalDesc" class="text-xs text-slate-600">-</p>
+            <button onclick="tutupCustomModal()"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition">OK</button>
+        </div>
+    </div>
 
-<!-- FLOATING BOTTOM NAVIGATION BAR -->
-<nav aria-label="Navigasi Utama" class="fixed bottom-4 left-0 right-0 z-40 px-4">
-<div class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
-<a href="index" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-blue-600 text-white font-bold text-[10px] shadow-xs transition">
-<span class="text-base leading-none mb-0.5">🏸</span>
-<span>Mabar</span>
-</a>
-<a href="jualan" class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
-<span class="text-base leading-none mb-0.5">🛍️</span>
-<span>Jajanan</span>
-</a>
-</div>
-</nav>
+    <script src="config.js"></script>
+    <script>
+        const GAS_URL = CONFIG.GAS_URL;
+        let selectedJadwal = null;
+        let currentTagihanVal = 0;
 
-<script>
-const GAS_URL = CONFIG.GAS_URL;
-let jadwalDipilihGlobal = null;
-let nominalMentahGlobal = 0; // Menyimpan angka nominal murni untuk disalin
+        document.addEventListener('DOMContentLoaded', () => {
+            loadJadwalFrontend();
+        });
 
-function formatJam(jam) {
-if (!jam) return '-';
-if (jam.includes('1899-12-30') || jam.includes('T')) {
-try {
-const d = new Date(jam);
-if (!isNaN(d.getTime())) {
-return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
-}
-} catch(e) {}
-}
-return jam;
-}
+        function formatJam(jam) {
+            if (!jam) return '-';
+            if (jam.includes('1899-12-30') || jam.includes('T')) {
+                try {
+                    const d = new Date(jam);
+                    if (!isNaN(d.getTime())) {
+                        return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false });
+                    }
+                } catch (e) { }
+            }
+            return jam;
+        }
 
-function showCustomMsg(title, desc) {
-document.getElementById('modalTitle').innerText = title;
-document.getElementById('modalDesc').innerText = desc;
-document.getElementById('customModal').classList.remove('hidden');
-}
-function tutupCustomModal() {
-document.getElementById('customModal').classList.add('hidden');
-}
+        async function loadJadwalFrontend() {
+            const container = document.getElementById('containerJadwal');
+            try {
+                const response = await fetch(GAS_URL);
+                const data = await response.json();
+                container.innerHTML = '';
 
-// Fungsi Salin Nominal Tagihan saat diklik
-function salinNominalTagihan() {
-if (!nominalMentahGlobal) return;
-navigator.clipboard.writeText(nominalMentahGlobal.toString()).then(() => {
-showCustomMsg("Berhasil Disalin!", `Nominal Rp ${nominalMentahGlobal.toLocaleString('id-ID')} berhasil disalin ke clipboard.`);
-});
-}
+                const jadwalList = (data.jadwal || []).filter(j => !j.status || !j.status.toString().toLowerCase().includes('nonaktif'));
+                const pemainList = data.pemain || [];
 
-async function loadDataIndex() {
-try {
-const response = await fetch(GAS_URL);
-const data = await response.json();
-const container = document.getElementById('containerJadwal');
-container.innerHTML = '';
+                if (jadwalList.length === 0) {
+                    container.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-white rounded-2xl border">Belum ada jadwal mabar aktif saat ini.</div>';
+                    return;
+                }
 
-const listJadwal = (data.jadwal || []).filter(j => {
-const statusJ = j.status ? j.status.toString().trim().toLowerCase() : 'aktif';
-return statusJ === 'aktif';
-});
+                jadwalList.forEach(j => {
+                    const pesertaJadwal = pemainList.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
+                    const slotTerisi = pesertaJadwal.length;
+                    const isFull = slotTerisi >= parseInt(j.kuota || 0);
 
-listJadwal.sort((a, b) => {
-let dateA = a.tanggal ? new Date(a.tanggal) : new Date(0);
-let dateB = b.tanggal ? new Date(b.tanggal) : new Date(0);
-if (dateA - dateB !== 0) return dateA - dateB;
-return (a.jam || '').localeCompare(b.jam || '');
-});
+                    const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-';
+                    const jamBersih = formatJam(j.jam);
 
-const listPemain = data.pemain || [];
+                    let bannerHtml = '';
+                    if (j.bannerUrl && j.bannerUrl.trim() !== '') {
+                        bannerHtml = `<div class="w-full h-36 bg-slate-100 overflow-hidden"><img src="${j.bannerUrl}" alt="Banner" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"></div>`;
+                    }
 
-if (listJadwal.length === 0) {
-container.innerHTML = '<div class="text-center text-xs text-slate-400 py-8 bg-white rounded-2xl border border-slate-200">Belum ada jadwal mabar aktif tersedia.</div>';
-return;
-}
+                    const actionBtn = isFull
+                        ? `<button disabled class="w-full bg-slate-100 text-slate-400 font-bold text-xs py-3 rounded-xl cursor-not-allowed">Slot Penuh ❌</button>`
+                        : `<button onclick="bukaModalDaftar('${j.id}', \`${j.infoRaw}\`, ${j.htm})" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl transition shadow-xs">Daftar Mabar 🏸</button>`;
 
-listJadwal.forEach(j => {
-const pemainJadwal = listPemain.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
-const sisaSlot = parseInt(j.kuota) - pemainJadwal.length;
-
-const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-';
-const jamBersih = formatJam(j.jam);
-
-let listPemainHtml = '';
-if (pemainJadwal.length === 0) {
-listPemainHtml = '<div class="text-[11px] text-slate-400 italic py-1 text-center">Belum ada pemain terdaftar.</div>';
-} else {
-pemainJadwal.forEach((p, idx) => {
-const badge = p.status.includes('Lunas')
-? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>'
-: '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
-
-listPemainHtml += `
-<li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
-<span class="font-bold text-slate-800">${idx + 1}. ${p.nama}</span>
-<div>${badge}</div>
-</li>`;
-});
-}
-
-const infoLengkap = `${displayTanggal} | ${j.infoRaw}`;
-
-let bannerHtml = '';
-if (j.bannerUrl && j.bannerUrl.trim() !== '') {
-bannerHtml = `<div class="overflow-hidden rounded-xl border border-slate-100"><img src="${j.bannerUrl}" alt="Banner" class="w-full h-32 object-cover" onerror="this.parentElement.style.display='none'"></div>`;
-}
-
-container.innerHTML += `
-<div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-xs space-y-3">
+                    container.innerHTML += `
+<div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden space-y-3">
 ${bannerHtml}
-<div class="flex justify-between items-start">
-<div>
-<span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">[${j.id}]</span>
-<h3 class="font-bold text-sm text-slate-900 mt-1">${j.infoRaw}</h3>
-<p class="text-[11px] text-slate-500 mt-0.5 font-medium">🗓️ ${displayTanggal}</p>
-<p class="text-[11px] text-slate-500">🕒 ${jamBersih} | HTM: Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</p>
+<div class="p-4 space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-[10px] bg-slate-100 text-slate-700 font-extrabold px-2.5 py-0.5 rounded-md border">${j.id}</span>
+<span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">Slot: ${slotTerisi}/${j.kuota}</span>
 </div>
-<span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${sisaSlot > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
-${sisaSlot > 0 ? `Sisa Slot: ${sisaSlot}` : 'Full'}
-</span>
+<h3 class="font-bold text-sm text-slate-900 leading-snug">${j.infoRaw}</h3>
+<div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-1">
+<div class="flex justify-between"><span class="text-slate-500">🗓️ Tanggal:</span><span class="font-semibold text-slate-800">${displayTanggal}</span></div>
+<div class="flex justify-between"><span class="text-slate-500">⏰ Jam Main:</span><span class="font-semibold text-slate-800">${jamBersih}</span></div>
+<div class="flex justify-between"><span class="text-slate-500">💵 HTM:</span><span class="font-semibold text-blue-600">Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</span></div>
 </div>
-
-<div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-<div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center">
-<span>👥 Pemain Terdaftar</span>
-<span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">${pemainJadwal.length}/${j.kuota}</span>
-</div>
-<ul class="divide-y divide-slate-100 max-h-36 overflow-y-auto no-scrollbar p-1.5 space-y-1">
-${listPemainHtml}
-</ul>
-</div>
-
-<div class="flex gap-2">
-<button onclick="bukaModalDaftar('${j.id}', \`${infoLengkap}\`, ${j.htm})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">
-+ Daftar Mabar Ini
-</button>
-<button onclick="shareJadwal('${j.id}', \`${j.infoRaw}\`, '${displayTanggal}', '${jamBersih}')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-2.5 rounded-xl border border-emerald-200 transition" title="Bagikan Link Jadwal">
-🔗 Share
-</button>
+${actionBtn}
 </div>
 </div>`;
-});
-} catch (e) { console.error("Error loadDataIndex:", e); }
-}
+                });
 
-function shareJadwal(id, infoGor, tanggal, jam) {
-const currentUrl = window.location.origin + window.location.pathname;
-const shareUrl = `${currentUrl}?jadwal=${id}`;
-const teksShare = `🏸 *Yuk Gabung Mabar Tepak Friendly!* 🏸\n\n📍 *${infoGor}*\n🗓️ ${tanggal}\n⏰ ${jam}\n\nKlik link di bawah untuk langsung mendaftar:\n${shareUrl}`;
+            } catch (error) {
+                container.innerHTML = '<div class="text-center text-rose-600 text-xs py-6 bg-white rounded-2xl border">Gagal memuat jadwal. Silakan refresh halaman.</div>';
+            }
+        }
 
-if (navigator.clipboard) {
-navigator.clipboard.writeText(teksShare).then(() => {
-showCustomMsg("Berhasil Disalin!", "Link & detail jadwal berhasil disalin ke clipboard. Silakan paste ke WhatsApp!");
-});
-} else {
-prompt("Salin link jadwal berikut:", shareUrl);
-}
-}
+        function bukaModalDaftar(jadwalId, infoRaw, htm) {
+            selectedJadwal = jadwalId;
+            const uniqueCode = Math.floor(Math.random() * 90) + 10;
+            currentTagihanVal = parseInt(htm || 0) + uniqueCode;
 
-function bukaModalDaftar(id, info, htm) {
-jadwalDipilihGlobal = { id, info, htm };
-document.getElementById('modalJadwalTitle').innerText = `Daftar: ${info}`;
-document.getElementById('modalJadwalSub').innerText = `HTM: Rp ${parseInt(htm || 0).toLocaleString('id-ID')} per orang`;
-document.getElementById('namaPemain').value = '';
-document.getElementById('emailPemain').value = '';
-document.getElementById('modalDaftar').classList.remove('hidden');
-}
+            document.getElementById('modalInfoJadwal').innerText = infoRaw;
+            document.getElementById('labelTotalTagihan').innerText = 'Rp ' + currentTagihanVal.toLocaleString('id-ID');
+            document.getElementById('inputNamaPemain').value = '';
+            document.getElementById('modalPendaftaran').classList.remove('hidden');
+        }
 
-function tutupModalDaftar() { document.getElementById('modalDaftar').classList.add('hidden'); }
+        function tutupModal() {
+            document.getElementById('modalPendaftaran').classList.add('hidden');
+        }
 
-async function kirimDaftarMabar() {
-const nama = document.getElementById('namaPemain').value.trim();
-const email = document.getElementById('emailPemain').value.trim();
+        function copyTagihan() {
+            navigator.clipboard.writeText(currentTagihanVal.toString()).then(() => {
+                showCustomWarning("Berhasil Disalin", "Jumlah tagihan berhasil disalin ke clipboard!");
+            });
+        }
 
-if (!nama) return showCustomMsg("Perhatian", "Nama pemain harus diisi!");
+        async function prosesDaftar(btn) {
+            const nama = document.getElementById('inputNamaPemain').value.trim();
+            if (!nama) return showCustomWarning("Perhatian", "Masukkan nama lengkap kamu terlebih dahulu!");
 
-const btn = document.getElementById('btnKirimDaftar');
-const oldText = btn.innerText;
-btn.innerText = 'Memproses...';
-btn.disabled = true;
+            const oldText = btn.innerText;
+            btn.innerText = 'Mengirim...';
+            btn.disabled = true;
 
-try {
-const response = await fetch(GAS_URL, {
-method: 'POST',
-body: JSON.stringify({
-action: 'register',
-nama: nama,
-email: email,
-jadwalId: jadwalDipilihGlobal.id,
-jadwalInfo: jadwalDipilihGlobal.info,
-htm: jadwalDipilihGlobal.htm
-})
-});
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'tambah_pemain',
+                        jadwalId: selectedJadwal,
+                        nama: nama,
+                        tagihan: currentTagihanVal
+                    })
+                });
+                const result = await response.json();
 
-const result = await response.json();
-tutupModalDaftar();
+                if (result.status === 'success') {
+                    tutupModal();
+                    showCustomWarning("Pendaftaran Berhasil 🎉", "Silakan lakukan transfer pembayaran sesuai nominal tagihan agar admin segera mengkonfirmasi slot kamu.");
+                    loadJadwalFrontend();
+                } else {
+                    throw new Error(result.message || 'Gagal mendaftar');
+                }
+            } catch (error) {
+                showCustomWarning("Gagal", "Terjadi kesalahan saat mendaftar. Silakan coba lagi.");
+            } finally {
+                btn.innerText = oldText;
+                btn.disabled = false;
+            }
+        }
 
-try {
-if (typeof kirimTelegram === 'function') {
-await kirimTelegram(nama, jadwalDipilihGlobal.info, (result ? result.totalTagihan : 0));
-}
-} catch (errTelegram) {
-console.warn("Telegram warning:", errTelegram);
-}
+        function showCustomWarning(title, desc) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalDesc').innerText = desc;
+            document.getElementById('customModal').classList.remove('hidden');
+        }
 
-nominalMentahGlobal = result.totalTagihan || 0;
-document.getElementById('invJudwalMabar').innerText = jadwalDipilihGlobal.info;
-document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(nominalMentahGlobal);
-document.getElementById('modalInvoice').classList.remove('hidden');
-
-} catch (e) {
-console.error("Error kirimDaftarMabar:", e);
-showCustomMsg("Error", "Gagal mendaftar mabar.");
-} finally {
-btn.innerText = oldText;
-btn.disabled = false;
-}
-}
-
-function tutupModalInvoice() {
-document.getElementById('modalInvoice').classList.add('hidden');
-loadDataIndex();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-loadDataIndex().then(() => {
-const urlParams = new URLSearchParams(window.location.search);
-const targetJadwalId = urlParams.get('jadwal');
-
-if (targetJadwalId) {
-fetch(GAS_URL).then(res => res.json()).then(data => {
-const jadwalDitemukan = (data.jadwal || []).find(j => String(j.id) === String(targetJadwalId));
-if (jadwalDitemukan) {
-const displayTgl = jadwalDitemukan.tanggal ? new Date(jadwalDitemukan.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
-const infoLengkap = `${displayTgl} | ${jadwalDitemukan.infoRaw}`;
-
-bukaModalDaftar(jadwalDitemukan.id, infoLengkap, jadwalDitemukan.htm);
-document.getElementById('pageTitle').innerText = `Daftar Mabar: ${jadwalDitemukan.infoRaw}`;
-}
-});
-}
-});
-
-setInterval(loadDataIndex, 5000);
-});
-</script>
+        function tutupCustomModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+    </script>
 </body>
+
 </html>
