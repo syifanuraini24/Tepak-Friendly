@@ -101,8 +101,15 @@
                 <h3 class="font-extrabold text-slate-900 text-base" id="invJudwalMabar">Jadwal Mabar</h3>
 
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-left text-xs space-y-1.5">
-                    <div class="flex justify-between"><span class="text-slate-500">Total Tagihan (+Kode Unik):</span>
-                        <strong id="invTotalTagihan" class="text-blue-600 text-sm font-extrabold">Rp 0</strong></div>
+                    <div class="flex justify-between items-center"><span class="text-slate-500">Total Tagihan (+Kode
+                            Unik):</span>
+                        <div class="flex items-center gap-1.5">
+                            <strong id="invTotalTagihan" class="text-blue-600 text-sm font-extrabold">Rp 0</strong>
+                            <button onclick="salinTagihanUnik()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-2 py-1 rounded-md transition shadow-2xs">📋
+                                Salin</button>
+                        </div>
+                    </div>
                 </div>
 
                 <p class="text-[11px] text-slate-500">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.
@@ -115,7 +122,7 @@
                 </div>
 
                 <button onclick="tutupModalInvoice()"
-                    class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup
+                    class="w-full bg-slate-900 hover:bg-slate-800text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup
                     & Selesai</button>
             </div>
         </div>
@@ -152,6 +159,7 @@
     <script>
         const GAS_URL = CONFIG.GAS_URL;
         let jadwalDipilihGlobal = null;
+        let rawTotalTagihanVal = 0; // Menyimpan angka mentah total tagihan untuk disalin
 
         // Fungsi Pengaman Format Jam (Mencegah teks ISO 1899-12-30 tampil berantakan)
         function formatJam(jam) {
@@ -285,6 +293,14 @@ ${listPemainHtml}
             }
         }
 
+        function salinTagihanUnik() {
+            if (rawTotalTagihanVal > 0) {
+                navigator.clipboard.writeText(rawTotalTagihanVal.toString()).then(() => {
+                    showCustomMsg("Berhasil Disalin!", "Jumlah total tagihan berhasil disalin ke clipboard!");
+                });
+            }
+        }
+
         function bukaModalDaftar(id, info, htm) {
             jadwalDipilihGlobal = { id, info, htm };
             document.getElementById('modalJadwalTitle').innerText = `Daftar: ${info}`;
@@ -331,8 +347,9 @@ ${listPemainHtml}
                     console.warn("Telegram warning:", errTelegram);
                 }
 
+                rawTotalTagihanVal = result.totalTagihan || 0;
                 document.getElementById('invJudwalMabar').innerText = jadwalDipilihGlobal.info;
-                document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(result.totalTagihan || 0);
+                document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(rawTotalTagihanVal);
                 document.getElementById('modalInvoice').classList.remove('hidden');
 
             } catch (e) {
