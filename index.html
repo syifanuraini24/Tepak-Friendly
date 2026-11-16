@@ -122,7 +122,7 @@
                 </div>
 
                 <button onclick="tutupModalInvoice()"
-                    class="w-full bg-slate-900 hover:bg-slate-800text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup
+                    class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup
                     & Selesai</button>
             </div>
         </div>
@@ -159,9 +159,8 @@
     <script>
         const GAS_URL = CONFIG.GAS_URL;
         let jadwalDipilihGlobal = null;
-        let rawTotalTagihanVal = 0; // Menyimpan angka mentah total tagihan untuk disalin
+        let rawTotalTagihanVal = 0;
 
-        // Fungsi Pengaman Format Jam (Mencegah teks ISO 1899-12-30 tampil berantakan)
         function formatJam(jam) {
             if (!jam) return '-';
             if (jam.includes('1899-12-30') || jam.includes('T')) {
