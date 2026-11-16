@@ -358,7 +358,7 @@ let totalLunasNum = 0, totalPendingNum = 0;
 (data.pemain || []).forEach(item => {
 const nominal = parseInt(item.tagihan || 0);
 if (item.status && item.status.includes('Lunas')) totalLunasNum += nominal;
-else if (item.status && item.status.includes('Menunggu')) totalPendingNum += nominal;
+else if (item.status && (item.status.includes('Menunggu') || item.status.includes('Pending'))) totalPendingNum += nominal;
 });
 document.getElementById('totalDanaLunas').innerText = formatRp.format(totalLunasNum);
 document.getElementById('totalDanaPending').innerText = formatRp.format(totalPendingNum);
@@ -385,6 +385,8 @@ let listNamaHtml = pesertaJadwal.length === 0 ? '<li class="text-slate-400 itali
 
 pesertaJadwal.forEach((p, idx) => {
 const isLunas = p.status.includes('Lunas');
+const isMenunggu = p.status.includes('Menunggu') || p.status.includes('Pending');
+
 if (isLunas) {
 totalEventLunas += parseInt(p.tagihan || 0);
 }
@@ -410,6 +412,13 @@ const actionAccBtn = !isLunas
 ? `<button onclick="accPemainLangsung(${p.rowIndex}, this)" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2 py-1 rounded-md transition shadow-2xs">ACC</button>`
 : '';
 
+let badgeColorClass = 'bg-slate-100 text-slate-700';
+if (isLunas) {
+badgeColorClass = 'bg-emerald-50 text-emerald-700 border border-emerald-100';
+} else if (isMenunggu) {
+badgeColorClass = 'bg-amber-50 text-amber-700 border border-amber-100';
+}
+
 listNamaHtml += `
 <li class="py-1.5 px-2.5 border-b border-slate-100 last:border-b-0 flex justify-between items-center text-xs gap-2">
 <div class="min-w-0 flex-1">
@@ -418,7 +427,7 @@ listNamaHtml += `
 <div class="text-right flex items-center gap-2 shrink-0">
 <div>
 <span class="block font-mono font-semibold text-slate-700">${formatRp.format(p.tagihan || 0)}</span>
-<span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${isLunas ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">${p.status}</span>
+<span class="inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-md ${badgeColorClass}">${p.status}</span>
 ${sisaWaktuHtml}
 </div>
 <div class="flex items-center gap-1">
@@ -434,7 +443,6 @@ const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID
 
 let bannerPreviewHtml = '';
 if (j.bannerUrl && j.bannerUrl.trim() !== '') {
-// Tambahkan onerror agar card otomatis menyembunyikan gambar jika file di Drive sudah dihapus
 bannerPreviewHtml = `<div class="mb-2"><img src="${j.bannerUrl}" alt="Banner" class="w-full h-24 object-cover rounded-xl border border-slate-100" onerror="this.parentElement.style.display='none'"></div>`;
 }
 
@@ -505,11 +513,18 @@ fetch(GAS_URL).then(res => res.json()).then(data => {
 const pesertaJadwal = (data.pemain || []).filter(p => p.jadwalId === jadwalId && p.status && !p.status.includes('Dihapus'));
 let teksWA = `🏸 *REKAP PESERTA MABAR* 🏸\n`;
 const displayTgl = tanggal ? new Date(tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
-teksWA += `📍 *${infoRaw}* | 🗓️ ${displayTgl}\n`;
+teksWA += `📍 *${infoRaw}* | 🗓️ *${displayTgl}*\n`;
 teksWA += `👥 Slot Terisi: ${pesertaJadwal.length}/${kuota}\n\n`;
-if (pesertaJadwal.length === 0) teksWA += `_Belum ada peserta terdaftar._`;
-else pesertaJadwal.forEach((p, idx) => { teksWA += `${idx + 1}. ${p.nama} (${p.status.includes('Lunas') ? 'Lunas 🟢' : 'Pending 🟡'})\n`; });
+if (pesertaJadwal.length === 0) {
+teksWA += `_Belum ada peserta terdaftar._`;
+} else {
+pesertaJadwal.forEach((p, idx) => { 
+const statusText = p.status.includes('Lunas') ? 'Lunas 🟢' : 'Menunggu Konfirmasi 🟡';
+teksWA += `${idx + 1}. ${p.nama} (${statusText})\n`; 
+});
+}
 teksWA += `\n_Yuk amankan slotnya!_`;
+
 navigator.clipboard.writeText(teksWA).then(() => {
 showCustomWarning("Berhasil", "List peserta berhasil disalin ke clipboard!");
 });
@@ -658,7 +673,7 @@ htm: document.getElementById('editJadwalHtm').value,
 kuota: document.getElementById('editJadwalKuota').value,
 bannerBase64: bannerBase64,
 bannerName: bannerName,
-hapusBanner: hapusBanner // Mengirim flag untuk menghapus banner di server
+hapusBanner: hapusBanner
 };
 
 if (!payload.tanggal || !payload.info || !payload.jam || payload.htm === '' || !payload.kuota) {
