@@ -82,7 +82,7 @@
               class="w-1/3 p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
           <div class="sm:col-span-2">
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Banner Acara (Opsional)</label>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Banner Acara (Opsional - Maks 1 MB)</label>
             <input type="file" id="addBannerFile" accept="image/*"
               class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition bg-white border border-slate-200 rounded-xl p-1">
           </div>
@@ -153,7 +153,7 @@
     </div>
   </div>
 
-  <!-- Modal Edit Jadwal (Dengan Fitur Hapus Gambar Banner) -->
+  <!-- Modal Edit Jadwal (Dengan Fitur Hapus Gambar Banner & Batas Ukuran File) -->
   <div id="modalEditJadwal"
     class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 max-h-[90vh] overflow-y-auto">
@@ -212,7 +212,8 @@
 
         <!-- Input Ganti Banner Baru -->
         <div>
-          <label class="block text-[11px] font-bold text-slate-600 mb-1">Ganti Banner Baru (Opsional)</label>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Ganti Banner Baru (Opsional - Maks 1
+            MB)</label>
           <input type="file" id="editBannerFile" accept="image/*"
             class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition bg-slate-50 border border-slate-200 rounded-xl p-1">
         </div>
@@ -644,6 +645,10 @@ ${bannerPreviewHtml}
 
       if (fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
+        const maxSizeInBytes = 1 * 1024 * 1024; // Maksimal 1 MB
+        if (file.size > maxSizeInBytes) {
+          return showCustomWarning("Ukuran File Terlalu Besar", "Ukuran gambar maksimal adalah 1 MB! Silakan pilih gambar yang lebih kecil.");
+        }
         bannerName = file.name;
         bannerBase64 = await compressImage(file, 800, 0.7);
       }
@@ -723,6 +728,10 @@ ${bannerPreviewHtml}
 
       if (fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
+        const maxSizeInBytes = 1 * 1024 * 1024; // Maksimal 1 MB
+        if (file.size > maxSizeInBytes) {
+          return showCustomWarning("Ukuran File Terlalu Besar", "Ukuran gambar maksimal adalah 1 MB! Silakan pilih gambar yang lebih kecil.");
+        }
         bannerName = file.name;
         bannerBase64 = await compressImage(file, 800, 0.7);
       }
