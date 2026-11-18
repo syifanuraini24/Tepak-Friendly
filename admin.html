@@ -115,18 +115,28 @@
     </div>
   </div>
 
-  <!-- Modal Edit Nominal (z-[9999]) -->
+  <!-- Modal Edit Nominal & Voucher (z-[9999]) -->
   <div id="modalEditNominal"
     class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 space-y-3">
-      <h3 class="font-bold text-sm text-slate-900">Edit Nominal Tagihan</h3>
+      <h3 class="font-bold text-sm text-slate-900">Edit Tagihan & Voucher</h3>
       <p class="text-xs text-slate-500" id="editNamaPesertaLabel">-</p>
       <input type="hidden" id="editRowIndexInput">
-      <div>
-        <label class="block text-[11px] font-bold text-slate-600 mb-1">Nominal Baru (Rp)</label>
-        <input type="number" id="inputNominalBaru"
-          class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+
+      <div class="space-y-2.5">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Nominal Tagihan Baru (Rp)</label>
+          <input type="number" id="inputNominalBaru"
+            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Kode Voucher (Opsional)</label>
+          <input type="text" id="inputVoucherBaru" placeholder="Contoh: HEMAT10"
+            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+          <span class="block text-[9px] text-slate-400 mt-0.5">Isi jika peserta menggunakan/lupa input voucher.</span>
+        </div>
       </div>
+
       <div class="flex gap-2 pt-2">
         <button onclick="tutupModalEditNominal()"
           class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
@@ -498,7 +508,7 @@ ${sisaWaktuHtml}
 </div>
 <div class="flex items-center gap-1">
 ${actionAccBtn}
-<button onclick="bukaModalEditNominal(${p.rowIndex}, '${p.nama}', ${p.tagihan || 0})" class="bg-slate-100 p-1.5 rounded-lg border hover:bg-slate-200 transition" title="Edit Tagihan">✏️</button>
+<button onclick="bukaModalEditNominal(${p.rowIndex}, '${p.nama}', ${p.tagihan || 0})" class="bg-slate-100 p-1.5 rounded-lg border hover:bg-slate-200 transition" title="Edit Tagihan & Voucher">✏️</button>
 <button onclick="hapusPemainDariRekap(${p.rowIndex}, this)" class="bg-rose-50 text-rose-600 p-1.5 rounded-lg border hover:bg-rose-100 transition" title="Hapus Peserta">🗑️</button>
 </div>
 </div>
@@ -562,9 +572,8 @@ ${bannerPreviewHtml}
     }
 
     async function accPemainLangsung(rowIndex, btn) {
-      // Kotak dialog kecil untuk memasukkan kode voucher secara manual jika peserta lupa input saat mendaftar
       const kodeVoucher = prompt("Masukkan Kode Voucher (Jika ada, kosongkan jika tidak):", "");
-      if (kodeVoucher === null) return; // Batal jika admin menekan tombol Batal
+      if (kodeVoucher === null) return;
 
       const oldText = btn.innerText;
       btn.innerText = '...';
@@ -646,6 +655,7 @@ ${bannerPreviewHtml}
       document.getElementById('editRowIndexInput').value = rowIndex;
       document.getElementById('editNamaPesertaLabel').innerText = `Peserta: ${nama}`;
       document.getElementById('inputNominalBaru').value = currentTagihan;
+      document.getElementById('inputVoucherBaru').value = '';
       document.getElementById('modalEditNominal').classList.remove('hidden');
     }
 
@@ -656,18 +666,41 @@ ${bannerPreviewHtml}
     async function simpanNominalBaru(btn) {
       const rowIndex = document.getElementById('editRowIndexInput').value;
       const nominalBaru = document.getElementById('inputNominalBaru').value.trim();
-      if (!nominalBaru || isNaN(nominalBaru)) return showCustomWarning("Validasi", "Masukkan nominal angka yang valid!");
+      const voucherBaru = document.getElementById('inputVoucherBaru').value.trim().toUpperCase();
+
+      if (!nominalBaru || isNaN(nominalBaru)) {
+        return showCustomWarning("Validasi", "Masukkan nominal angka tagihan yang valid!");
+      }
 
       const oldText = btn.innerText;
       btn.innerText = 'Menyimpan...';
       btn.disabled = true;
 
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_tagihan', rowIndex: parseInt(rowIndex), tagihanBaru: parseInt(nominalBaru) }) });
-      tutupModalEditNominal();
-      await loadDataAdmin();
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'update_tagihan',
+            rowIndex: parseInt(rowIndex),
+            tagihanBaru: parseInt(nominalBaru),
+            voucher: voucherBaru
+          })
+        });
+        const result = await response.json();
 
-      btn.innerText = oldText;
-      btn.disabled = false;
+        if (result.status === 'success') {
+          tutupModalEditNominal();
+          await loadDataAdmin();
+          showCustomWarning("Berhasil", "Tagihan dan kuota voucher peserta berhasil diperbarui!");
+        } else {
+          throw new Error(result.message || 'Gagal memperbarui data.');
+        }
+      } catch (err) {
+        showCustomWarning("Gagal", err.message);
+      } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+      }
     }
 
     async function hapusPemain(rowIndex) {
@@ -719,7 +752,7 @@ ${bannerPreviewHtml}
 
       if (fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
-        const maxSizeInBytes = 2 * 1024 * 1024; // Maksimal 2 MB sebelum kompresi
+        const maxSizeInBytes = 2 * 1024 * 1024;
         if (file.size > maxSizeInBytes) {
           return showCustomWarning("Ukuran File Terlalu Besar", "Ukuran gambar maksimal adalah 2 MB! Silakan pilih gambar yang lebih kecil.");
         }
