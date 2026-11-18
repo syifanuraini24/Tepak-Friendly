@@ -562,14 +562,33 @@ ${bannerPreviewHtml}
     }
 
     async function accPemainLangsung(rowIndex, btn) {
+      // Kotak dialog kecil untuk memasukkan kode voucher secara manual jika peserta lupa input saat mendaftar
+      const kodeVoucher = prompt("Masukkan Kode Voucher (Jika ada, kosongkan jika tidak):", "");
+      if (kodeVoucher === null) return; // Batal jika admin menekan tombol Batal
+
       const oldText = btn.innerText;
       btn.innerText = '...';
       btn.disabled = true;
+
       try {
-        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'update_status', rowIndex: rowIndex }) });
-        await loadDataAdmin();
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'update_status',
+            rowIndex: rowIndex,
+            voucher: kodeVoucher.trim()
+          })
+        });
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          await loadDataAdmin();
+          showCustomWarning("Berhasil", "Pembayaran peserta berhasil di-ACC dan kuota voucher (jika dimasukkan) berhasil diperbarui!");
+        } else {
+          throw new Error(result.message || 'Gagal memproses ACC.');
+        }
       } catch (e) {
-        showCustomWarning("Gagal", "Gagal meng-ACC pembayaran peserta.");
+        showCustomWarning("Gagal", e.message);
         btn.innerText = oldText;
         btn.disabled = false;
       }
