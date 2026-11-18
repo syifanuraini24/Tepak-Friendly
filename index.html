@@ -53,7 +53,7 @@
             </div>
         </div>
 
-        <!-- MODAL PENDAFTARAN MABAR (FIXED OVERLAY GLITCH) -->
+        <!-- MODAL PENDAFTARAN MABAR (Super Ringkas Tanpa Voucher) -->
         <div id="modalDaftar"
             class="fixed inset-0 w-full h-full bg-slate-900/70 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
             <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3">
@@ -91,7 +91,7 @@
             </div>
         </div>
 
-        <!-- MODAL INVOICE PEMBAYARAN MABAR -->
+        <!-- MODAL INVOICE PEMBAYARAN MABAR (Dilengkapi Input Voucher) -->
         <div id="modalInvoice"
             class="fixed inset-0 w-full h-full bg-slate-900/70 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
             <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 text-center space-y-3">
@@ -100,7 +100,7 @@
                     Pendaftaran Berhasil</div>
                 <h3 class="font-extrabold text-slate-900 text-base" id="invJudwalMabar">Jadwal Mabar</h3>
 
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-left text-xs space-y-1.5">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-left text-xs space-y-2">
                     <div class="flex justify-between items-center"><span class="text-slate-500">Total Tagihan (+Kode
                             Unik):</span>
                         <div class="flex items-center gap-1.5">
@@ -110,22 +110,34 @@
                                 Salin</button>
                         </div>
                     </div>
+
+                    <!-- KOTAK INPUT VOUCHER DI INVOICE -->
+                    <div class="pt-2 border-t border-slate-200">
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Punya Kode Voucher?</label>
+                        <div class="flex gap-1.5">
+                            <input type="text" id="inputVoucher" placeholder="Cth: TEPAKHEMAT"
+                                oninput="this.value = this.value.toUpperCase()"
+                                class="w-full p-2 border border-slate-200 rounded-lg text-xs uppercase bg-white focus:outline-none transition font-bold tracking-wider">
+                            <button type="button" onclick="terapkanVoucher()"
+                                class="bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-bold px-3 py-2 rounded-lg transition">
+                                Pakai
+                            </button>
+                        </div>
+                        <p id="notifVoucher" class="text-[10px] mt-1 font-medium"></p>
+                    </div>
                 </div>
 
-                <p class="text-[11px] text-slate-500">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.
-                </p>
+                <p class="text-[11px] text-slate-500">Scan QRIS di bawah atau unduh gambarnya untuk pembayaran.</p>
 
-                <!-- AREA QRIS DIPERBESAR + TOMBOL DOWNLOAD -->
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 inline-block w-full">
+                <!-- AREA QRIS + TOMBOL UNDUH -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 inline-block w-full space-y-2.5">
                     <img id="imgQris" src="qris.png" alt="QRIS"
-                        class="mx-auto w-56 h-56 object-contain mb-2 rounded-lg bg-white p-1 border shadow-xs">
-                    <div class="flex items-center justify-between px-1">
-                        <span class="text-[10px] font-medium text-slate-600">BCA 0083677071 a.n Andi</span>
-                        <a href="qris.png" download="QRIS-TepakFriendly.png"
-                            class="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition shadow-2xs">
-                            📥 Unduh QRIS
-                        </a>
-                    </div>
+                        class="mx-auto w-56 h-56 object-contain rounded-lg bg-white p-1 border shadow-xs">
+
+                    <a href="qris.png" download="QRIS-TepakFriendly.png"
+                        class="w-full flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl transition shadow-2xs">
+                        📥 Unduh QRIS
+                    </a>
                 </div>
 
                 <button onclick="tutupModalInvoice()"
@@ -166,6 +178,7 @@
         const GAS_URL = CONFIG.GAS_URL;
         let jadwalDipilihGlobal = null;
         let rawTotalTagihanVal = 0;
+        let baseTagihanAwal = 0; // Menyimpan tagihan asli sebelum diskon
 
         function formatJam(jam) {
             if (!jam) return '-';
@@ -279,7 +292,7 @@ ${sisaSlot > 0 ? `Sisa: ${sisaSlot}` : 'Full'}
 </span>
 </div>
 
-<!-- Accordion Ringkas yang Membuka ke Bawah -->
+<!-- Accordion Ringkas -->
 <div class="bg-slate-50 rounded-xl border border-slate-200/80 overflow-hidden">
 <button onclick="toggleDaftarPemain('${j.id}')" class="w-full px-3 py-2 text-[11px] font-bold text-slate-700 flex justify-between items-center hover:bg-slate-100 transition">
 <span class="flex items-center gap-1.5">👥 <span id="btnToggleText-${j.id}" data-count="${countText}">Lihat Anggota (${countText})</span></span>
@@ -310,7 +323,7 @@ ${listPemainHtml}
 
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(teksShare).then(() => {
-                    showCustomMsg("Berhasil Disalin!", "Link & detail jadwal berhasil disalin ke clipboard. Silakan paste ke WhatsApp!");
+                    showCustomMsg("Berhasil Disalin!", "Link & detail jadwal berhasil disalin ke clipboard!");
                 });
             } else {
                 prompt("Salin link jadwal berikut:", shareUrl);
@@ -372,6 +385,12 @@ ${listPemainHtml}
                 }
 
                 rawTotalTagihanVal = result.totalTagihan || 0;
+                baseTagihanAwal = rawTotalTagihanVal; // Simpan nilai awal untuk acuan diskon voucher
+
+                // Reset form input voucher di modal invoice
+                document.getElementById('inputVoucher').value = '';
+                document.getElementById('notifVoucher').innerText = '';
+
                 document.getElementById('invJudwalMabar').innerText = jadwalDipilihGlobal.info;
                 document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(rawTotalTagihanVal);
                 document.getElementById('modalInvoice').classList.remove('hidden');
@@ -382,6 +401,52 @@ ${listPemainHtml}
             } finally {
                 btn.innerText = oldText;
                 btn.disabled = false;
+            }
+        }
+
+        // FUNGSI CEK & TERAPKAN VOUCHER LANGSUNG DI INVOICE
+        async function terapkanVoucher() {
+            const kode = document.getElementById('inputVoucher').value.trim().toUpperCase();
+            const notif = document.getElementById('notifVoucher');
+
+            if (!kode) {
+                notif.innerText = "⚠️ Masukkan kode voucher.";
+                notif.className = "text-[10px] mt-1 font-medium text-amber-600";
+                return;
+            }
+
+            try {
+                const res = await fetch(GAS_URL);
+                const data = await res.json();
+                const found = (data.voucherList || []).find(v => v.kode === kode && v.status.toLowerCase() === 'aktif');
+
+                if (found) {
+                    let diskon = 0;
+                    if (found.persen > 0) {
+                        diskon = Math.round((found.persen / 100) * baseTagihanAwal);
+                    } else if (found.nominal > 0) {
+                        diskon = found.nominal;
+                    }
+
+                    if (diskon > baseTagihanAwal) diskon = baseTagihanAwal;
+
+                    // Update total tagihan baru (pertahankan kode unik jika ada di digit terakhir)
+                    let kodeUnikLama = rawTotalTagihanVal % 1000;
+                    rawTotalTagihanVal = (baseTagihanAwal - diskon);
+
+                    document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(rawTotalTagihanVal);
+
+                    let infoPotongan = found.persen > 0 ? `${found.persen}%` : `Rp ${found.nominal.toLocaleString('id-ID')}`;
+                    notif.innerText = `✅ Voucher ${found.kode} berhasil! Diskon ${infoPotongan}`;
+                    notif.className = "text-[10px] mt-1 font-medium text-emerald-600";
+                } else {
+                    notif.innerText = "❌ Kode voucher tidak valid / kedaluwarsa.";
+                    notif.className = "text-[10px] mt-1 font-medium text-rose-600";
+                }
+            } catch (e) {
+                console.error("Gagal cek voucher:", e);
+                notif.innerText = "❌ Gagal memvalidasi voucher.";
+                notif.className = "text-[10px] mt-1 font-medium text-rose-600";
             }
         }
 
