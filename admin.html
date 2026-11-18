@@ -509,7 +509,6 @@
             const isMenunggu = p.status.includes('Menunggu') || p.status.includes('Pending');
             if (isLunas) totalEventLunas += parseInt(p.tagihan || 0);
 
-            // Tombol ACC sekarang memicu modal seamless
             const actionAccBtn = !isLunas
               ? `<button onclick="bukaModalAcc(${p.rowIndex}, '${p.nama}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2 py-1 rounded-md transition shadow-2xs">ACC</button>`
               : '';
@@ -574,7 +573,6 @@
       } catch (error) { divAktif.innerHTML = '<div class="text-center text-rose-600 text-xs py-4">Gagal memuat data.</div>'; }
     }
 
-    // Modal ACC Seamless Logic
     function bukaModalAcc(rowIndex, nama) {
       document.getElementById('accRowIndexInput').value = rowIndex;
       document.getElementById('accNamaPesertaLabel').innerText = `Peserta: ${nama}`;
@@ -616,7 +614,6 @@
       }
     }
 
-    // Modal Edit Nominal & Voucher
     function bukaModalEditNominal(rowIndex, nama, currentTagihan) {
       document.getElementById('editRowIndexInput').value = rowIndex;
       document.getElementById('editNamaPesertaLabel').innerText = `Peserta: ${nama}`;
@@ -655,7 +652,6 @@
       finally { btn.innerText = oldText; btn.disabled = false; }
     }
 
-    // Fungsi Pendukung Lainnya
     function bukaModalKirimVoucher(kode, kadaluwarsa) {
       document.getElementById('labelKodeVoucher').innerText = kode;
       document.getElementById('labelKadaluwarsa').innerText = kadaluwarsa;
@@ -737,11 +733,40 @@
     function copyListKeWA(jadwalId, tanggal, infoRaw, kuota) {
       fetch(GAS_URL).then(res => res.json()).then(data => {
         const pesertaJadwal = (data.pemain || []).filter(p => String(p.jadwalId) === String(jadwalId) && p.status && !p.status.includes('Dihapus'));
-        let teksWA = `🏸 *PESERTA MABAR Tepak Friendly* 🏸\n📍 *${infoRaw}* | 🗓️ *${tanggal}*\n\n`;
-        for (let i = 1; i <= (parseInt(kuota) || 12); i++) {
-          teksWA += `${i}. ${pesertaJadwal[i - 1] ? pesertaJadwal[i - 1].nama : '-'}\n`;
+        const totalKuota = parseInt(kuota) || 12;
+
+        let teksWA = `🏸 *PESERTA MABAR Tepak Friendly* 🏸\n`;
+
+        let displayTgl = tanggal;
+        try {
+          if (tanggal) {
+            displayTgl = new Date(tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+          }
+        } catch (e) { }
+
+        teksWA += `📍 *${infoRaw}* | 🗓️ *${displayTgl}*\n`;
+
+        const jadwalItem = (data.jadwal || []).find(j => String(j.id) === String(jadwalId));
+        if (jadwalItem && jadwalItem.htm) {
+          teksWA += `💰 HTM: Rp ${parseInt(jadwalItem.htm).toLocaleString('id-ID')}\n`;
         }
-        navigator.clipboard.writeText(teksWA).then(() => showCustomWarning("Berhasil", "Format rekap WA disalin!"));
+
+        teksWA += `👥 Slot Terisi: ${pesertaJadwal.length}/${totalKuota}\n\n`;
+
+        for (let i = 1; i <= totalKuota; i++) {
+          if (pesertaJadwal[i - 1]) {
+            teksWA += `${i}. ${pesertaJadwal[i - 1].nama}\n`;
+          } else {
+            teksWA += `${i}. -\n`;
+          }
+        }
+
+        const linkPendaftaran = `https://tepakfriendly.web.id/?jadwal=${jadwalId}`;
+        teksWA += `\nYuk amankan slotnya!\nKlik link di bawah untuk langsung mendaftar:\n${linkPendaftaran}`;
+
+        navigator.clipboard.writeText(teksWA).then(() => {
+          showCustomWarning("Berhasil", "Format rekap WA lengkap berhasil disalin ke clipboard!");
+        });
       });
     }
 
