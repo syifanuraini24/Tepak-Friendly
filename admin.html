@@ -81,10 +81,14 @@
             <input type="number" id="addKuota" placeholder="Kuota"
               class="w-1/3 p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
-          <div class="sm:col-span-2">
-            <label class="block text-[11px] font-bold text-slate-600 mb-1">Banner Acara (Opsional - Maks 1 MB)</label>
+          <div class="sm:col-span-2 space-y-2">
+            <label class="block text-[11px] font-bold text-slate-600">Banner Acara (Opsional - Maks 2 MB)</label>
             <input type="file" id="addBannerFile" accept="image/*"
+              onchange="previewLocalBanner(this, 'addBannerLivePreview', 'addBannerLiveImg')"
               class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition bg-white border border-slate-200 rounded-xl p-1">
+            <div id="addBannerLivePreview" class="hidden rounded-xl overflow-hidden border border-slate-200 bg-white">
+              <img id="addBannerLiveImg" src="" alt="Preview Banner" class="w-full h-28 object-cover">
+            </div>
           </div>
         </div>
         <button onclick="tambahJadwalBaru(this)"
@@ -200,7 +204,7 @@
           class="hidden space-y-2 pt-1 bg-slate-50 p-3 rounded-xl border border-slate-200">
           <label class="block text-[11px] font-bold text-slate-700">Banner / Gambar Saat Ini</label>
           <div
-            class="relative rounded-lg overflow-hidden border border-slate-200 w-full h-24 bg-white flex items-center justify-center">
+            class="relative rounded-lg overflow-hidden border border-slate-200 w-full h-28 bg-white flex items-center justify-center">
             <img id="editBannerPreviewImg" src="" alt="Banner" class="w-full h-full object-cover">
           </div>
           <label class="flex items-center gap-2 cursor-pointer pt-1 bg-rose-50 p-2 rounded-lg border border-rose-100">
@@ -211,11 +215,14 @@
         </div>
 
         <!-- Input Ganti Banner Baru -->
-        <div>
-          <label class="block text-[11px] font-bold text-slate-600 mb-1">Ganti Banner Baru (Opsional - Maks 1
-            MB)</label>
+        <div class="space-y-2">
+          <label class="block text-[11px] font-bold text-slate-600">Ganti Banner Baru (Opsional - Maks 2 MB)</label>
           <input type="file" id="editBannerFile" accept="image/*"
+            onchange="previewLocalBanner(this, 'editBannerNewPreview', 'editBannerNewImg')"
             class="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition bg-slate-50 border border-slate-200 rounded-xl p-1">
+          <div id="editBannerNewPreview" class="hidden rounded-xl overflow-hidden border border-blue-200 bg-white">
+            <img id="editBannerNewImg" src="" alt="Preview Banner Baru" class="w-full h-28 object-cover">
+          </div>
         </div>
 
       </div>
@@ -240,6 +247,22 @@
       cekSesiLogin();
     });
 
+    function previewLocalBanner(input, containerId, imgId) {
+      const container = document.getElementById(containerId);
+      const img = document.getElementById(imgId);
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          img.src = e.target.result;
+          container.classList.remove('hidden');
+        };
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        img.src = '';
+        container.classList.add('hidden');
+      }
+    }
+
     function formatJam(jam) {
       if (!jam) return '-';
       if (jam.includes('1899-12-30') || jam.includes('T')) {
@@ -253,7 +276,7 @@
       return jam;
     }
 
-    function compressImage(file, maxWidth = 800, quality = 0.7) {
+    function compressImage(file, maxWidth = 900, quality = 0.75) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -508,7 +531,7 @@ ${actionAccBtn}
 
           let bannerPreviewHtml = '';
           if (j.bannerUrl && j.bannerUrl.trim() !== '') {
-            bannerPreviewHtml = `<div class="mb-2 relative group"><img src="${j.bannerUrl}" alt="Banner" class="w-full h-24 object-cover rounded-xl border border-slate-100" onerror="this.parentElement.style.display='none'"></div>`;
+            bannerPreviewHtml = `<div class="mb-2 relative group"><img src="${j.bannerUrl}" alt="Banner" class="w-full h-28 object-cover rounded-xl border border-slate-100" onerror="this.parentElement.style.display='none'"></div>`;
           }
 
           const cardHtml = `
@@ -645,12 +668,12 @@ ${bannerPreviewHtml}
 
       if (fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
-        const maxSizeInBytes = 1 * 1024 * 1024; // Maksimal 1 MB
+        const maxSizeInBytes = 2 * 1024 * 1024; // Maksimal 2 MB sebelum kompresi
         if (file.size > maxSizeInBytes) {
-          return showCustomWarning("Ukuran File Terlalu Besar", "Ukuran gambar maksimal adalah 1 MB! Silakan pilih gambar yang lebih kecil.");
+          return showCustomWarning("Ukuran File Terlalu Besar", "Ukuran gambar maksimal adalah 2 MB! Silakan pilih gambar yang lebih kecil.");
         }
         bannerName = file.name;
-        bannerBase64 = await compressImage(file, 800, 0.7);
+        bannerBase64 = await compressImage(file, 900, 0.75);
       }
 
       const payload = {
@@ -673,12 +696,25 @@ ${bannerPreviewHtml}
       btn.innerText = 'Menyimpan...';
       btn.disabled = true;
 
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-      await loadDataAdmin();
+      try {
+        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await res.json();
 
-      ['addId', 'addTanggal', 'addInfo', 'addJam', 'addHtm', 'addKuota', 'addBannerFile'].forEach(id => document.getElementById(id).value = '');
-      btn.innerText = oldText;
-      btn.disabled = false;
+        if (result.status !== 'success') {
+          throw new Error(result.message || 'Gagal menyimpan jadwal.');
+        }
+
+        await loadDataAdmin();
+
+        ['addId', 'addTanggal', 'addInfo', 'addJam', 'addHtm', 'addKuota', 'addBannerFile'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('addBannerLivePreview').classList.add('hidden');
+        document.getElementById('addBannerLiveImg').src = '';
+      } catch (err) {
+        showCustomWarning("Gagal Menyimpan", err.message);
+      } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+      }
     }
 
     async function hapusPemain(rowIndex) {
@@ -701,6 +737,8 @@ ${bannerPreviewHtml}
       document.getElementById('editJadwalHtm').value = htm;
       document.getElementById('editJadwalKuota').value = kuota;
       document.getElementById('editBannerFile').value = '';
+      document.getElementById('editBannerNewPreview').classList.add('hidden');
+      document.getElementById('editBannerNewImg').src = '';
       document.getElementById('hapusBannerCheck').checked = false;
 
       const previewContainer = document.getElementById('editBannerPreviewContainer');
@@ -728,12 +766,12 @@ ${bannerPreviewHtml}
 
       if (fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
-        const maxSizeInBytes = 1 * 1024 * 1024; // Maksimal 1 MB
+        const maxSizeInBytes = 2 * 1024 * 1024; // Maksimal 2 MB sebelum kompresi
         if (file.size > maxSizeInBytes) {
-          return showCustomWarning("Ukuran File Terlalu Besar", "Ukuran gambar maksimal adalah 1 MB! Silakan pilih gambar yang lebih kecil.");
+          return showCustomWarning("Ukuran File Terlalu Besar", "Ukuran gambar maksimal adalah 2 MB! Silakan pilih gambar yang lebih kecil.");
         }
         bannerName = file.name;
-        bannerBase64 = await compressImage(file, 800, 0.7);
+        bannerBase64 = await compressImage(file, 900, 0.75);
       }
 
       const payload = {
@@ -757,12 +795,22 @@ ${bannerPreviewHtml}
       btn.innerText = 'Menyimpan...';
       btn.disabled = true;
 
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-      tutupModalEditJadwal();
-      await loadDataAdmin();
+      try {
+        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+        const result = await res.json();
 
-      btn.innerText = oldText;
-      btn.disabled = false;
+        if (result.status !== 'success') {
+          throw new Error(result.message || 'Gagal menyimpan perubahan jadwal.');
+        }
+
+        tutupModalEditJadwal();
+        await loadDataAdmin();
+      } catch (err) {
+        showCustomWarning("Gagal Menyimpan", err.message);
+      } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+      }
     }
 
     async function hapusJadwalMaster(jadwalId) {

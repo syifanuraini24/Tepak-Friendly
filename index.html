@@ -237,7 +237,7 @@
 
                     let bannerHtml = '';
                     if (j.bannerUrl && j.bannerUrl.trim() !== '') {
-                        bannerHtml = `<div class="overflow-hidden rounded-xl border border-slate-100"><img src="${j.bannerUrl}" alt="Banner" class="w-full h-32 object-cover" onerror="this.parentElement.style.display='none'"></div>`;
+                        bannerHtml = `<div class="overflow-hidden rounded-xl border border-slate-100 bg-slate-50"><img src="${j.bannerUrl}" alt="Banner ${j.infoRaw}" referrerpolicy="no-referrer" class="w-full h-36 object-cover" onerror="this.parentElement.style.display='none'"></div>`;
                     }
 
                     container.innerHTML += `
