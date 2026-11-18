@@ -139,22 +139,21 @@
         </div>
     </main>
 
-    <!-- FLOATING BOTTOM NAVIGATION BAR -->
-    <nav aria-label="Navigasi Utama" class="fixed bottom-4 left-0 right-0 z-40 px-4">
-        <div
-            class="max-w-md mx-auto bg-slate-900/90 backdrop-blur-md border border-slate-800/80 rounded-2xl shadow-xl p-1.5 flex justify-around items-center text-white">
-            <a href="index"
-                class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl bg-blue-600 text-white font-bold text-[10px] shadow-xs transition">
-                <span class="text-base leading-none mb-0.5">🏸</span>
+    <!-- FLOATING BOTTOM NAVIGATION BAR (Disamakan dengan halaman Jualan) -->
+    <div class="fixed bottom-4 left-4 right-4 max-w-md mx-auto z-40">
+        <div class="bg-slate-900/95 backdrop-blur-md p-2 rounded-2xl shadow-xl border border-slate-800 flex gap-2">
+            <a href="index.html"
+                class="flex-1 flex items-center justify-center gap-2 py-3 bg-blue-600 text-white rounded-xl text-xs font-bold transition shadow-sm">
+                <span>🏸</span>
                 <span>Mabar</span>
             </a>
-            <a href="jualan"
-                class="flex-1 flex flex-col items-center justify-center py-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 font-medium text-[10px] transition">
-                <span class="text-base leading-none mb-0.5">🛍️</span>
+            <a href="jualan.html"
+                class="flex-1 flex items-center justify-center gap-2 py-3 bg-transparent hover:bg-slate-800 text-slate-400 hover:text-white rounded-xl text-xs font-bold transition">
+                <span>🍔</span>
                 <span>Jajanan</span>
             </a>
         </div>
-    </nav>
+    </div>
 
     <script>
         const GAS_URL = CONFIG.GAS_URL;
@@ -237,7 +236,7 @@
 
                     let bannerHtml = '';
                     if (j.bannerUrl && j.bannerUrl.trim() !== '') {
-                        bannerHtml = `<div class="overflow-hidden rounded-xl border border-slate-100 bg-slate-50"><img src="${j.bannerUrl}" alt="Banner ${j.infoRaw}" referrerpolicy="no-referrer" class="w-full h-36 object-cover" onerror="this.parentElement.style.display='none'"></div>`;
+                        bannerHtml = `<div class="overflow-hidden rounded-xl border border-slate-100"><img src="${j.bannerUrl}" alt="Banner" class="w-full h-32 object-cover" onerror="this.parentElement.style.display='none'"></div>`;
                     }
 
                     container.innerHTML += `
