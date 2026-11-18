@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="logo.png">
+    <title>Kelola Voucher - Admin Tepak Friendly</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100 min-h-screen p-4 font-sans text-slate-800 antialiased pb-12">
+
+    <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-6">
+
+        <!-- Header & Navigasi Kembali -->
+        <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+            <div>
+                <h1 class="text-base font-extrabold text-slate-900">🎟️ Manajemen Voucher Diskon</h1>
+                <p class="text-[11px] text-slate-500">Buat kode promo, atur kuota, dan pantau penggunaan</p>
+            </div>
+            <a href="admin.html"
+                class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl transition">
+                ⬅️ Menu Utama
+            </a>
+        </div>
+
+        <!-- Form Tambah Voucher -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+            <h2 class="font-bold text-xs text-slate-800 uppercase tracking-wide">➕ Buat Voucher Promo Baru</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Kode Voucher</label>
+                    <input type="text" id="addVoucherKode" placeholder="Cth: TEPAKHEMAT"
+                        oninput="this.value = this.value.toUpperCase()"
+                        class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white uppercase font-bold tracking-wider focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Tipe Diskon</label>
+                    <select id="addVoucherTipe" onchange="gantiLabelTipeVoucher()"
+                        class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="nominal">Nominal Tetap (Rp)</option>
+                        <option value="persen">Persentase (%)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1" id="labelNilaiPotongan">Besar
+                        Potongan (Rp)</label>
+                    <input type="number" id="addVoucherNilai" placeholder="Cth: 5000"
+                        class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Kuota Maksimal (0 =
+                        Unlimited)</label>
+                    <input type="number" id="addVoucherKuota" placeholder="Cth: 50"
+                        class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                </div>
+            </div>
+            <button onclick="tambahVoucherBaru(this)"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-sm">Simpan
+                & Aktifkan Voucher</button>
+        </div>
+
+        <!-- List Daftar Voucher & Sisa Kuota -->
+        <div class="space-y-2">
+            <h3 class="font-bold text-xs text-slate-800 uppercase tracking-wide px-1">📋 Daftar Voucher Tersimpan & Cek
+                Kuota</h3>
+            <div id="listVoucherAdmin" class="space-y-2.5">
+                <div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl border">Memuat daftar
+                    voucher...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Custom Notifikasi / Konfirmasi -->
+    <div id="customModal"
+        class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+            <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Notifikasi</h3>
+            <p id="modalDesc" class="text-xs text-slate-600">-</p>
+            <div class="flex gap-2 pt-2">
+                <button id="modalBtnCancel"
+                    class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition hidden">Batal</button>
+                <button id="modalBtnConfirm"
+                    class="flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white bg-blue-600 hover:bg-blue-700">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const GAS_URL = CONFIG.GAS_URL;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDataVoucherAdmin();
+        });
+
+        function gantiLabelTipeVoucher() {
+            const tipe = document.getElementById('addVoucherTipe').value;
+            const label = document.getElementById('labelNilaiPotongan');
+            const input = document.getElementById('addVoucherNilai');
+            if (tipe === 'persen') {
+                label.innerText = 'Besar Persentase (%)';
+                input.placeholder = 'Cth: 10 (diskon 10%)';
+            } else {
+                label.innerText = 'Besar Potongan Nominal (Rp)';
+                input.placeholder = 'Cth: 5000';
+            }
+        }
+
+        function showCustomWarning(title, desc) {
+            const modal = document.getElementById('customModal');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalDesc').innerText = desc;
+            const btnConfirm = document.getElementById('modalBtnConfirm');
+            btnConfirm.innerText = "OK";
+            btnConfirm.className = "flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white bg-blue-600 hover:bg-blue-700";
+            document.getElementById('modalBtnCancel').classList.add('hidden');
+            modal.classList.remove('hidden');
+
+            const newBtn = btnConfirm.cloneNode(true);
+            btnConfirm.parentNode.replaceChild(newBtn, btnConfirm);
+            newBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        }
+
+        function showConfirmModal(title, desc, onConfirm) {
+            const modal = document.getElementById('customModal');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalDesc').innerText = desc;
+            const btnConfirm = document.getElementById('modalBtnConfirm');
+            const btnCancel = document.getElementById('modalBtnCancel');
+
+            btnConfirm.innerText = "Ya, Hapus";
+            btnConfirm.className = "flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white bg-rose-600 hover:bg-rose-700";
+            btnCancel.classList.remove('hidden');
+            modal.classList.remove('hidden');
+
+            const newBtnConfirm = btnConfirm.cloneNode(true);
+            const newBtnCancel = btnCancel.cloneNode(true);
+            btnConfirm.parentNode.replaceChild(newBtnConfirm, btnConfirm);
+            btnCancel.parentNode.replaceChild(newBtnCancel, btnCancel);
+
+            newBtnConfirm.addEventListener('click', () => { modal.classList.add('hidden'); onConfirm(); });
+            newBtnCancel.addEventListener('click', () => { modal.classList.add('hidden'); });
+        }
+
+        async function loadDataVoucherAdmin() {
+            const container = document.getElementById('listVoucherAdmin');
+            try {
+                const res = await fetch(GAS_URL);
+                const data = await res.json();
+                const vouchers = data.voucherList || [];
+                container.innerHTML = '';
+
+                if (vouchers.length === 0) {
+                    container.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-white rounded-2xl border">Belum ada voucher promo tersimpan.</div>';
+                    return;
+                }
+
+                vouchers.forEach(v => {
+                    let infoPotongan = v.tipe === 'persen' ? `Diskon ${v.nilai}%` : `Diskon Rp ${v.nilai.toLocaleString('id-ID')}`;
+                    let infoKuota = v.kuota > 0 ? `Terpakai: ${v.terpakai} / ${v.kuota}` : `Kuota: Unlimited ♾️`;
+                    let isHabis = v.kuota > 0 && v.terpakai >= v.kuota;
+
+                    container.innerHTML += `
+<div class="bg-white p-3.5 rounded-2xl border border-slate-200 flex justify-between items-center shadow-xs">
+  <div>
+    <div class="flex items-center gap-2">
+      <span class="font-extrabold text-xs text-slate-900 bg-slate-100 px-2 py-0.5 rounded border">${v.kode}</span>
+      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${isHabis ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">
+        ${isHabis ? 'Habis 🔴' : 'Aktif 🟢'}
+      </span>
+    </div>
+    <p class="text-[11px] text-slate-600 font-medium mt-1">Potongan: <strong>${infoPotongan}</strong></p>
+    <p class="text-[10px] text-blue-600 font-semibold mt-0.5">📊 ${infoKuota}</p>
+  </div>
+  <div>
+    <button onclick="hapusVoucherMaster('${v.kode}')" class="text-[10px] font-bold px-3 py-2 rounded-xl border bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 transition">
+      🗑️ Hapus
+    </button>
+  </div>
+</div>`;
+                });
+            } catch (e) {
+                container.innerHTML = '<div class="text-center text-rose-600 text-xs py-4">Gagal memuat daftar voucher.</div>';
+            }
+        }
+
+        async function tambahVoucherBaru(btn) {
+            const kode = document.getElementById('addVoucherKode').value.trim().toUpperCase();
+            const tipe = document.getElementById('addVoucherTipe').value;
+            const nilai = parseFloat(document.getElementById('addVoucherNilai').value) || 0;
+            const kuota = parseInt(document.getElementById('addVoucherKuota').value) || 0;
+
+            if (!kode || nilai <= 0) {
+                return showCustomWarning("Form Belum Lengkap", "Harap isi kode voucher dan besar potongan dengan benar!");
+            }
+
+            const oldText = btn.innerText;
+            btn.innerText = 'Menyimpan...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'add_voucher', kode, tipe, nilai, kuota })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    document.getElementById('addVoucherKode').value = '';
+                    document.getElementById('addVoucherNilai').value = '';
+                    document.getElementById('addVoucherKuota').value = '';
+                    await loadDataVoucherAdmin();
+                    showCustomWarning("Berhasil", "Voucher baru berhasil dibuat & diaktifkan!");
+                } else {
+                    throw new Error(result.message || 'Gagal menyimpan voucher');
+                }
+            } catch (e) {
+                showCustomWarning("Gagal", e.message);
+            } finally {
+                btn.innerText = oldText;
+                btn.disabled = false;
+            }
+        }
+
+        async function hapusVoucherMaster(kode) {
+            showConfirmModal("Hapus Voucher", `Yakin ingin menghapus kode voucher [${kode}] secara permanen?`, async () => {
+                try {
+                    const res = await fetch(GAS_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'delete_voucher', kode })
+                    });
+                    const result = await res.json();
+                    if (result.status === 'success') {
+                        await loadDataVoucherAdmin();
+                    } else {
+                        throw new Error(result.message || 'Gagal menghapus');
+                    }
+                } catch (e) {
+                    showCustomWarning("Gagal", "Gagal menghapus voucher: " + e.message);
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
