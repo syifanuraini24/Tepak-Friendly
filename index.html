@@ -139,7 +139,7 @@
         </div>
     </main>
 
-    <!-- FLOATING BOTTOM NAVIGATION BAR (Disamakan dengan halaman Jualan) -->
+    <!-- FLOATING BOTTOM NAVIGATION BAR -->
     <div class="fixed bottom-4 left-4 right-4 max-w-md mx-auto z-40">
         <div class="bg-slate-900/95 backdrop-blur-md p-2 rounded-2xl shadow-xl border border-slate-800 flex gap-2">
             <a href="index.html"
@@ -182,6 +182,19 @@
             document.getElementById('customModal').classList.add('hidden');
         }
 
+        // Fungsi untuk toggle (buka/tutup) list pemain secara dinamis
+        function toggleDaftarPemain(id) {
+            const el = document.getElementById(`listPemain-${id}`);
+            const btnText = document.getElementById(`btnToggleText-${id}`);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                btnText.innerText = 'Sembunyikan Pemain ▲';
+            } else {
+                el.classList.add('hidden');
+                btnText.innerText = `Lihat Pemain Terdaftar (${btnText.getAttribute('data-count')}) ▼`;
+            }
+        }
+
         async function loadDataIndex() {
             try {
                 const response = await fetch(GAS_URL);
@@ -217,7 +230,7 @@
 
                     let listPemainHtml = '';
                     if (pemainJadwal.length === 0) {
-                        listPemainHtml = '<div class="text-[11px] text-slate-400 italic py-1 text-center">Belum ada pemain terdaftar.</div>';
+                        listPemainHtml = '<div class="text-[11px] text-slate-400 italic py-2 text-center">Belum ada pemain terdaftar.</div>';
                     } else {
                         pemainJadwal.forEach((p, idx) => {
                             const badge = p.status.includes('Lunas')
@@ -225,7 +238,7 @@
                                 : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
 
                             listPemainHtml += `
-<li class="py-1 px-2 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
+<li class="py-1.5 px-2.5 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
 <span class="font-bold text-slate-800">${idx + 1}. ${p.nama}</span>
 <div>${badge}</div>
 </li>`;
@@ -254,12 +267,13 @@ ${sisaSlot > 0 ? `Sisa Slot: ${sisaSlot}` : 'Full'}
 </span>
 </div>
 
+<!-- Tombol Accordion untuk Collapse/Expand List Pemain -->
 <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-<div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center">
-<span>👥 Pemain Terdaftar</span>
-<span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">${pemainJadwal.length}/${j.kuota}</span>
-</div>
-<ul class="divide-y divide-slate-100 max-h-36 overflow-y-auto no-scrollbar p-1.5 space-y-1">
+<button onclick="toggleDaftarPemain('${j.id}')" class="w-full bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center hover:bg-slate-100 transition">
+<span class="flex items-center gap-1.5">👥 <span id="btnToggleText-${j.id}" data-count="${pemainJadwal.length}/${j.kuota}">Lihat Pemain Terdaftar (${pemainJadwal.length}/${j.kuota}) ▼</span></span>
+<span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">${pemainJadwal.length} Orang</span>
+</button>
+<ul id="listPemain-${j.id}" class="divide-y divide-slate-100 max-h-40 overflow-y-auto no-scrollbar p-2 space-y-1 hidden">
 ${listPemainHtml}
 </ul>
 </div>
