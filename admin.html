@@ -46,7 +46,7 @@
             class="bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 transition shadow-xs">🔄
             Refresh</button>
           <button onclick="logout()"
-            class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-rose-200 transition">🚪
+            class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-200 transition">🚪
             Logout</button>
         </div>
       </div>
@@ -578,22 +578,33 @@ ${bannerPreviewHtml}
     function copyListKeWA(jadwalId, tanggal, infoRaw, kuota) {
       fetch(GAS_URL).then(res => res.json()).then(data => {
         const pesertaJadwal = (data.pemain || []).filter(p => p.jadwalId === jadwalId && p.status && !p.status.includes('Dihapus'));
-        let teksWA = `🏸 *REKAP PESERTA MABAR* 🏸\n`;
+        const totalKuota = parseInt(kuota) || 12;
+
+        let teksWA = `🏸 *PESERTA MABAR Tepak Friendly* 🏸\n`;
         const displayTgl = tanggal ? new Date(tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
         teksWA += `📍 *${infoRaw}* | 🗓️ *${displayTgl}*\n`;
-        teksWA += `👥 Slot Terisi: ${pesertaJadwal.length}/${kuota}\n\n`;
-        if (pesertaJadwal.length === 0) {
-          teksWA += `_Belum ada peserta terdaftar._`;
-        } else {
-          pesertaJadwal.forEach((p, idx) => {
-            const statusText = p.status.includes('Lunas') ? 'Lunas 🟢' : 'Menunggu Konfirmasi 🟡';
-            teksWA += `${idx + 1}. ${p.nama} (${statusText})\n`;
-          });
+        teksWA += `👥 Slot Terisi: ${pesertaJadwal.length}/${totalKuota}\n`;
+
+        const jadwalItem = (data.jadwal || []).find(j => String(j.id) === String(jadwalId));
+        if (jadwalItem && jadwalItem.htm) {
+          teksWA += `HTM Rp ${parseInt(jadwalItem.htm).toLocaleString('id-ID')}\n`;
         }
-        teksWA += `\n_Yuk amankan slotnya!_`;
+
+        teksWA += `\n`;
+
+        for (let i = 1; i <= totalKuota; i++) {
+          if (pesertaJadwal[i - 1]) {
+            teksWA += `${i}. ${pesertaJadwal[i - 1].nama}\n`;
+          } else {
+            teksWA += `${i}. -\n`;
+          }
+        }
+
+        const linkPendaftaran = `https://tepakfriendly.web.id/?jadwal=${jadwalId}`;
+        teksWA += `\nYuk amankan slotnya!\nKlik link di bawah untuk langsung mendaftar:\n${linkPendaftaran}`;
 
         navigator.clipboard.writeText(teksWA).then(() => {
-          showCustomWarning("Berhasil", "List peserta berhasil disalin ke clipboard!");
+          showCustomWarning("Berhasil", "Format rekap WA berhasil disalin ke clipboard!");
         });
       });
     }
