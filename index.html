@@ -115,10 +115,17 @@
                 <p class="text-[11px] text-slate-500">Transfer persis hingga 3 digit terakhir untuk verifikasi otomatis.
                 </p>
 
-                <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 inline-block">
-                    <img src="qris.png" alt="QRIS"
-                        class="mx-auto w-48 h-48 object-contain mb-1 rounded-lg bg-white p-1 border">
-                    <span class="text-[10px] text-slate-500 block">BCA 0083677071 a.n Andi</span>
+                <!-- AREA QRIS DIPERBESAR + TOMBOL DOWNLOAD -->
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 inline-block w-full">
+                    <img id="imgQris" src="qris.png" alt="QRIS"
+                        class="mx-auto w-56 h-56 object-contain mb-2 rounded-lg bg-white p-1 border shadow-xs">
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-[10px] font-medium text-slate-600">BCA 0083677071 a.n Andi</span>
+                        <a href="qris.png" download="QRIS-TepakFriendly.png"
+                            class="inline-flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold px-2.5 py-1.5 rounded-lg transition shadow-2xs">
+                            📥 Unduh QRIS
+                        </a>
+                    </div>
                 </div>
 
                 <button onclick="tutupModalInvoice()"
