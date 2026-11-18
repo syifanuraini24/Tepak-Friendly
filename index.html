@@ -53,10 +53,10 @@
             </div>
         </div>
 
-        <!-- MODAL PENDAFTARAN MABAR -->
+        <!-- MODAL PENDAFTARAN MABAR (FIXED OVERLAY GLITCH) -->
         <div id="modalDaftar"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
-            <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3">
+            class="fixed inset-0 w-full h-full bg-slate-900/70 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3">
                 <h3 id="modalJadwalTitle" class="font-bold text-sm text-slate-900 mb-1">Daftar Mabar</h3>
                 <p class="text-[11px] text-slate-500 mb-3" id="modalJadwalSub">-</p>
 
@@ -93,8 +93,8 @@
 
         <!-- MODAL INVOICE PEMBAYARAN MABAR -->
         <div id="modalInvoice"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4 transition-opacity duration-300">
-            <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 text-center space-y-3">
+            class="fixed inset-0 w-full h-full bg-slate-900/70 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 text-center space-y-3">
                 <div
                     class="inline-block bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">
                     Pendaftaran Berhasil</div>
@@ -136,8 +136,8 @@
 
         <!-- MODAL CUSTOM NOTIFIKASI -->
         <div id="customModal"
-            class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
-            <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 text-center">
+            class="fixed inset-0 w-full h-full bg-slate-900/70 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
+            <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-3 text-center">
                 <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Notifikasi</h3>
                 <p id="modalDesc" class="text-xs text-slate-600">-</p>
                 <button onclick="tutupCustomModal()"
@@ -189,7 +189,6 @@
             document.getElementById('customModal').classList.add('hidden');
         }
 
-        // Fungsi toggle buka/tutup list pemain ke bawah
         function toggleDaftarPemain(id) {
             const el = document.getElementById(`listPemain-${id}`);
             const arrow = document.getElementById(`arrow-${id}`);
