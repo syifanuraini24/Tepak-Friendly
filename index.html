@@ -182,16 +182,21 @@
             document.getElementById('customModal').classList.add('hidden');
         }
 
-        // Fungsi untuk toggle (buka/tutup) list pemain secara dinamis
+        // Fungsi toggle buka/tutup list pemain ke bawah
         function toggleDaftarPemain(id) {
             const el = document.getElementById(`listPemain-${id}`);
+            const arrow = document.getElementById(`arrow-${id}`);
             const btnText = document.getElementById(`btnToggleText-${id}`);
+            const countStr = btnText.getAttribute('data-count');
+
             if (el.classList.contains('hidden')) {
                 el.classList.remove('hidden');
-                btnText.innerText = 'Sembunyikan Pemain ▲';
+                arrow.innerText = '▲';
+                btnText.innerText = `Sembunyikan Anggota (${countStr})`;
             } else {
                 el.classList.add('hidden');
-                btnText.innerText = `Lihat Pemain Terdaftar (${btnText.getAttribute('data-count')}) ▼`;
+                arrow.innerText = '▼';
+                btnText.innerText = `Lihat Anggota (${countStr})`;
             }
         }
 
@@ -246,6 +251,7 @@
                     }
 
                     const infoLengkap = `${displayTanggal} | ${j.infoRaw}`;
+                    const countText = `${pemainJadwal.length}/${j.kuota}`;
 
                     let bannerHtml = '';
                     if (j.bannerUrl && j.bannerUrl.trim() !== '') {
@@ -263,27 +269,27 @@ ${bannerHtml}
 <p class="text-[11px] text-slate-500">🕒 ${jamBersih} | HTM: Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</p>
 </div>
 <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${sisaSlot > 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">
-${sisaSlot > 0 ? `Sisa Slot: ${sisaSlot}` : 'Full'}
+${sisaSlot > 0 ? `Sisa: ${sisaSlot}` : 'Full'}
 </span>
 </div>
 
-<!-- Tombol Accordion untuk Collapse/Expand List Pemain -->
-<div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
-<button onclick="toggleDaftarPemain('${j.id}')" class="w-full bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center hover:bg-slate-100 transition">
-<span class="flex items-center gap-1.5">👥 <span id="btnToggleText-${j.id}" data-count="${pemainJadwal.length}/${j.kuota}">Lihat Pemain Terdaftar (${pemainJadwal.length}/${j.kuota}) ▼</span></span>
-<span class="text-[10px] text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">${pemainJadwal.length} Orang</span>
+<!-- Accordion Ringkas yang Membuka ke Bawah -->
+<div class="bg-slate-50 rounded-xl border border-slate-200/80 overflow-hidden">
+<button onclick="toggleDaftarPemain('${j.id}')" class="w-full px-3 py-2 text-[11px] font-bold text-slate-700 flex justify-between items-center hover:bg-slate-100 transition">
+<span class="flex items-center gap-1.5">👥 <span id="btnToggleText-${j.id}" data-count="${countText}">Lihat Anggota (${countText})</span></span>
+<span id="arrow-${j.id}" class="text-xs text-slate-400">▼</span>
 </button>
-<ul id="listPemain-${j.id}" class="divide-y divide-slate-100 max-h-40 overflow-y-auto no-scrollbar p-2 space-y-1 hidden">
+<ul id="listPemain-${j.id}" class="divide-y divide-slate-100 max-h-40 overflow-y-auto no-scrollbar p-2 space-y-1 bg-white hidden border-t border-slate-100">
 ${listPemainHtml}
 </ul>
 </div>
 
-<div class="flex gap-2">
+<div class="flex gap-2 pt-1">
 <button onclick="bukaModalDaftar('${j.id}', \`${infoLengkap}\`, ${j.htm})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">
 + Daftar Mabar Ini
 </button>
-<button onclick="shareJadwal('${j.id}', \`${j.infoRaw}\`, '${displayTanggal}', '${jamBersih}')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-2.5 rounded-xl border border-emerald-200 transition" title="Bagikan Link Jadwal">
-🔗 Share
+<button onclick="shareJadwal('${j.id}', \`${j.infoRaw}\`, '${displayTanggal}', '${jamBersih}')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-emerald-200 transition" title="Bagikan Link Jadwal">
+🔗
 </button>
 </div>
 </div>`;
