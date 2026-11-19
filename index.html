@@ -188,6 +188,12 @@
         let baseTagihanAwal = 0;
         let cachedIndexData = { jadwal: [], pemain: [] };
         const openListIds = new Set();
+        let isFetchingIndex = false;
+
+        function getFreshGasUrl() {
+            const sep = GAS_URL.includes('?') ? '&' : '?';
+            return `${GAS_URL}${sep}_t=${Date.now()}`;
+        }
 
         function formatJam(jam) {
             if (!jam) return '-';
@@ -250,8 +256,10 @@
         }
 
         async function loadDataIndex() {
+            if (isFetchingIndex) return;
+            isFetchingIndex = true;
             try {
-                const response = await fetch(GAS_URL);
+                const response = await fetch(getFreshGasUrl(), { cache: 'no-store' });
                 const data = await response.json();
                 cachedIndexData = data || { jadwal: [], pemain: [] };
 
@@ -289,7 +297,8 @@
                         listPemainHtml = '<div class="text-[11px] text-slate-400 italic py-2 text-center">Belum ada pemain terdaftar.</div>';
                     } else {
                         pemainJadwal.forEach((p, idx) => {
-                            const badge = p.status.includes('Lunas')
+                            const statusText = String(p.status || '').trim();
+                            const badge = statusText.toLowerCase().includes('lunas')
                                 ? '<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-1.5 py-0.5 rounded border border-emerald-100">Lunas 🟢</span>'
                                 : '<span class="text-[9px] bg-amber-50 text-amber-700 font-bold px-1.5 py-0.5 rounded border border-amber-100">Pending 🟡</span>';
 
@@ -346,7 +355,11 @@ ${listPemainHtml}
 </div>
 </div>`;
                 });
-            } catch (e) { console.error("Error loadDataIndex:", e); }
+            } catch (e) {
+                console.error("Error loadDataIndex:", e);
+            } finally {
+                isFetchingIndex = false;
+            }
         }
 
         function shareJadwal(jadwalId) {
@@ -445,8 +458,9 @@ ${listPemainHtml}
             btn.disabled = true;
 
             try {
-                const response = await fetch(GAS_URL, {
+                const response = await fetch(getFreshGasUrl(), {
                     method: 'POST',
+                    cache: 'no-store',
                     body: JSON.stringify({
                         action: 'register',
                         nama: namaBersih,
@@ -498,7 +512,7 @@ ${listPemainHtml}
             }
 
             try {
-                const res = await fetch(GAS_URL);
+                const res = await fetch(getFreshGasUrl(), { cache: 'no-store' });
                 const data = await res.json();
                 const found = (data.voucherList || []).find(v => v.kode === kode && v.status.toLowerCase() === 'aktif');
 
@@ -552,7 +566,15 @@ ${listPemainHtml}
                 }
             });
 
-            setInterval(loadDataIndex, 5000);
+            setInterval(() => {
+                const adaModalTerbuka =
+                    !document.getElementById('modalDaftar').classList.contains('hidden') ||
+                    !document.getElementById('modalInvoice').classList.contains('hidden') ||
+                    !document.getElementById('customModal').classList.contains('hidden');
+                if (!adaModalTerbuka) {
+                    loadDataIndex();
+                }
+            }, 5000);
         });
     </script>
 </body>
