@@ -202,7 +202,8 @@
           class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
           <div>
             <h3 class="font-extrabold text-sm text-slate-900">🎁 Manajemen &amp; Kirim Voucher</h3>
-            <p class="text-[11px] text-slate-500">Atur penerima yang berhak, pantau kuota &amp; spent, dan kirim voucher.</p>
+            <p class="text-[11px] text-slate-500">Atur penerima yang berhak, pantau kuota &amp; spent, dan kirim
+              voucher.</p>
           </div>
           <div class="flex items-center gap-1.5 w-full sm:w-auto">
             <button type="button" onclick="sinkronKuotaVoucher(this)"
@@ -576,7 +577,8 @@
             <input type="checkbox" id="chkKembalikanKuotaVoucherHapus" checked class="mt-0.5 rounded border-rose-300">
             <span>Kembalikan kuota voucher jika peserta memakai voucher</span>
           </label>
-          <p class="text-[9px] text-rose-600 leading-snug">Peserta dalam rentang akan ditandai Dihapus 🔴 dan slot jadwal akan terbuka kembali.</p>
+          <p class="text-[9px] text-rose-600 leading-snug">Peserta dalam rentang akan ditandai Dihapus 🔴 dan slot
+            jadwal akan terbuka kembali.</p>
         </div>
       </div>
 
@@ -931,15 +933,15 @@
       const pemakaiList = Array.isArray(voucherObj?.pemakaiVoucher) && voucherObj.pemakaiVoucher.length > 0
         ? voucherObj.pemakaiVoucher
         : (cachedDataAdmin.pemain || [])
-            .filter(p => bersihkanKodeVoucher_(p.voucher) === kodeNorm)
-            .map(p => ({
-              rowIndex: p.rowIndex,
-              nama: p.nama,
-              jadwalId: p.jadwalId,
-              jadwalInfo: p.jadwalId,
-              status: p.status,
-              tagihan: p.tagihan
-            }));
+          .filter(p => bersihkanKodeVoucher_(p.voucher) === kodeNorm)
+          .map(p => ({
+            rowIndex: p.rowIndex,
+            nama: p.nama,
+            jadwalId: p.jadwalId,
+            jadwalInfo: p.jadwalId,
+            status: p.status,
+            tagihan: p.tagihan
+          }));
 
       let totalSpent = 0;
       let jumlahAktif = 0;
@@ -964,6 +966,14 @@
         jumlahAktif,
         spentByRowIndex
       };
+    }
+
+    function renderBadgePakaiVoucher_(nominalTagihan, hasVoucher) {
+      if (!hasVoucher) return '';
+      const nominalClass = nominalTagihan === 0
+        ? 'font-mono font-bold text-emerald-700 text-xs'
+        : 'font-mono font-semibold text-slate-700 text-xs';
+      return `<div class="flex items-center gap-1.5 flex-wrap"><span class="${nominalClass}">${formatRp.format(nominalTagihan)}</span><span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200/70">Pakai Voucher</span></div>`;
     }
 
     function cekSesiLogin() {
@@ -1483,9 +1493,7 @@
         : `Total ${penggunaVoucherData.length} pemakaian voucher dari ${uniqueCodes.length} kode • Spent ${formatRp.format(totalSpentFiltered)}`;
 
       container.innerHTML = filtered.map(item => {
-        const tagihanText = item.tagihan === 0
-          ? '<span class="font-mono font-bold text-emerald-700">Rp 0</span>'
-          : `<span class="font-mono font-semibold text-slate-700">${formatRp.format(item.tagihan)}</span>`;
+        const tagihanText = renderBadgePakaiVoucher_(item.tagihan, true);
 
         return `
           <div class="bg-white border border-slate-200/90 rounded-xl px-3 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 text-xs">
@@ -1761,8 +1769,8 @@
               ? `<span class="inline-flex items-center gap-1 text-[10px] font-mono font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-200 max-w-full break-all">🎟️ ${escapeHtml(kodeBersih)}</span>`
               : '';
 
-            const labelTagihanHtml = (nominalTagihan === 0 && hasVoucher)
-              ? `<div class="flex items-center gap-1.5"><span class="font-mono font-bold text-emerald-700 text-xs">Rp 0</span><span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Pakai Voucher</span></div>`
+            const labelTagihanHtml = hasVoucher
+              ? renderBadgePakaiVoucher_(nominalTagihan, true)
               : `<span class="font-mono font-semibold text-slate-700 text-xs">${formatRp.format(nominalTagihan)}</span>`;
 
             listNamaHtml += `
