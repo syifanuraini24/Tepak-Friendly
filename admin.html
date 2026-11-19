@@ -264,25 +264,37 @@
     </div>
   </div>
 
-  <!-- Modal Edit Nominal & Voucher -->
+  <!-- Modal Edit Nama, Tagihan & Voucher -->
   <div id="modalEditNominal"
     class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 space-y-3">
-      <h3 class="font-bold text-sm text-slate-900">Edit Tagihan & Voucher</h3>
+      <h3 class="font-bold text-sm text-slate-900">✏️ Edit Data, Tagihan & Voucher</h3>
       <p class="text-xs text-slate-500" id="editNamaPesertaLabel">-</p>
       <input type="hidden" id="editRowIndexInput">
+      <input type="hidden" id="editVoucherTerkunciInput">
 
       <div class="space-y-2.5">
         <div>
-          <label class="block text-[11px] font-bold text-slate-600 mb-1">Nominal Tagihan Baru (Rp)</label>
-          <input type="number" id="inputNominalBaru"
-            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Peserta</label>
+          <input type="text" id="inputNamaBaru" placeholder="Nama lengkap / awalan resmi"
+            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-600 mb-1">Kode Voucher (Opsional)</label>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Nominal Tagihan Baru (Rp)</label>
+          <input type="number" id="inputNominalBaru"
+            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+        </div>
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="block text-[11px] font-bold text-slate-600">Kode Voucher</label>
+            <span id="badgeStatusVoucherEdit"
+              class="hidden text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Terpasang
+              🔒</span>
+          </div>
           <input type="text" id="inputVoucherBaru" placeholder="Contoh: HEMAT10"
-            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
-          <span class="block text-[9px] text-slate-400 mt-0.5">Isi jika peserta menggunakan voucher.</span>
+            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono disabled:bg-slate-200/70 disabled:text-slate-600 disabled:cursor-not-allowed">
+          <span id="helperVoucherEdit" class="block text-[9px] text-slate-400 mt-0.5">Kosongkan jika peserta tidak
+            memakai voucher.</span>
         </div>
       </div>
 
@@ -723,17 +735,20 @@
               : '';
 
             let namaColorClass = isLunas ? 'text-emerald-700 font-bold' : (isMenunggu ? 'text-amber-600 font-bold' : 'text-slate-800');
+            const voucherBadgeHtml = p.voucher
+              ? `<span class="inline-block ml-1.5 text-[9px] font-mono font-bold bg-blue-50 text-blue-700 px-1.5 py-0.2 rounded border border-blue-200">${escapeHtml(p.voucher)}</span>`
+              : '';
 
             listNamaHtml += `
               <li class="py-2 px-2.5 border-b border-slate-100 last:border-b-0 flex justify-between items-center text-xs gap-2">
                 <div class="min-w-0 flex-1">
-                  <span class="${namaColorClass} block truncate">${idx + 1}. ${escapeHtml(p.nama)}</span>
+                  <span class="${namaColorClass} truncate inline-flex items-center max-w-full">${idx + 1}. ${escapeHtml(p.nama)}${voucherBadgeHtml}</span>
                 </div>
                 <div class="text-right flex items-center gap-2 shrink-0">
                   <div><span class="block font-mono font-semibold text-slate-700">${formatRp.format(p.tagihan || 0)}</span></div>
                   <div class="flex items-center gap-1">
                     ${actionAccBtn}
-                    <button onclick="bukaModalEditNominal(${p.rowIndex}, '${escapeHtml(p.nama)}', ${p.tagihan || 0})" class="bg-slate-100 p-1.5 rounded-lg border hover:bg-slate-200 transition" title="Edit Tagihan & Voucher">✏️</button>
+                    <button onclick="bukaModalEditNominal(${p.rowIndex})" class="bg-slate-100 p-1.5 rounded-lg border hover:bg-slate-200 transition" title="Edit Nama, Tagihan & Voucher">✏️</button>
                     <button onclick="hapusPemain(${p.rowIndex})" class="bg-rose-50 text-rose-600 p-1.5 rounded-lg border hover:bg-rose-100 transition" title="Hapus">🗑️</button>
                   </div>
                 </div>
@@ -983,11 +998,36 @@
       }
     }
 
-    function bukaModalEditNominal(rowIndex, nama, currentTagihan) {
+    function bukaModalEditNominal(rowIndex) {
+      const p = (cachedDataAdmin.pemain || []).find(item => Number(item.rowIndex) === Number(rowIndex));
+      const namaAwal = p ? String(p.nama || '') : '';
+      const tagihanAwal = p ? parseInt(p.tagihan || 0) : 0;
+      const voucherSudahAda = p && p.voucher ? String(p.voucher).trim().toUpperCase() : '';
+
       document.getElementById('editRowIndexInput').value = rowIndex;
-      document.getElementById('editNamaPesertaLabel').innerText = `Peserta: ${nama}`;
-      document.getElementById('inputNominalBaru').value = currentTagihan;
-      document.getElementById('inputVoucherBaru').value = '';
+      document.getElementById('editNamaPesertaLabel').innerText = `Peserta: ${namaAwal || '-'}`;
+      document.getElementById('inputNamaBaru').value = namaAwal;
+      document.getElementById('inputNominalBaru').value = tagihanAwal;
+
+      const inputVoucher = document.getElementById('inputVoucherBaru');
+      const badgeVoucher = document.getElementById('badgeStatusVoucherEdit');
+      const helperVoucher = document.getElementById('helperVoucherEdit');
+      const hiddenVoucherTerkunci = document.getElementById('editVoucherTerkunciInput');
+
+      if (voucherSudahAda) {
+        hiddenVoucherTerkunci.value = voucherSudahAda;
+        inputVoucher.value = voucherSudahAda;
+        inputVoucher.disabled = true;
+        badgeVoucher.classList.remove('hidden');
+        helperVoucher.innerText = `Voucher "${voucherSudahAda}" sudah terpasang dan dikunci.`;
+      } else {
+        hiddenVoucherTerkunci.value = '';
+        inputVoucher.value = '';
+        inputVoucher.disabled = false;
+        badgeVoucher.classList.add('hidden');
+        helperVoucher.innerText = 'Kosongkan jika peserta tidak memakai voucher.';
+      }
+
       document.getElementById('modalEditNominal').classList.remove('hidden');
     }
 
@@ -997,9 +1037,12 @@
 
     async function simpanNominalBaru(btn) {
       const rowIndex = document.getElementById('editRowIndexInput').value;
+      const namaBaru = document.getElementById('inputNamaBaru').value.trim().replace(/\s+/g, ' ');
       const nominalBaru = document.getElementById('inputNominalBaru').value.trim();
-      const voucherBaru = document.getElementById('inputVoucherBaru').value.trim().toUpperCase();
+      const voucherTerkunci = document.getElementById('editVoucherTerkunciInput').value.trim().toUpperCase();
+      const voucherBaru = voucherTerkunci || document.getElementById('inputVoucherBaru').value.trim().toUpperCase();
 
+      if (!namaBaru) return showCustomWarning("Validasi", "Nama peserta wajib diisi!");
       if (!nominalBaru || isNaN(nominalBaru)) return showCustomWarning("Validasi", "Masukkan nominal angka tagihan yang valid!");
 
       const oldText = btn.innerText;
@@ -1009,13 +1052,19 @@
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'update_tagihan', rowIndex: parseInt(rowIndex), tagihanBaru: parseInt(nominalBaru), voucher: voucherBaru })
+          body: JSON.stringify({
+            action: 'update_tagihan',
+            rowIndex: parseInt(rowIndex),
+            namaBaru: namaBaru,
+            tagihanBaru: parseInt(nominalBaru),
+            voucher: voucherBaru
+          })
         });
         const result = await response.json();
         if (result.status === 'success') {
           tutupModalEditNominal();
           await loadDataAdmin();
-          showCustomWarning("Berhasil", "Tagihan dan catatan voucher berhasil diperbarui tanpa menghapus data sebelumnya!");
+          showCustomWarning("Berhasil", "Nama, tagihan, dan catatan voucher berhasil diperbarui!");
         } else { throw new Error(result.message || 'Gagal memperbarui data.'); }
       } catch (err) { showCustomWarning("Gagal", err.message); }
       finally { btn.innerText = oldText; btn.disabled = false; }
