@@ -156,6 +156,12 @@
             </div>
           </div>
 
+          <div id="rekapSpentPenggunaVoucher"
+            class="bg-white/90 border border-blue-200/70 rounded-xl px-3 py-2 flex items-center justify-between gap-2 text-[11px]">
+            <span class="text-slate-600 font-semibold">Total Spent Voucher:</span>
+            <span id="totalSpentFilterVoucher" class="font-mono font-extrabold text-blue-700">Rp 0</span>
+          </div>
+
           <div id="containerPenggunaVoucher" class="space-y-1.5 max-h-60 overflow-y-auto">
             <span class="text-[11px] text-slate-400">Memuat daftar pengguna voucher...</span>
           </div>
@@ -196,7 +202,7 @@
           class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
           <div>
             <h3 class="font-extrabold text-sm text-slate-900">🎁 Manajemen &amp; Kirim Voucher</h3>
-            <p class="text-[11px] text-slate-500">Atur penerima yang berhak, pantau kuota, dan kirim voucher.</p>
+            <p class="text-[11px] text-slate-500">Atur penerima yang berhak, pantau kuota &amp; spent, dan kirim voucher.</p>
           </div>
           <div class="flex items-center gap-1.5 w-full sm:w-auto">
             <button type="button" onclick="sinkronKuotaVoucher(this)"
@@ -570,8 +576,7 @@
             <input type="checkbox" id="chkKembalikanKuotaVoucherHapus" checked class="mt-0.5 rounded border-rose-300">
             <span>Kembalikan kuota voucher jika peserta memakai voucher</span>
           </label>
-          <p class="text-[9px] text-rose-600 leading-snug">Peserta dalam rentang akan ditandai Dihapus 🔴 dan slot
-            jadwal akan terbuka kembali.</p>
+          <p class="text-[9px] text-rose-600 leading-snug">Peserta dalam rentang akan ditandai Dihapus 🔴 dan slot jadwal akan terbuka kembali.</p>
         </div>
       </div>
 
@@ -875,6 +880,83 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    }
+
+    function hitungSpentVoucherItem_(voucherObj, jadwalObj, pemainObj) {
+      const statusStr = String(pemainObj?.status || '');
+      if (statusStr.includes('Dihapus') || statusStr.includes('Expired')) {
+        return 0;
+      }
+
+      const htmNormal = Math.max(0, parseInt(jadwalObj?.htm ?? pemainObj?.tagihan ?? 0, 10) || 0);
+      const tagihanAktual = Math.max(0, parseInt(pemainObj?.tagihan ?? htmNormal, 10) || 0);
+
+      if (voucherObj) {
+        const tipe = String(voucherObj.tipe || '').toLowerCase();
+        if (tipe === 'persen') {
+          const persen = Math.max(0, Math.min(100, parseFloat(voucherObj.persen ?? voucherObj.nilai ?? 0) || 0));
+          const potongan = Math.round((htmNormal * persen) / 100);
+          return Math.min(htmNormal, potongan);
+        }
+        const nilaiNominal = Math.max(0, parseInt(voucherObj.nilai || 0, 10) || 0);
+        if (nilaiNominal > 0) {
+          return Math.min(htmNormal, nilaiNominal);
+        }
+      }
+
+      return Math.max(0, htmNormal - tagihanAktual);
+    }
+
+    function getInfoSpentVoucher_(kodeVoucher) {
+      const kodeNorm = String(kodeVoucher || '').trim().toUpperCase();
+      const voucherObj = (cachedDataAdmin.voucherList || []).find(
+        v => String(v.kode || '').trim().toUpperCase() === kodeNorm
+      );
+      const jadwalMap = {};
+      (cachedDataAdmin.jadwal || []).forEach(j => {
+        jadwalMap[String(j.id)] = j;
+      });
+      const pemainMap = {};
+      (cachedDataAdmin.pemain || []).forEach(p => {
+        pemainMap[Number(p.rowIndex)] = p;
+      });
+
+      const pemakaiList = Array.isArray(voucherObj?.pemakaiVoucher) && voucherObj.pemakaiVoucher.length > 0
+        ? voucherObj.pemakaiVoucher
+        : (cachedDataAdmin.pemain || [])
+            .filter(p => String(p.voucher || '').trim().toUpperCase() === kodeNorm)
+            .map(p => ({
+              rowIndex: p.rowIndex,
+              nama: p.nama,
+              jadwalId: p.jadwalId,
+              jadwalInfo: p.jadwalId,
+              status: p.status,
+              tagihan: p.tagihan
+            }));
+
+      let totalSpent = 0;
+      let jumlahAktif = 0;
+      const spentByRowIndex = {};
+
+      pemakaiList.forEach(item => {
+        const pFull = pemainMap[Number(item.rowIndex)] || item;
+        const jObj = jadwalMap[String(pFull.jadwalId || item.jadwalId || '')];
+        const statusStr = String(item.status || pFull.status || '');
+        const isAktif = !statusStr.includes('Dihapus') && !statusStr.includes('Expired');
+        const spent = isAktif ? hitungSpentVoucherItem_(voucherObj, jObj, pFull) : 0;
+
+        if (isAktif) jumlahAktif++;
+        totalSpent += spent;
+        if (item.rowIndex !== undefined) {
+          spentByRowIndex[Number(item.rowIndex)] = spent;
+        }
+      });
+
+      return {
+        totalSpent,
+        jumlahAktif,
+        spentByRowIndex
+      };
     }
 
     function cekSesiLogin() {
@@ -1329,13 +1411,19 @@
       const container = document.getElementById('containerPenggunaVoucher');
       const subInfo = document.getElementById('subInfoPenggunaVoucher');
       const selectFilter = document.getElementById('filterKodeVoucher');
+      const totalSpentEl = document.getElementById('totalSpentFilterVoucher');
       if (!container || !subInfo || !selectFilter) return;
 
       const pemainList = cachedDataAdmin.pemain || [];
       const jadwalList = cachedDataAdmin.jadwal || [];
+      const voucherList = cachedDataAdmin.voucherList || [];
       const mapJadwal = {};
       jadwalList.forEach(j => {
         mapJadwal[String(j.id)] = j;
+      });
+      const mapVoucher = {};
+      voucherList.forEach(v => {
+        mapVoucher[String(v.kode || '').trim().toUpperCase()] = v;
       });
 
       penggunaVoucherData = pemainList
@@ -1343,15 +1431,18 @@
         .map(p => {
           const kode = String(p.voucher).trim().toUpperCase();
           const j = mapJadwal[String(p.jadwalId)] || {};
+          const vObj = mapVoucher[kode];
           const tglSingkat = j.tanggal
             ? new Date(j.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
             : '-';
+          const spent = hitungSpentVoucherItem_(vObj, j, p);
           return {
             rowIndex: p.rowIndex,
             nama: p.nama || '-',
             kode: kode,
             jadwalLabel: j.infoRaw ? `${j.infoRaw} (${tglSingkat})` : (p.jadwalId || '-'),
             tagihan: parseInt(p.tagihan || 0, 10),
+            spent: spent,
             status: p.status || '-'
           };
         });
@@ -1369,6 +1460,11 @@
         ? penggunaVoucherData.filter(item => item.kode === activeKode)
         : penggunaVoucherData;
 
+      const totalSpentFiltered = filtered.reduce((acc, item) => acc + (item.spent || 0), 0);
+      if (totalSpentEl) {
+        totalSpentEl.innerText = `${formatRp.format(totalSpentFiltered)} (${filtered.length} pemakai)`;
+      }
+
       if (penggunaVoucherData.length === 0) {
         subInfo.innerText = 'Belum ada peserta yang tercatat memakai voucher';
         container.innerHTML = '<div class="text-[11px] text-slate-400 italic py-1">Belum ada pengguna voucher.</div>';
@@ -1376,8 +1472,8 @@
       }
 
       subInfo.innerText = activeKode
-        ? `${filtered.length} peserta memakai kode ${activeKode}`
-        : `Total ${penggunaVoucherData.length} pemakaian voucher dari ${uniqueCodes.length} kode`;
+        ? `${filtered.length} peserta memakai kode ${activeKode} • Spent ${formatRp.format(totalSpentFiltered)}`
+        : `Total ${penggunaVoucherData.length} pemakaian voucher dari ${uniqueCodes.length} kode • Spent ${formatRp.format(totalSpentFiltered)}`;
 
       container.innerHTML = filtered.map(item => {
         const tagihanText = item.tagihan === 0
@@ -1390,6 +1486,7 @@
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-bold text-slate-900 break-words">${escapeHtml(item.nama)}</span>
                 <span class="text-[10px] font-mono font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-200 break-all">🎟️ ${escapeHtml(item.kode)}</span>
+                <span class="text-[10px] font-mono font-bold bg-amber-50 text-amber-800 px-2 py-0.5 rounded-md border border-amber-200">Spent: ${formatRp.format(item.spent)}</span>
               </div>
               <p class="text-[10px] text-slate-500 truncate">📍 ${escapeHtml(item.jadwalLabel)}</p>
             </div>
@@ -1415,26 +1512,30 @@
         return showCustomWarning("Kosong", "Tidak ada data pengguna voucher untuk disalin.");
       }
 
+      const totalSpentFiltered = filtered.reduce((acc, item) => acc + (item.spent || 0), 0);
       const judul = activeKode ? `🎟️ *PENGGUNA VOUCHER: ${activeKode}*` : `🎟️ *REKAP PENGGUNA VOUCHER*`;
-      const lines = filtered.map((item, idx) => `${idx + 1}. ${item.nama} — ${item.kode} (${item.jadwalLabel})`);
-      const text = `${judul}\n\n${lines.join('\n')}`;
+      const lines = filtered.map((item, idx) => `${idx + 1}. ${item.nama} — ${item.kode} (${item.jadwalLabel}) [Spent: ${formatRp.format(item.spent)}]`);
+      const text = `${judul}\nTotal Pemakai: ${filtered.length} | Total Spent: ${formatRp.format(totalSpentFiltered)}\n\n${lines.join('\n')}`;
 
       navigator.clipboard.writeText(text).then(() => {
         showCustomWarning("Berhasil", "Daftar pengguna voucher berhasil disalin ke clipboard!");
       });
     }
 
-    function renderDaftarPemakaiVoucherKartu(v) {
+    function renderDaftarPemakaiVoucherKartu(v, spentInfo) {
       const list = v.pemakaiVoucher || [];
       if (list.length === 0) {
         return `<div class="text-[11px] text-slate-400 italic py-1.5 px-2.5 bg-slate-50 rounded-xl border border-slate-100">Belum ada peserta tercatat memakai voucher ini.</div>`;
       }
+
+      const spentByRow = spentInfo?.spentByRowIndex || {};
 
       return list.map(p => {
         const isDihapusAtauExp = p.status && (String(p.status).includes('Dihapus') || String(p.status).includes('Expired'));
         const badgeStatus = isDihapusAtauExp
           ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">${escapeHtml(p.status)}</span>`
           : `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">${escapeHtml(p.status || 'Aktif')}</span>`;
+        const itemSpent = isDihapusAtauExp ? 0 : (spentByRow[Number(p.rowIndex)] || 0);
 
         return `
           <div class="flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px]">
@@ -1442,6 +1543,7 @@
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-bold text-slate-800 truncate">${escapeHtml(p.nama || '-')}</span>
                 ${badgeStatus}
+                <span class="text-[10px] font-mono font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">Spent: ${formatRp.format(itemSpent)}</span>
               </div>
               <div class="text-[10px] text-slate-500 truncate">${escapeHtml(p.jadwalInfo || p.jadwalId || '-')}</div>
             </div>
@@ -1574,6 +1676,7 @@
               : 'Semua peserta (bebas)';
             const jumlahPemakai = (v.pemakaiVoucher || []).length;
             const terpakaiAktifLabel = v.terpakaiAktif !== undefined ? ` (Aktif: ${v.terpakaiAktif})` : '';
+            const spentInfo = getInfoSpentVoucher_(v.kode);
             const statusBadgeClass = v.status === 'Aktif'
               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
               : (v.status === 'Belum Berlaku'
@@ -1592,16 +1695,17 @@
               <div class="bg-slate-50 rounded-xl p-2.5 text-xs space-y-1 border border-slate-100 text-slate-600">
                 <div class="flex justify-between gap-2"><span>Diskon:</span><span class="font-bold text-slate-800">${v.tipe === 'persen' ? v.persen + '%' : 'Rp ' + Number(v.nilai).toLocaleString('id-ID')}</span></div>
                 <div class="flex justify-between gap-2"><span>Terpakai / Kuota:</span><span class="font-bold text-slate-800">${v.terpakai} / ${v.kuota === 0 ? '∞' : v.kuota}<span class="text-[10px] font-semibold text-slate-500">${terpakaiAktifLabel}</span></span></div>
+                <div class="flex justify-between gap-2"><span>Total Spent Voucher:</span><span class="font-mono font-extrabold text-blue-700">${formatRp.format(spentInfo.totalSpent)} <span class="text-[10px] font-sans font-semibold text-slate-500">(${spentInfo.jumlahAktif} pakai)</span></span></div>
                 <div class="flex justify-between gap-2"><span>Masa Berlaku:</span><span class="font-bold text-rose-600 text-right">${escapeHtml(v.kadaluwarsa)}</span></div>
                 <div class="flex justify-between gap-2 pt-1 border-t border-slate-200/60"><span>Hak Pakai:</span><span class="font-semibold text-slate-800 text-right break-words max-w-[65%]">${penerimaInfo}</span></div>
               </div>
               <div class="space-y-1.5 pt-1 border-t border-slate-100">
                 <div class="flex items-center justify-between text-[11px]">
-                  <span class="font-bold text-slate-700">Daftar Pemakai (${jumlahPemakai})</span>
+                  <span class="font-bold text-slate-700">Daftar Pemakai (${jumlahPemakai}) • Spent: ${formatRp.format(spentInfo.totalSpent)}</span>
                   <span class="text-[10px] text-slate-400">Hapus jika salah input / testing</span>
                 </div>
                 <div class="space-y-1.5 max-h-40 overflow-y-auto pr-0.5">
-                  ${renderDaftarPemakaiVoucherKartu(v)}
+                  ${renderDaftarPemakaiVoucherKartu(v, spentInfo)}
                 </div>
               </div>
               <button type="button" onclick="bukaModalKirimVoucher('${escapeHtml(v.kode)}', '${escapeHtml(v.kadaluwarsa)}')" class="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs py-2 rounded-xl border border-blue-200 transition">✉️ Kirim Voucher ke Email</button>
