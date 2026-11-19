@@ -884,6 +884,11 @@
         .replace(/'/g, '&#39;');
     }
 
+    function isPesertaAktif_(p) {
+      const st = String(p?.status || '').toLowerCase();
+      return Boolean(st) && !st.includes('dihapus') && !st.includes('expired');
+    }
+
     function bersihkanKodeVoucher_(raw) {
       if (!raw) return '';
       return String(raw)
@@ -893,8 +898,7 @@
     }
 
     function hitungSpentVoucherItem_(voucherObj, jadwalObj, pemainObj) {
-      const statusStr = String(pemainObj?.status || '');
-      if (statusStr.includes('Dihapus') || statusStr.includes('Expired')) {
+      if (!isPesertaAktif_(pemainObj)) {
         return 0;
       }
 
@@ -933,7 +937,7 @@
       const pemakaiList = Array.isArray(voucherObj?.pemakaiVoucher) && voucherObj.pemakaiVoucher.length > 0
         ? voucherObj.pemakaiVoucher
         : (cachedDataAdmin.pemain || [])
-          .filter(p => bersihkanKodeVoucher_(p.voucher) === kodeNorm)
+          .filter(p => bersihkanKodeVoucher_(p.voucher) === kodeNorm && isPesertaAktif_(p))
           .map(p => ({
             rowIndex: p.rowIndex,
             nama: p.nama,
@@ -950,8 +954,7 @@
       pemakaiList.forEach(item => {
         const pFull = pemainMap[Number(item.rowIndex)] || item;
         const jObj = jadwalMap[String(pFull.jadwalId || item.jadwalId || '')];
-        const statusStr = String(item.status || pFull.status || '');
-        const isAktif = !statusStr.includes('Dihapus') && !statusStr.includes('Expired');
+        const isAktif = isPesertaAktif_(pFull) && isPesertaAktif_(item);
         const spent = isAktif ? hitungSpentVoucherItem_(voucherObj, jObj, pFull) : 0;
 
         if (isAktif) jumlahAktif++;
@@ -1347,8 +1350,8 @@
     function hitungRekapKehadiran(pemainList) {
       const mapHadir = {};
       (pemainList || []).forEach(p => {
-        if (!p.nama || !p.status) return;
-        if (!p.status.includes('Lunas')) return;
+        if (!p.nama || !isPesertaAktif_(p)) return;
+        if (!String(p.status).includes('Lunas')) return;
 
         const rawName = String(p.nama).trim();
         if (!rawName) return;
@@ -1444,7 +1447,7 @@
       });
 
       penggunaVoucherData = pemainList
-        .filter(p => p.status && !String(p.status).includes('Dihapus') && bersihkanKodeVoucher_(p.voucher) !== '')
+        .filter(p => isPesertaAktif_(p) && bersihkanKodeVoucher_(p.voucher) !== '')
         .map(p => {
           const kode = bersihkanKodeVoucher_(p.voucher);
           const j = mapJadwal[String(p.jadwalId)] || {};
@@ -1538,7 +1541,7 @@
     }
 
     function renderDaftarPemakaiVoucherKartu(v, spentInfo) {
-      const list = v.pemakaiVoucher || [];
+      const list = (v.pemakaiVoucher || []).filter(p => isPesertaAktif_(p));
       if (list.length === 0) {
         return `<div class="text-[11px] text-slate-400 italic py-1.5 px-2.5 bg-slate-50 rounded-xl border border-slate-100">Belum ada peserta tercatat memakai voucher ini.</div>`;
       }
@@ -1546,11 +1549,8 @@
       const spentByRow = spentInfo?.spentByRowIndex || {};
 
       return list.map(p => {
-        const isDihapusAtauExp = p.status && (String(p.status).includes('Dihapus') || String(p.status).includes('Expired'));
-        const badgeStatus = isDihapusAtauExp
-          ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">${escapeHtml(p.status)}</span>`
-          : `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">${escapeHtml(p.status || 'Aktif')}</span>`;
-        const itemSpent = isDihapusAtauExp ? 0 : (spentByRow[Number(p.rowIndex)] || 0);
+        const badgeStatus = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">${escapeHtml(p.status || 'Aktif')}</span>`;
+        const itemSpent = spentByRow[Number(p.rowIndex)] || 0;
         const kodeBersih = bersihkanKodeVoucher_(v.kode);
 
         return `
@@ -1616,7 +1616,7 @@
       const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
       showConfirmModal(
         "Sinkronkan Kuota Voucher",
-        "Samakan nilai Terpakai di Master_Voucher dengan jumlah pemakaian aktif (non-Dihapus/non-Expired) di Data_Mabar?",
+        "Samakan nilai Terpakai di Master_Voucher dengan jumlah pemakaian aktif di Data_Mabar?",
         "Ya, Sinkronkan",
         "bg-blue-600 hover:bg-blue-700",
         async () => {
@@ -1672,6 +1672,7 @@
         let totalLunasNum = 0, totalPendingNum = 0;
 
         (data.pemain || []).forEach(item => {
+          if (!isPesertaAktif_(item)) return;
           const nominal = parseInt(item.tagihan || 0);
           if (item.status && item.status.includes('Lunas')) totalLunasNum += nominal;
           else if (item.status && (item.status.includes('Menunggu') || item.status.includes('Pending'))) totalPendingNum += nominal;
@@ -1692,7 +1693,8 @@
             const penerimaInfo = v.penerima && String(v.penerima).trim() !== ''
               ? escapeHtml(v.penerima)
               : 'Semua peserta (bebas)';
-            const jumlahPemakai = (v.pemakaiVoucher || []).length;
+            const pemakaiAktif = (v.pemakaiVoucher || []).filter(p => isPesertaAktif_(p));
+            const jumlahPemakai = pemakaiAktif.length;
             const terpakaiAktifLabel = v.terpakaiAktif !== undefined ? ` (Aktif: ${v.terpakaiAktif})` : '';
             const spentInfo = getInfoSpentVoucher_(kodeBersih);
             const statusBadgeClass = v.status === 'Aktif'
@@ -1723,7 +1725,7 @@
                   <span class="text-[10px] text-slate-400">Hapus jika salah input / testing</span>
                 </div>
                 <div class="space-y-1.5 max-h-40 overflow-y-auto pr-0.5">
-                  ${renderDaftarPemakaiVoucherKartu(v, spentInfo)}
+                  ${renderDaftarPemakaiVoucherKartu({ ...v, pemakaiVoucher: pemakaiAktif }, spentInfo)}
                 </div>
               </div>
               <button type="button" onclick="bukaModalKirimVoucher('${escapeHtml(kodeBersih)}', '${escapeHtml(v.kadaluwarsa)}')" class="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs py-2 rounded-xl border border-blue-200 transition">✉️ Kirim Voucher ke Email</button>
@@ -1745,7 +1747,7 @@
         let countAktif = 0, countNonaktif = 0;
 
         jadwalList.forEach(j => {
-          const pesertaJadwal = pemainList.filter(p => String(p.jadwalId) === String(j.id) && p.status && !p.status.includes('Dihapus'));
+          const pesertaJadwal = pemainList.filter(p => String(p.jadwalId) === String(j.id) && isPesertaAktif_(p));
           const isNonaktif = j.status && j.status.toString().toLowerCase().includes('nonaktif');
           const isMenungguAcc = String(j.statusAcc || 'Disetujui').toLowerCase() === 'menunggu acc';
 
@@ -2036,7 +2038,7 @@
 
     function getPesertaAktifJadwal_(jadwalId) {
       return (cachedDataAdmin.pemain || []).filter(
-        p => String(p.jadwalId) === String(jadwalId) && p.status && !String(p.status).includes('Dihapus')
+        p => String(p.jadwalId) === String(jadwalId) && isPesertaAktif_(p)
       );
     }
 
@@ -2718,7 +2720,7 @@
       const jadwalItem = (cachedDataAdmin.jadwal || []).find(j => String(j.id) === String(jadwalId));
       if (!jadwalItem) return showCustomWarning("Error", "Data jadwal tidak ditemukan.");
 
-      const pesertaJadwal = (cachedDataAdmin.pemain || []).filter(p => String(p.jadwalId) === String(jadwalId) && p.status && !p.status.includes('Dihapus'));
+      const pesertaJadwal = (cachedDataAdmin.pemain || []).filter(p => String(p.jadwalId) === String(jadwalId) && isPesertaAktif_(p));
       const totalKuota = parseInt(jadwalItem.kuota) || 12;
 
       let displayTgl = jadwalItem.tanggal || '-';
