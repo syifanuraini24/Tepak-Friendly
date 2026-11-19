@@ -9,18 +9,19 @@
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="bg-slate-100 min-h-screen p-3 sm:p-4 font-sans text-slate-800 antialiased pb-12">
+<body class="bg-slate-100 min-h-screen p-2.5 sm:p-4 font-sans text-slate-800 antialiased pb-12 overflow-x-hidden">
 
-  <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 space-y-4">
+  <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-3.5 sm:p-5 space-y-4">
 
     <!-- Header Superadmin -->
-    <div class="flex justify-between items-center border-b border-slate-100 pb-3.5">
-      <div>
-        <h1 class="text-base font-extrabold text-slate-900">🛠️ Panel Superadmin Tepak Friendly</h1>
-        <p class="text-[11px] text-slate-500">Kelola jadwal, ACC, peserta, kehadiran, rekap dana, voucher & user</p>
+    <div class="flex justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3.5">
+      <div class="min-w-0">
+        <h1 class="text-sm sm:text-base font-extrabold text-slate-900 truncate">🛠️ Panel Superadmin Tepak Friendly</h1>
+        <p class="text-[11px] text-slate-500 leading-snug">Kelola jadwal, ACC, peserta, kehadiran, rekap dana, voucher &
+          user</p>
       </div>
       <div id="statusOnline"
-        class="hidden flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">
+        class="hidden flex items-center gap-1 bg-emerald-50 text-emerald-700 text-[10px] sm:text-[11px] font-bold px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">
         <span>Online 🟢</span>
       </div>
     </div>
@@ -40,7 +41,7 @@
             onkeydown="if(event.key==='Enter') login()"
             class="w-full p-3 pr-10 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
           <button type="button" onclick="togglePassVisibility('passInput')"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold">
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold p-1">
             👁️
           </button>
         </div>
@@ -56,19 +57,19 @@
 
       <!-- Bar Sesi Ringkas -->
       <div
-        class="flex flex-wrap justify-between items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200/80">
-        <span class="text-[11px] font-bold text-slate-600" id="labelSesiUser">Sesi Aktif Superadmin</span>
-        <div class="flex gap-1.5">
+        class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 bg-slate-50 px-3 py-2.5 rounded-xl border border-slate-200/80">
+        <span class="text-[11px] font-bold text-slate-600 truncate" id="labelSesiUser">Sesi Aktif Superadmin</span>
+        <div class="flex flex-wrap gap-1.5">
           <button type="button" onclick="bukaModalGantiPass()"
-            class="bg-amber-50 hover:bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-amber-200 transition">
-            🔑 Ganti Password
+            class="flex-1 sm:flex-initial bg-amber-50 hover:bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-amber-200 transition text-center">
+            🔑 Ganti Pass
           </button>
           <button type="button" onclick="loadDataAdmin()"
-            class="bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-slate-200 transition shadow-2xs">
+            class="flex-1 sm:flex-initial bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-slate-200 transition shadow-2xs text-center">
             🔄 Refresh
           </button>
           <button type="button" onclick="logout()"
-            class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-rose-200 transition">
+            class="flex-1 sm:flex-initial bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-rose-200 transition text-center">
             🚪 Keluar
           </button>
         </div>
@@ -77,15 +78,15 @@
       <!-- Segmented Tab Utama -->
       <div class="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
         <button type="button" onclick="switchTabMenu('jadwal')" id="btnTabJadwalMenu"
-          class="bg-slate-900 text-white font-bold text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1 shadow-xs">
+          class="bg-slate-900 text-white font-bold text-[11px] sm:text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1 shadow-xs">
           <span>📅</span> Jadwal
         </button>
         <button type="button" onclick="switchTabMenu('voucher')" id="btnTabVoucherMenu"
-          class="bg-transparent hover:bg-white/60 text-slate-600 font-bold text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1">
+          class="bg-transparent hover:bg-white/60 text-slate-600 font-bold text-[11px] sm:text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1">
           <span>🎁</span> Voucher
         </button>
         <button type="button" onclick="switchTabMenu('users')" id="btnTabUsersMenu"
-          class="bg-transparent hover:bg-white/60 text-slate-600 font-bold text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1">
+          class="bg-transparent hover:bg-white/60 text-slate-600 font-bold text-[11px] sm:text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1">
           <span>👥</span> Users
         </button>
       </div>
@@ -95,16 +96,17 @@
 
         <!-- Ringkasan Dana -->
         <div class="grid grid-cols-2 gap-2.5">
-          <div class="bg-blue-50/70 border border-blue-100 rounded-2xl p-3 text-center">
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide block mb-0.5">Total Dana Masuk
+          <div class="bg-blue-50/70 border border-blue-100 rounded-2xl p-3 text-center min-w-0">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide block mb-0.5 truncate">Total Dana
+              Masuk
               (Lunas)</span>
-            <span class="text-sm sm:text-base font-extrabold text-blue-700 tracking-tight"
+            <span class="text-xs sm:text-base font-extrabold text-blue-700 tracking-tight block truncate"
               id="totalDanaLunas">Memuat...</span>
           </div>
-          <div class="bg-amber-50/70 border border-amber-100 rounded-2xl p-3 text-center">
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide block mb-0.5">Potensi
+          <div class="bg-amber-50/70 border border-amber-100 rounded-2xl p-3 text-center min-w-0">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wide block mb-0.5 truncate">Potensi
               Pending</span>
-            <span class="text-sm sm:text-base font-extrabold text-amber-600 tracking-tight"
+            <span class="text-xs sm:text-base font-extrabold text-amber-600 tracking-tight block truncate"
               id="totalDanaPending">Memuat...</span>
           </div>
         </div>
@@ -112,9 +114,9 @@
         <!-- Rekap Kehadiran Peserta -->
         <div class="bg-slate-50/90 border border-slate-200 rounded-2xl p-3.5 space-y-2.5">
           <div class="flex justify-between items-center gap-2">
-            <div>
-              <h3 class="text-xs font-extrabold text-slate-900">🏅 Rekap Kehadiran Peserta (Lunas)</h3>
-              <p class="text-[10px] text-slate-500" id="subInfoKehadiran">Menghitung riwayat kehadiran...</p>
+            <div class="min-w-0">
+              <h3 class="text-xs font-extrabold text-slate-900 truncate">🏅 Rekap Kehadiran Peserta (Lunas)</h3>
+              <p class="text-[10px] text-slate-500 truncate" id="subInfoKehadiran">Menghitung riwayat kehadiran...</p>
             </div>
             <button type="button" onclick="toggleSemuaKehadiran()" id="btnToggleKehadiran"
               class="hidden bg-white hover:bg-slate-100 text-slate-700 font-bold text-[10px] px-2.5 py-1 rounded-lg border border-slate-200 transition shrink-0">
@@ -135,7 +137,8 @@
 
         <!-- Sub-Tab Jadwal + Tombol Tambah Jadwal Cepat -->
         <div class="space-y-3">
-          <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
+          <div
+            class="flex flex-wrap sm:flex-nowrap items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
             <button type="button" onclick="gantiTabJadwal('aktif')" id="tabJadwalAktif"
               class="flex-1 bg-white text-slate-900 font-bold text-[11px] sm:text-xs py-2 px-2 rounded-lg shadow-2xs transition">
               🟢 Aktif <span id="badgeCountAktif" class="text-[10px] text-slate-400 font-semibold"></span>
@@ -145,7 +148,7 @@
               🔴 Riwayat <span id="badgeCountNonaktif" class="text-[10px] text-slate-400 font-semibold"></span>
             </button>
             <button type="button" onclick="bukaModalTambahJadwal()"
-              class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] sm:text-xs py-2 px-3 rounded-lg shadow-2xs transition shrink-0 flex items-center gap-1">
+              class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] sm:text-xs py-2 px-3 rounded-lg shadow-2xs transition shrink-0 flex items-center justify-center gap-1">
               <span>➕</span> Jadwal
             </button>
           </div>
@@ -163,13 +166,14 @@
 
       <!-- KONTEN TAB: VOUCHER -->
       <div id="wrapperTabVoucher" class="space-y-4 hidden">
-        <div class="flex justify-between items-center bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+        <div
+          class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
           <div>
             <h3 class="font-extrabold text-sm text-slate-900">🎁 Manajemen & Kirim Voucher</h3>
             <p class="text-[11px] text-slate-500">Buat, pantau kuota, dan kirim email voucher ke peserta.</p>
           </div>
           <button type="button" onclick="bukaModalTambahVoucher()"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition shadow-xs shrink-0">
+            class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition shadow-xs shrink-0 text-center">
             ➕ Buat Voucher
           </button>
         </div>
@@ -181,13 +185,14 @@
 
       <!-- KONTEN TAB: KELOLA USER -->
       <div id="wrapperTabUsers" class="space-y-4 hidden">
-        <div class="flex justify-between items-center bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+        <div
+          class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
           <div>
             <h3 class="font-extrabold text-sm text-slate-900">👥 Kelola Akun Admin & Host</h3>
             <p class="text-[11px] text-slate-500">Buat akun baru, atur status aktif, atau reset password awal.</p>
           </div>
           <button type="button" onclick="bukaModalTambahUser()"
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition shadow-xs shrink-0">
+            class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition shadow-xs shrink-0 text-center">
             ➕ Tambah User
           </button>
         </div>
@@ -202,12 +207,12 @@
 
   <!-- Modal Tambah User Admin -->
   <div id="modalTambahUser"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-100 pb-2">
         <h3 class="font-bold text-sm text-slate-900">➕ Buat Akun Admin / Host</h3>
         <button type="button" onclick="tutupModalTambahUser()"
-          class="text-slate-400 hover:text-slate-700 text-sm font-bold">✕</button>
+          class="text-slate-400 hover:text-slate-700 text-sm font-bold p-1">✕</button>
       </div>
       <div class="space-y-2.5 text-xs">
         <div>
@@ -244,12 +249,12 @@
 
   <!-- Modal Reset Password User -->
   <div id="modalResetPassUser"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-100 pb-2">
         <h3 class="font-bold text-sm text-slate-900">🔄 Reset Password Awal</h3>
         <button type="button" onclick="tutupModalResetPassUser()"
-          class="text-slate-400 hover:text-slate-700 text-sm font-bold">✕</button>
+          class="text-slate-400 hover:text-slate-700 text-sm font-bold p-1">✕</button>
       </div>
       <p class="text-xs text-slate-500" id="resetPassUserLabel">-</p>
       <input type="hidden" id="resetPassTargetUserId">
@@ -271,12 +276,12 @@
 
   <!-- Modal Ganti Password -->
   <div id="modalGantiPass"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-100 pb-2">
         <h3 class="font-bold text-sm text-slate-900">🔑 Ganti Password Akun</h3>
         <button type="button" onclick="tutupModalGantiPass()"
-          class="text-slate-400 hover:text-slate-700 text-sm font-bold">✕</button>
+          class="text-slate-400 hover:text-slate-700 text-sm font-bold p-1">✕</button>
       </div>
       <p id="infoWajibGantiPass"
         class="hidden text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-2.5">
@@ -311,10 +316,11 @@
 
   <!-- Modal Konfirmasi Custom -->
   <div id="customModal"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Konfirmasi Tindakan</h3>
-      <p id="modalDesc" class="text-xs text-slate-600">Apakah kamu yakin ingin melanjutkan tindakan ini?</p>
+      <p id="modalDesc" class="text-xs text-slate-600 leading-relaxed">Apakah kamu yakin ingin melanjutkan tindakan ini?
+      </p>
       <div class="flex gap-2 pt-2">
         <button type="button" id="modalBtnCancel"
           class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition">Batal</button>
@@ -327,15 +333,15 @@
 
   <!-- Modal Tambah Jadwal Cepat -->
   <div id="modalTambahJadwal"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-100 pb-2">
         <h3 class="font-bold text-sm text-slate-900">➕ Tambah Jadwal Mabar</h3>
         <button type="button" onclick="tutupModalTambahJadwal()"
-          class="text-slate-400 hover:text-slate-700 text-sm font-bold">✕</button>
+          class="text-slate-400 hover:text-slate-700 text-sm font-bold p-1">✕</button>
       </div>
       <div class="space-y-2.5 text-xs">
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">ID Jadwal</label>
             <input type="text" id="addJadwalId" placeholder="MABAR-01"
@@ -352,7 +358,7 @@
           <input type="text" id="addJadwalInfo" placeholder="Contoh: Kawal Sport Center"
             class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
         </div>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <div>
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Jam Main</label>
             <input type="text" id="addJadwalJam" placeholder="19:00 - 22:00"
@@ -387,8 +393,8 @@
 
   <!-- Modal ACC Pembayaran (Seamless) -->
   <div id="modalAccPembayaran"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 space-y-3">
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <h3 class="font-bold text-sm text-slate-900">✅ Konfirmasi ACC Pembayaran</h3>
       <p class="text-xs text-slate-500" id="accNamaPesertaLabel">-</p>
       <input type="hidden" id="accRowIndexInput">
@@ -415,8 +421,8 @@
 
   <!-- Modal Edit Nama, Tagihan & Voucher -->
   <div id="modalEditNominal"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-5 space-y-3">
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <h3 class="font-bold text-sm text-slate-900">✏️ Edit Data, Tagihan & Voucher</h3>
       <p class="text-xs text-slate-500" id="editNamaPesertaLabel">-</p>
       <input type="hidden" id="editRowIndexInput">
@@ -434,15 +440,16 @@
             class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
         </div>
         <div>
-          <div class="flex justify-between items-center mb-1">
+          <div class="flex justify-between items-center gap-1 mb-1">
             <label class="block text-[11px] font-bold text-slate-600">Kode Voucher</label>
             <span id="badgeStatusVoucherEdit"
-              class="hidden text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Terpasang
-              🔒</span>
+              class="hidden text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">🎟️
+              Pakai Voucher</span>
           </div>
           <input type="text" id="inputVoucherBaru" placeholder="Contoh: HEMAT10"
             class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono disabled:bg-slate-200/70 disabled:text-slate-600 disabled:cursor-not-allowed">
-          <span id="helperVoucherEdit" class="block text-[9px] text-slate-400 mt-0.5">Kosongkan jika peserta tidak
+          <span id="helperVoucherEdit" class="block text-[9px] text-slate-400 mt-0.5 leading-snug">Kosongkan jika
+            peserta tidak
             memakai voucher.</span>
         </div>
       </div>
@@ -458,20 +465,20 @@
 
   <!-- Modal Edit Jadwal -->
   <div id="modalEditJadwal"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <h3 class="font-bold text-sm text-slate-900">✏️ Edit Jadwal Mabar</h3>
       <p class="text-[10px] text-slate-500 bg-slate-100 px-2 py-1 rounded font-mono inline-block"
         id="editJadwalLabelId">-</p>
       <input type="hidden" id="editJadwalId">
       <div class="space-y-2 text-xs">
-        <div class="grid grid-cols-2 gap-2">
-          <div class="col-span-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div class="sm:col-span-2">
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Tanggal</label>
             <input type="date" id="editJadwalTanggal"
               class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
           </div>
-          <div class="col-span-2">
+          <div class="sm:col-span-2">
             <label class="block text-[11px] font-bold text-slate-600 mb-1">Lokasi / GOR</label>
             <input type="text" id="editJadwalInfo" class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
           </div>
@@ -512,18 +519,18 @@
 
   <!-- Modal Kirim Voucher Bulk -->
   <div id="modalKirimVoucher"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <h3 class="font-bold text-sm text-slate-900">✉️ Kirim Voucher ke Email</h3>
-      <p class="text-xs text-slate-500">Kode: <span id="labelKodeVoucher"
+      <p class="text-xs text-slate-500 leading-relaxed">Kode: <span id="labelKodeVoucher"
           class="font-bold text-blue-600 font-mono"></span> | Exp: <span id="labelKadaluwarsa"
           class="text-rose-600 font-bold"></span></p>
       <input type="hidden" id="inputKodeTarget">
       <input type="hidden" id="inputExpiredTarget">
       <div class="space-y-1">
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center gap-1">
           <label class="block text-[11px] font-bold text-slate-600">Daftar Penerima (Format: Nama, Email)</label>
-          <span id="counterPenerima" class="text-[10px] font-bold text-blue-600">0 penerima</span>
+          <span id="counterPenerima" class="text-[10px] font-bold text-blue-600 shrink-0">0 penerima</span>
         </div>
         <textarea id="inputListPenerima" rows="5" oninput="updateCounterPenerima()" placeholder="Budi, budi@gmail.com"
           class="w-full p-3 border border-slate-200 rounded-xl text-xs bg-slate-50 font-mono"></textarea>
@@ -539,8 +546,8 @@
 
   <!-- Modal Tambah Voucher Baru -->
   <div id="modalTambahVoucher"
-    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
-    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <h3 class="font-bold text-sm text-slate-900">➕ Buat Voucher Diskon Baru</h3>
       <div class="space-y-2.5 text-xs">
         <div>
@@ -562,7 +569,7 @@
               class="w-full p-2.5 border border-slate-200 rounded-xl">
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <div>
             <label class="block font-bold text-slate-600 mb-1">Kuota (0=Inf)</label>
             <input type="number" id="addKuotaVoucher" value="0" class="w-full p-2.5 border border-slate-200 rounded-xl">
@@ -606,8 +613,8 @@
       const wrapVoucher = document.getElementById('wrapperTabVoucher');
       const wrapUsers = document.getElementById('wrapperTabUsers');
 
-      const activeCls = "bg-slate-900 text-white font-bold text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1 shadow-xs";
-      const idleCls = "bg-transparent hover:bg-white/60 text-slate-600 font-bold text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1";
+      const activeCls = "bg-slate-900 text-white font-bold text-[11px] sm:text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1 shadow-xs";
+      const idleCls = "bg-transparent hover:bg-white/60 text-slate-600 font-bold text-[11px] sm:text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1";
 
       btnJadwal.className = menu === 'jadwal' ? activeCls : idleCls;
       btnVoucher.className = menu === 'voucher' ? activeCls : idleCls;
@@ -803,7 +810,7 @@
           : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">jadwal</span>';
 
         return `
-          <div class="bg-white border border-slate-200 rounded-2xl p-3.5 flex justify-between items-center gap-2">
+          <div class="bg-white border border-slate-200 rounded-2xl p-3.5 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2.5">
             <div class="min-w-0">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="font-extrabold text-xs text-slate-900">${escapeHtml(u.nama)}</span>
@@ -815,11 +822,11 @@
             </div>
             <div class="flex items-center gap-1.5 shrink-0">
               <button type="button" onclick="bukaModalResetPassUser('${escapeHtml(u.userId)}', '${escapeHtml(u.nama)}')"
-                class="text-[10px] font-bold px-2 py-1.5 rounded-lg border bg-amber-50 text-amber-700 border-amber-200">
+                class="flex-1 sm:flex-initial text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-amber-50 text-amber-700 border-amber-200 text-center">
                 🔄 Reset Pass
               </button>
               <button type="button" onclick="toggleStatusUserAdmin('${escapeHtml(u.userId)}', '${isAktif ? 'Nonaktif' : 'Aktif'}')"
-                class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border ${isAktif ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}">
+                class="flex-1 sm:flex-initial text-[10px] font-bold px-2.5 py-1.5 rounded-lg border text-center ${isAktif ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}">
                 ${isAktif ? 'Nonaktifkan' : 'Aktifkan'}
               </button>
             </div>
@@ -1056,9 +1063,9 @@
       container.innerHTML = listToShow.map((item, idx) => {
         const medal = (!keyword && idx === 0) ? '🥇 ' : (!keyword && idx === 1) ? '🥈 ' : (!keyword && idx === 2) ? '🥉 ' : '';
         return `
-          <span class="inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded-full text-[11px] shadow-2xs">
-            <span class="font-semibold text-slate-800">${medal}${escapeHtml(item.nama)}</span>
-            <span class="bg-blue-50 text-blue-700 font-extrabold px-1.5 py-0.5 rounded-full text-[10px]">${item.count}x hadir</span>
+          <span class="inline-flex items-center gap-1.5 bg-white border border-slate-200 px-2.5 py-1 rounded-full text-[11px] shadow-2xs max-w-full">
+            <span class="font-semibold text-slate-800 truncate">${medal}${escapeHtml(item.nama)}</span>
+            <span class="bg-blue-50 text-blue-700 font-extrabold px-1.5 py-0.5 rounded-full text-[10px] shrink-0">${item.count}x hadir</span>
           </span>
         `;
       }).join('');
@@ -1099,18 +1106,18 @@
           divVoucherList.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl border">Belum ada voucher terdaftar.</div>';
         } else {
           divVoucherList.innerHTML = voucherList.map(v => `
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs space-y-3">
-              <div class="flex justify-between items-start">
-                <div>
+            <div class="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-2xs space-y-3">
+              <div class="flex justify-between items-start gap-2">
+                <div class="min-w-0">
                   <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${v.status === 'Aktif' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">${v.status}</span>
-                  <h4 class="font-extrabold text-sm text-slate-900 mt-1 font-mono tracking-wider">${escapeHtml(v.kode)}</h4>
+                  <h4 class="font-extrabold text-sm text-slate-900 mt-1 font-mono tracking-wider break-all">${escapeHtml(v.kode)}</h4>
                 </div>
-                <button type="button" onclick="hapusVoucherAdmin('${escapeHtml(v.kode)}')" class="text-slate-400 hover:text-rose-600 text-xs p-1">🗑️</button>
+                <button type="button" onclick="hapusVoucherAdmin('${escapeHtml(v.kode)}')" class="text-slate-400 hover:text-rose-600 text-xs p-1.5 shrink-0">🗑️</button>
               </div>
               <div class="bg-slate-50 rounded-xl p-2.5 text-xs space-y-1 border border-slate-100 text-slate-600">
-                <div class="flex justify-between"><span>Diskon:</span><span class="font-bold text-slate-800">${v.tipe === 'persen' ? v.persen + '%' : 'Rp ' + Number(v.nilai).toLocaleString('id-ID')}</span></div>
-                <div class="flex justify-between"><span>Terpakai / Kuota:</span><span class="font-bold text-slate-800">${v.terpakai} / ${v.kuota === 0 ? '∞' : v.kuota}</span></div>
-                <div class="flex justify-between"><span>Kadaluwarsa:</span><span class="font-bold text-rose-600">${escapeHtml(v.kadaluwarsa)}</span></div>
+                <div class="flex justify-between gap-2"><span>Diskon:</span><span class="font-bold text-slate-800">${v.tipe === 'persen' ? v.persen + '%' : 'Rp ' + Number(v.nilai).toLocaleString('id-ID')}</span></div>
+                <div class="flex justify-between gap-2"><span>Terpakai / Kuota:</span><span class="font-bold text-slate-800">${v.terpakai} / ${v.kuota === 0 ? '∞' : v.kuota}</span></div>
+                <div class="flex justify-between gap-2"><span>Kadaluwarsa:</span><span class="font-bold text-rose-600 text-right">${escapeHtml(v.kadaluwarsa)}</span></div>
               </div>
               <button type="button" onclick="bukaModalKirimVoucher('${escapeHtml(v.kode)}', '${escapeHtml(v.kadaluwarsa)}')" class="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs py-2 rounded-xl border border-blue-200 transition">✉️ Kirim Voucher ke Email</button>
             </div>
@@ -1135,33 +1142,40 @@
           const isMenungguAcc = String(j.statusAcc || 'Disetujui').toLowerCase() === 'menunggu acc';
 
           let totalEventLunas = 0;
-          let listNamaHtml = pesertaJadwal.length === 0 ? '<li class="text-slate-400 italic text-[11px] py-2 text-center">Belum ada peserta.</li>' : '';
+          let listNamaHtml = pesertaJadwal.length === 0 ? '<li class="text-slate-400 italic text-[11px] py-3 text-center">Belum ada peserta.</li>' : '';
 
           pesertaJadwal.forEach((p, idx) => {
-            const isLunas = p.status.includes('Lunas');
-            const isMenunggu = p.status.includes('Menunggu') || p.status.includes('Pending');
-            if (isLunas) totalEventLunas += parseInt(p.tagihan || 0);
+            const nominalTagihan = parseInt(p.tagihan || 0);
+            const hasVoucher = Boolean(p.voucher && String(p.voucher).trim() !== '');
+            const isLunas = p.status.includes('Lunas') || (nominalTagihan === 0 && hasVoucher);
+            const isMenunggu = !isLunas && (p.status.includes('Menunggu') || p.status.includes('Pending'));
+            if (isLunas) totalEventLunas += nominalTagihan;
 
             const actionAccBtn = !isLunas
-              ? `<button type="button" onclick="bukaModalAcc(${p.rowIndex}, '${escapeHtml(p.nama)}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2 py-1 rounded-md transition shadow-2xs">ACC</button>`
+              ? `<button type="button" onclick="bukaModalAcc(${p.rowIndex}, '${escapeHtml(p.nama)}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2.5 py-1.5 rounded-lg transition shadow-2xs">ACC</button>`
               : '';
 
             let namaColorClass = isLunas ? 'text-emerald-700 font-bold' : (isMenunggu ? 'text-amber-600 font-bold' : 'text-slate-800');
-            const voucherBadgeHtml = p.voucher
-              ? `<span class="inline-block ml-1.5 text-[9px] font-mono font-bold bg-blue-50 text-blue-700 px-1.5 py-0.2 rounded border border-blue-200">${escapeHtml(p.voucher)}</span>`
+            const voucherBadgeHtml = hasVoucher
+              ? `<span class="inline-flex items-center gap-1 text-[10px] font-mono font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-200 max-w-full break-all">🎟️ ${escapeHtml(p.voucher)}</span>`
               : '';
 
+            const labelTagihanHtml = (nominalTagihan === 0 && hasVoucher)
+              ? `<div class="flex items-center gap-1.5"><span class="font-mono font-bold text-emerald-700 text-xs">Rp 0</span><span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">Pakai Voucher</span></div>`
+              : `<span class="font-mono font-semibold text-slate-700 text-xs">${formatRp.format(nominalTagihan)}</span>`;
+
             listNamaHtml += `
-              <li class="py-2 px-2.5 border-b border-slate-100 last:border-b-0 flex justify-between items-center text-xs gap-2">
-                <div class="min-w-0 flex-1">
-                  <span class="${namaColorClass} truncate inline-flex items-center max-w-full">${idx + 1}. ${escapeHtml(p.nama)}${voucherBadgeHtml}</span>
+              <li class="p-3 border-b border-slate-100 last:border-b-0 space-y-2 hover:bg-slate-50/70 transition">
+                <div class="flex items-start justify-between gap-2">
+                  <span class="${namaColorClass} text-xs leading-snug break-words flex-1">${idx + 1}. ${escapeHtml(p.nama)}</span>
                 </div>
-                <div class="text-right flex items-center gap-2 shrink-0">
-                  <div><span class="block font-mono font-semibold text-slate-700">${formatRp.format(p.tagihan || 0)}</span></div>
-                  <div class="flex items-center gap-1">
+                ${voucherBadgeHtml ? `<div>${voucherBadgeHtml}</div>` : ''}
+                <div class="flex items-center justify-between gap-2 pt-0.5">
+                  <div>${labelTagihanHtml}</div>
+                  <div class="flex items-center gap-1.5 shrink-0">
                     ${actionAccBtn}
-                    <button type="button" onclick="bukaModalEditNominal(${p.rowIndex})" class="bg-slate-100 p-1.5 rounded-lg border hover:bg-slate-200 transition" title="Edit Nama, Tagihan & Voucher">✏️</button>
-                    <button type="button" onclick="hapusPemain(${p.rowIndex})" class="bg-rose-50 text-rose-600 p-1.5 rounded-lg border hover:bg-rose-100 transition" title="Hapus">🗑️</button>
+                    <button type="button" onclick="bukaModalEditNominal(${p.rowIndex})" class="bg-slate-100 px-2.5 py-1.5 rounded-lg border hover:bg-slate-200 transition text-xs" title="Edit Nama, Tagihan & Voucher">✏️</button>
+                    <button type="button" onclick="hapusPemain(${p.rowIndex})" class="bg-rose-50 text-rose-600 px-2.5 py-1.5 rounded-lg border hover:bg-rose-100 transition text-xs" title="Hapus">🗑️</button>
                   </div>
                 </div>
               </li>`;
@@ -1178,40 +1192,40 @@
             ? '<span class="text-[10px] bg-amber-50 text-amber-700 font-bold px-2 py-0.5 rounded-md border border-amber-200">⏳ Menunggu ACC</span>'
             : '<span class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-md border border-emerald-200">✅ Tayang di Home</span>';
           const accJadwalBtn = isMenungguAcc
-            ? `<button type="button" onclick="accJadwalMaster('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100">✅ ACC Jadwal</button>`
+            ? `<button type="button" onclick="accJadwalMaster('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100">✅ ACC Jadwal</button>`
             : '';
 
           const cardHtml = `
-            <div class="border ${isNonaktif ? 'border-slate-200 bg-slate-50/50' : 'border-emerald-100 bg-white shadow-sm'} rounded-2xl p-4 space-y-3">
+            <div class="border ${isNonaktif ? 'border-slate-200 bg-slate-50/50' : 'border-emerald-100 bg-white shadow-sm'} rounded-2xl p-3.5 sm:p-4 space-y-3">
               ${bannerPreviewHtml}
               <div class="border-b border-slate-100 pb-3 space-y-2">
-                <div class="flex justify-between items-center gap-2 flex-wrap">
-                  <div class="flex items-center gap-1.5 flex-wrap">
-                    <span class="text-[10px] bg-slate-100 text-slate-700 font-extrabold px-2.5 py-0.5 rounded-md border font-mono">${escapeHtml(j.id)}</span>
+                <div class="flex justify-between items-start sm:items-center gap-2 flex-wrap">
+                  <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+                    <span class="text-[10px] bg-slate-100 text-slate-700 font-extrabold px-2 py-0.5 rounded-md border font-mono">${escapeHtml(j.id)}</span>
                     ${badgePembuat}
                     ${badgeAcc}
                   </div>
-                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">Slot: ${pesertaJadwal.length}/${j.kuota}</span>
+                  <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100 shrink-0">Slot: ${pesertaJadwal.length}/${j.kuota}</span>
                 </div>
-                <h3 class="font-bold text-sm text-slate-900">${escapeHtml(j.infoRaw)}</h3>
+                <h3 class="font-bold text-sm text-slate-900 break-words">${escapeHtml(j.infoRaw)}</h3>
                 <div class="flex items-center gap-1.5 flex-wrap pt-1">
                   ${accJadwalBtn}
-                  <button type="button" onclick="bukaModalEditJadwal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-amber-50 text-amber-700 border-amber-200">✏️ Edit</button>
-                  <button type="button" onclick="hapusJadwalMaster('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-rose-50 text-rose-700 border-rose-200">🗑️ Hapus</button>
-                  <button type="button" onclick="copyListKeWA('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200">📋 Copy WA</button>
-                  <button type="button" onclick="toggleStatusJadwal('${escapeHtml(j.id)}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}', this)" class="text-[10px] font-bold px-2 py-1 rounded-lg border ${isNonaktif ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">${isNonaktif ? '🟢 Aktifkan' : '🔴 Nonaktifkan'}</button>
+                  <button type="button" onclick="bukaModalEditJadwal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-amber-50 text-amber-700 border-amber-200">✏️ Edit</button>
+                  <button type="button" onclick="hapusJadwalMaster('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-rose-50 text-rose-700 border-rose-200">🗑️ Hapus</button>
+                  <button type="button" onclick="copyListKeWA('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200">📋 Copy WA</button>
+                  <button type="button" onclick="toggleStatusJadwal('${escapeHtml(j.id)}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}', this)" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border ${isNonaktif ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">${isNonaktif ? '🟢 Aktifkan' : '🔴 Nonaktifkan'}</button>
                 </div>
               </div>
-              <div class="text-xs text-slate-600 flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border">
-                <span>🗓️ ${displayTanggal}<br>⏰ ${jamBersih}</span>
-                <div class="text-right">
-                  <span class="block mb-0.5">HTM: Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</span>
-                  <span class="text-[11px] text-emerald-700 font-bold bg-emerald-100/50 px-2 py-1 rounded-md">💰 Terkumpul: ${formatRp.format(totalEventLunas)}</span>
+              <div class="text-xs text-slate-600 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 bg-slate-50 p-2.5 rounded-xl border">
+                <span class="leading-relaxed">🗓️ ${displayTanggal}<br>⏰ ${jamBersih}</span>
+                <div class="flex sm:flex-col items-center sm:items-end justify-between gap-1 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200/70">
+                  <span class="font-medium text-slate-700">HTM: Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</span>
+                  <span class="inline-flex items-center gap-1 whitespace-nowrap text-[11px] text-emerald-700 font-bold bg-emerald-100/70 px-2.5 py-1 rounded-md">💰 Terkumpul: ${formatRp.format(totalEventLunas)}</span>
                 </div>
               </div>
-              <div class="rounded-xl border border-slate-200 overflow-hidden">
-                <div class="bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700 border-b">Daftar Peserta:</div>
-                <ul class="divide-y divide-slate-100 max-h-40 overflow-y-auto">${listNamaHtml}</ul>
+              <div class="rounded-xl border border-slate-200 overflow-hidden bg-white">
+                <div class="bg-slate-50 px-3 py-2 text-[11px] font-bold text-slate-700 border-b">Daftar Peserta:</div>
+                <ul class="divide-y divide-slate-100 max-h-72 overflow-y-auto">${listNamaHtml}</ul>
               </div>
             </div>`;
 
@@ -1450,13 +1464,14 @@
         inputVoucher.value = voucherSudahAda;
         inputVoucher.disabled = true;
         badgeVoucher.classList.remove('hidden');
-        helperVoucher.innerText = `Voucher "${voucherSudahAda}" sudah terpasang dan dikunci.`;
+        badgeVoucher.innerText = '🎟️ Pakai Voucher';
+        helperVoucher.innerText = `Peserta menggunakan voucher "${voucherSudahAda}".`;
       } else {
         hiddenVoucherTerkunci.value = '';
         inputVoucher.value = '';
         inputVoucher.disabled = false;
         badgeVoucher.classList.add('hidden');
-        helperVoucher.innerText = 'Kosongkan jika peserta tidak memakai voucher.';
+        helperVoucher.innerText = 'Peserta tidak memakai voucher. Isi jika ingin mencatat voucher.';
       }
 
       document.getElementById('modalEditNominal').classList.remove('hidden');
