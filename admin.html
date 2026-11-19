@@ -17,7 +17,7 @@
     <div class="flex justify-between items-center border-b border-slate-100 pb-3.5">
       <div>
         <h1 class="text-base font-extrabold text-slate-900">🛠️ Panel Superadmin Tepak Friendly</h1>
-        <p class="text-[11px] text-slate-500">Kelola jadwal, peserta, kehadiran, rekap dana & voucher</p>
+        <p class="text-[11px] text-slate-500">Kelola jadwal, ACC, peserta, kehadiran, rekap dana, voucher & user</p>
       </div>
       <div id="statusOnline"
         class="hidden flex items-center gap-1.5 bg-emerald-50 text-emerald-700 text-[11px] font-bold px-2.5 py-1 rounded-full border border-emerald-200 shrink-0">
@@ -74,15 +74,19 @@
         </div>
       </div>
 
-      <!-- Segmented Tab Utama Setara -->
-      <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
+      <!-- Segmented Tab Utama -->
+      <div class="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
         <button type="button" onclick="switchTabMenu('jadwal')" id="btnTabJadwalMenu"
-          class="bg-slate-900 text-white font-bold text-xs py-2.5 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-xs">
-          <span>📅</span> Jadwal & Rekap
+          class="bg-slate-900 text-white font-bold text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1 shadow-xs">
+          <span>📅</span> Jadwal
         </button>
         <button type="button" onclick="switchTabMenu('voucher')" id="btnTabVoucherMenu"
-          class="bg-transparent hover:bg-white/60 text-slate-600 font-bold text-xs py-2.5 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5">
+          class="bg-transparent hover:bg-white/60 text-slate-600 font-bold text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1">
           <span>🎁</span> Voucher
+        </button>
+        <button type="button" onclick="switchTabMenu('users')" id="btnTabUsersMenu"
+          class="bg-transparent hover:bg-white/60 text-slate-600 font-bold text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1">
+          <span>👥</span> Users
         </button>
       </div>
 
@@ -175,6 +179,93 @@
         </div>
       </div>
 
+      <!-- KONTEN TAB: KELOLA USER -->
+      <div id="wrapperTabUsers" class="space-y-4 hidden">
+        <div class="flex justify-between items-center bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+          <div>
+            <h3 class="font-extrabold text-sm text-slate-900">👥 Kelola Akun Admin & Host</h3>
+            <p class="text-[11px] text-slate-500">Buat akun baru, atur status aktif, atau reset password awal.</p>
+          </div>
+          <button type="button" onclick="bukaModalTambahUser()"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition shadow-xs shrink-0">
+            ➕ Tambah User
+          </button>
+        </div>
+        <div id="containerUsersList" class="space-y-2.5">
+          <div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl border">Memuat daftar user...
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal Tambah User Admin -->
+  <div id="modalTambahUser"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-sm text-slate-900">➕ Buat Akun Admin / Host</h3>
+        <button type="button" onclick="tutupModalTambahUser()"
+          class="text-slate-400 hover:text-slate-700 text-sm font-bold">✕</button>
+      </div>
+      <div class="space-y-2.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">User ID</label>
+          <input type="text" id="addUserId" placeholder="Contoh: host_andi"
+            class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50 font-mono">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Nama Tampilan</label>
+          <input type="text" id="addUserNama" placeholder="Contoh: Andi"
+            class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Password Awal (Min. 6 karakter)</label>
+          <input type="text" id="addUserPass" placeholder="Password sementara untuk user..."
+            class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Role Akses</label>
+          <select id="addUserRole" class="w-full p-2.5 border border-slate-200 rounded-xl bg-white">
+            <option value="jadwal">Admin Jadwal / Host (admin-jadwal.html)</option>
+            <option value="superadmin">Superadmin (admin.html)</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="tutupModalTambahUser()"
+          class="flex-1 bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+        <button type="button" onclick="simpanUserBaru(this)"
+          class="flex-1 bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl">Simpan User</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Reset Password User -->
+  <div id="modalResetPassUser"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-sm text-slate-900">🔄 Reset Password Awal</h3>
+        <button type="button" onclick="tutupModalResetPassUser()"
+          class="text-slate-400 hover:text-slate-700 text-sm font-bold">✕</button>
+      </div>
+      <p class="text-xs text-slate-500" id="resetPassUserLabel">-</p>
+      <input type="hidden" id="resetPassTargetUserId">
+      <div class="text-xs">
+        <label class="block font-bold text-slate-600 mb-1">Password Awal Baru (Min. 6 karakter)</label>
+        <input type="text" id="resetPassBaruInput" placeholder="Masukkan password baru..."
+          class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
+        <span class="block text-[10px] text-slate-400 mt-1">User akan diminta mengganti password saat login
+          berikutnya.</span>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="tutupModalResetPassUser()"
+          class="flex-1 bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+        <button type="button" onclick="eksekusiResetPassUser(this)"
+          class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-2.5 rounded-xl">Reset</button>
+      </div>
     </div>
   </div>
 
@@ -496,7 +587,7 @@
     const GAS_URL = CONFIG.GAS_URL;
     const SESSION_DURATION = 6 * 60 * 60 * 1000;
     let currentTabJadwal = 'aktif';
-    let cachedDataAdmin = { jadwal: [], pemain: [], voucherList: [] };
+    let cachedDataAdmin = { jadwal: [], pemain: [], voucherList: [], usersList: [] };
     let rekapKehadiranData = [];
     let showAllKehadiran = false;
 
@@ -510,20 +601,21 @@
     function switchTabMenu(menu) {
       const btnJadwal = document.getElementById('btnTabJadwalMenu');
       const btnVoucher = document.getElementById('btnTabVoucherMenu');
+      const btnUsers = document.getElementById('btnTabUsersMenu');
       const wrapJadwal = document.getElementById('wrapperTabJadwal');
       const wrapVoucher = document.getElementById('wrapperTabVoucher');
+      const wrapUsers = document.getElementById('wrapperTabUsers');
 
-      if (menu === 'jadwal') {
-        btnJadwal.className = "bg-slate-900 text-white font-bold text-xs py-2.5 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-xs";
-        btnVoucher.className = "bg-transparent hover:bg-white/60 text-slate-600 font-bold text-xs py-2.5 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5";
-        wrapJadwal.classList.remove('hidden');
-        wrapVoucher.classList.add('hidden');
-      } else {
-        btnVoucher.className = "bg-slate-900 text-white font-bold text-xs py-2.5 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-xs";
-        btnJadwal.className = "bg-transparent hover:bg-white/60 text-slate-600 font-bold text-xs py-2.5 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5";
-        wrapVoucher.classList.remove('hidden');
-        wrapJadwal.classList.add('hidden');
-      }
+      const activeCls = "bg-slate-900 text-white font-bold text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1 shadow-xs";
+      const idleCls = "bg-transparent hover:bg-white/60 text-slate-600 font-bold text-xs py-2.5 px-2 rounded-lg text-center transition flex items-center justify-center gap-1";
+
+      btnJadwal.className = menu === 'jadwal' ? activeCls : idleCls;
+      btnVoucher.className = menu === 'voucher' ? activeCls : idleCls;
+      btnUsers.className = menu === 'users' ? activeCls : idleCls;
+
+      wrapJadwal.classList.toggle('hidden', menu !== 'jadwal');
+      wrapVoucher.classList.toggle('hidden', menu !== 'voucher');
+      wrapUsers.classList.toggle('hidden', menu !== 'users');
     }
 
     function gantiTabJadwal(tab) {
@@ -693,6 +785,168 @@
       }
     }
 
+    function renderUsersAdmin(usersList) {
+      const container = document.getElementById('containerUsersList');
+      if (!container) return;
+      if (!usersList || usersList.length === 0) {
+        container.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl border">Belum ada user terdaftar.</div>';
+        return;
+      }
+
+      container.innerHTML = usersList.map(u => {
+        const isAktif = String(u.status).toLowerCase() === 'aktif';
+        const statusBadge = isAktif
+          ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Aktif</span>'
+          : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200">Nonaktif</span>';
+        const roleBadge = u.role === 'superadmin'
+          ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200">superadmin</span>'
+          : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200">jadwal</span>';
+
+        return `
+          <div class="bg-white border border-slate-200 rounded-2xl p-3.5 flex justify-between items-center gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-extrabold text-xs text-slate-900">${escapeHtml(u.nama)}</span>
+                <span class="text-[11px] font-mono text-slate-500">@${escapeHtml(u.userId)}</span>
+                ${roleBadge}
+                ${statusBadge}
+              </div>
+              <p class="text-[10px] text-slate-400 mt-0.5">${u.wajibGantiPass ? 'Wajib ganti password saat login' : 'Password sudah diperbarui'}</p>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button type="button" onclick="bukaModalResetPassUser('${escapeHtml(u.userId)}', '${escapeHtml(u.nama)}')"
+                class="text-[10px] font-bold px-2 py-1.5 rounded-lg border bg-amber-50 text-amber-700 border-amber-200">
+                🔄 Reset Pass
+              </button>
+              <button type="button" onclick="toggleStatusUserAdmin('${escapeHtml(u.userId)}', '${isAktif ? 'Nonaktif' : 'Aktif'}')"
+                class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border ${isAktif ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}">
+                ${isAktif ? 'Nonaktifkan' : 'Aktifkan'}
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function bukaModalTambahUser() {
+      document.getElementById('addUserId').value = '';
+      document.getElementById('addUserNama').value = '';
+      document.getElementById('addUserPass').value = '';
+      document.getElementById('addUserRole').value = 'jadwal';
+      document.getElementById('modalTambahUser').classList.remove('hidden');
+    }
+
+    function tutupModalTambahUser() {
+      document.getElementById('modalTambahUser').classList.add('hidden');
+    }
+
+    async function simpanUserBaru(btn) {
+      const userId = document.getElementById('addUserId').value.trim().toLowerCase();
+      const nama = document.getElementById('addUserNama').value.trim();
+      const passwordAwal = document.getElementById('addUserPass').value;
+      const userRole = document.getElementById('addUserRole').value;
+      const roleCaller = localStorage.getItem('tepak_admin_role') || 'superadmin';
+
+      if (!userId || !passwordAwal) {
+        return showCustomWarning("Validasi", "User ID dan password awal wajib diisi!");
+      }
+
+      const oldText = btn.innerText;
+      btn.innerText = 'Menyimpan...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'add_admin_user', roleCaller, userId, nama, passwordAwal, userRole })
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+          tutupModalTambahUser();
+          await loadDataAdmin();
+          showCustomWarning("Berhasil", `Akun "${userId}" berhasil dibuat! User bisa langsung login lalu ganti password.`);
+        } else {
+          throw new Error(json.message || 'Gagal membuat user.');
+        }
+      } catch (err) {
+        showCustomWarning("Gagal", err.message);
+      } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+      }
+    }
+
+    function bukaModalResetPassUser(userId, nama) {
+      document.getElementById('resetPassTargetUserId').value = userId;
+      document.getElementById('resetPassUserLabel').innerText = `Target akun: ${nama} (@${userId})`;
+      document.getElementById('resetPassBaruInput').value = '';
+      document.getElementById('modalResetPassUser').classList.remove('hidden');
+    }
+
+    function tutupModalResetPassUser() {
+      document.getElementById('modalResetPassUser').classList.add('hidden');
+    }
+
+    async function eksekusiResetPassUser(btn) {
+      const userId = document.getElementById('resetPassTargetUserId').value;
+      const passwordBaru = document.getElementById('resetPassBaruInput').value;
+      const roleCaller = localStorage.getItem('tepak_admin_role') || 'superadmin';
+
+      if (!passwordBaru || passwordBaru.length < 6) {
+        return showCustomWarning("Validasi", "Password baru minimal 6 karakter!");
+      }
+
+      const oldText = btn.innerText;
+      btn.innerText = 'Mereset...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'reset_admin_password', roleCaller, userId, passwordBaru })
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+          tutupModalResetPassUser();
+          await loadDataAdmin();
+          showCustomWarning("Berhasil", `Password untuk @${userId} berhasil direset.`);
+        } else {
+          throw new Error(json.message || 'Gagal mereset password.');
+        }
+      } catch (err) {
+        showCustomWarning("Gagal", err.message);
+      } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+      }
+    }
+
+    async function toggleStatusUserAdmin(userId, statusBaru) {
+      const roleCaller = localStorage.getItem('tepak_admin_role') || 'superadmin';
+      await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'toggle_admin_user', roleCaller, userId, statusBaru })
+      });
+      await loadDataAdmin();
+    }
+
+    async function accJadwalMaster(jadwalId) {
+      const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
+      showConfirmModal("ACC Jadwal", `Setujui jadwal "${jadwalId}" agar tampil di halaman Home?`, "Ya, ACC", "bg-blue-600 hover:bg-blue-700", async () => {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'acc_jadwal', role, id: jadwalId })
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+          await loadDataAdmin();
+          showCustomWarning("Berhasil", "Jadwal telah di-ACC dan kini tampil di Home!");
+        } else {
+          showCustomWarning("Gagal", json.message || "Gagal meng-ACC jadwal.");
+        }
+      });
+    }
+
     function showConfirmModal(title, desc, confirmButtonText, confirmButtonClass, onConfirm) {
       const modal = document.getElementById('customModal');
       document.getElementById('modalTitle').innerText = title;
@@ -838,6 +1092,7 @@
         document.getElementById('totalDanaPending').innerText = formatRp.format(totalPendingNum);
 
         hitungRekapKehadiran(data.pemain || []);
+        renderUsersAdmin(data.usersList || []);
 
         const voucherList = data.voucherList || [];
         if (voucherList.length === 0) {
@@ -877,6 +1132,8 @@
         jadwalList.forEach(j => {
           const pesertaJadwal = pemainList.filter(p => String(p.jadwalId) === String(j.id) && p.status && !p.status.includes('Dihapus'));
           const isNonaktif = j.status && j.status.toString().toLowerCase().includes('nonaktif');
+          const isMenungguAcc = String(j.statusAcc || 'Disetujui').toLowerCase() === 'menunggu acc';
+
           let totalEventLunas = 0;
           let listNamaHtml = pesertaJadwal.length === 0 ? '<li class="text-slate-400 italic text-[11px] py-2 text-center">Belum ada peserta.</li>' : '';
 
@@ -917,6 +1174,12 @@
           const badgePembuat = pembuat
             ? `<span class="text-[10px] bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded-md border">✍️ ${escapeHtml(pembuat)}</span>`
             : '';
+          const badgeAcc = isMenungguAcc
+            ? '<span class="text-[10px] bg-amber-50 text-amber-700 font-bold px-2 py-0.5 rounded-md border border-amber-200">⏳ Menunggu ACC</span>'
+            : '<span class="text-[10px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-md border border-emerald-200">✅ Tayang di Home</span>';
+          const accJadwalBtn = isMenungguAcc
+            ? `<button type="button" onclick="accJadwalMaster('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100">✅ ACC Jadwal</button>`
+            : '';
 
           const cardHtml = `
             <div class="border ${isNonaktif ? 'border-slate-200 bg-slate-50/50' : 'border-emerald-100 bg-white shadow-sm'} rounded-2xl p-4 space-y-3">
@@ -926,11 +1189,13 @@
                   <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="text-[10px] bg-slate-100 text-slate-700 font-extrabold px-2.5 py-0.5 rounded-md border font-mono">${escapeHtml(j.id)}</span>
                     ${badgePembuat}
+                    ${badgeAcc}
                   </div>
                   <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">Slot: ${pesertaJadwal.length}/${j.kuota}</span>
                 </div>
                 <h3 class="font-bold text-sm text-slate-900">${escapeHtml(j.infoRaw)}</h3>
                 <div class="flex items-center gap-1.5 flex-wrap pt-1">
+                  ${accJadwalBtn}
                   <button type="button" onclick="bukaModalEditJadwal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-amber-50 text-amber-700 border-amber-200">✏️ Edit</button>
                   <button type="button" onclick="hapusJadwalMaster('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-rose-50 text-rose-700 border-rose-200">🗑️ Hapus</button>
                   <button type="button" onclick="copyListKeWA('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200">📋 Copy WA</button>
@@ -1000,6 +1265,7 @@
       const kuota = parseInt(document.getElementById('addJadwalKuota').value) || 12;
       const bannerInput = document.getElementById('addJadwalBanner');
       const dibuatOleh = localStorage.getItem('tepak_admin_nama') || localStorage.getItem('tepak_admin_user') || 'Superadmin';
+      const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
 
       if (!id || !tanggal || !info || !jam) {
         return showCustomWarning("Validasi", "ID Jadwal, Tanggal, Lokasi/GOR, dan Jam Main wajib diisi!");
@@ -1022,7 +1288,7 @@
           body: JSON.stringify({
             action: 'add_jadwal',
             id, tanggal, info, jam, htm, kuota,
-            dibuatOleh,
+            dibuatOleh, role,
             bannerBase64, bannerName
           })
         });
