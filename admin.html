@@ -951,6 +951,48 @@
       }
     }
 
+    async function syncPaymentJadwal(jadwalId, btn) {
+      const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
+      const oldText = btn ? btn.innerText : '';
+      if (btn) {
+        btn.innerText = '⏳ Sync...';
+        btn.disabled = true;
+      }
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'sync_payment_jadwal',
+            role: role,
+            jadwalId: jadwalId
+          })
+        });
+        const json = await res.json();
+        await loadDataAdmin();
+
+        if (json.status === 'success') {
+          showCustomWarning(
+            "Sync Payment Selesai",
+            json.message || `Status pembayaran & peserta untuk jadwal "${jadwalId}" berhasil diselaraskan. Perubahan akan otomatis tampil di index.html.`
+          );
+        } else {
+          showCustomWarning(
+            "Data Disegarkan",
+            json.message || `Data jadwal "${jadwalId}" telah dimuat ulang dari server.`
+          );
+        }
+      } catch (err) {
+        await loadDataAdmin();
+        showCustomWarning("Info Sync", `Data jadwal "${jadwalId}" sudah dimuat ulang. (${err.message})`);
+      } finally {
+        if (btn) {
+          btn.innerText = oldText || '🔄 Sync Payment';
+          btn.disabled = false;
+        }
+      }
+    }
+
     function renderUsersAdmin(usersList) {
       const container = document.getElementById('containerUsersList');
       if (!container) return;
@@ -1447,7 +1489,8 @@
       document.getElementById('totalDanaPending').innerText = 'Memuat...';
 
       try {
-        const response = await fetch(GAS_URL);
+        const sep = GAS_URL.includes('?') ? '&' : '?';
+        const response = await fetch(`${GAS_URL}${sep}_t=${Date.now()}`, { cache: 'no-store' });
         const data = await response.json();
         cachedDataAdmin = data;
 
@@ -1600,6 +1643,7 @@
                 <h3 class="font-bold text-sm text-slate-900 break-words">${escapeHtml(j.infoRaw)}</h3>
                 <div class="flex items-center gap-1.5 flex-wrap pt-1">
                   ${accJadwalBtn}
+                  <button type="button" onclick="syncPaymentJadwal('${escapeHtml(j.id)}', this)" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100">🔄 Sync Payment</button>
                   <button type="button" onclick="bukaModalAccMassal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100">⚡ ACC Massal</button>
                   <button type="button" onclick="bukaModalBatalAccMassal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100">↩️ Batal ACC Massal</button>
                   <button type="button" onclick="bukaModalEditJadwal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-amber-50 text-amber-700 border-amber-200">✏️ Edit</button>
