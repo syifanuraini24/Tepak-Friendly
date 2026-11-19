@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="logo.png">
-  <title>Admin Dashboard - Tepak Friendly</title>
+  <title>Superadmin Dashboard - Tepak Friendly</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -13,10 +13,10 @@
 
   <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 space-y-4">
 
-    <!-- Header Admin -->
+    <!-- Header Superadmin -->
     <div class="flex justify-between items-center border-b border-slate-100 pb-3.5">
       <div>
-        <h1 class="text-base font-extrabold text-slate-900">🛠️ Panel Admin Tepak Friendly</h1>
+        <h1 class="text-base font-extrabold text-slate-900">🛠️ Panel Superadmin Tepak Friendly</h1>
         <p class="text-[11px] text-slate-500">Kelola jadwal, peserta, kehadiran, rekap dana & voucher</p>
       </div>
       <div id="statusOnline"
@@ -28,29 +28,46 @@
     <!-- Bagian Login -->
     <div id="loginSection" class="max-w-sm mx-auto space-y-3 py-6">
       <div>
-        <label for="passInput" class="block text-xs font-bold text-slate-600 mb-1">Password Admin</label>
-        <input type="password" id="passInput" placeholder="Masukkan password..."
+        <label for="userIdInput" class="block text-xs font-bold text-slate-600 mb-1">User ID</label>
+        <input type="text" id="userIdInput" placeholder="Masukkan User ID Anda..."
           onkeydown="if(event.key==='Enter') login()"
           class="w-full p-3 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
       </div>
-      <button onclick="login()"
+      <div>
+        <label for="passInput" class="block text-xs font-bold text-slate-600 mb-1">Password</label>
+        <div class="relative">
+          <input type="password" id="passInput" placeholder="Masukkan password..."
+            onkeydown="if(event.key==='Enter') login()"
+            class="w-full p-3 pr-10 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <button type="button" onclick="togglePassVisibility('passInput')"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold">
+            👁️
+          </button>
+        </div>
+      </div>
+      <button type="button" onclick="login()"
         class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">
         Masuk Dashboard
       </button>
     </div>
 
-    <!-- Panel Utama Admin -->
+    <!-- Panel Utama Superadmin -->
     <div id="adminPanel" class="hidden space-y-4">
 
       <!-- Bar Sesi Ringkas -->
-      <div class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-xl border border-slate-200/80">
-        <span class="text-[11px] font-bold text-slate-600">Sesi Aktif Admin</span>
+      <div
+        class="flex flex-wrap justify-between items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200/80">
+        <span class="text-[11px] font-bold text-slate-600" id="labelSesiUser">Sesi Aktif Superadmin</span>
         <div class="flex gap-1.5">
-          <button onclick="loadDataAdmin()"
+          <button type="button" onclick="bukaModalGantiPass()"
+            class="bg-amber-50 hover:bg-amber-100 text-amber-800 text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-amber-200 transition">
+            🔑 Ganti Password
+          </button>
+          <button type="button" onclick="loadDataAdmin()"
             class="bg-white hover:bg-slate-100 text-slate-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-slate-200 transition shadow-2xs">
             🔄 Refresh
           </button>
-          <button onclick="logout()"
+          <button type="button" onclick="logout()"
             class="bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold px-2.5 py-1.5 rounded-lg border border-rose-200 transition">
             🚪 Keluar
           </button>
@@ -59,11 +76,11 @@
 
       <!-- Segmented Tab Utama Setara -->
       <div class="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
-        <button onclick="switchTabMenu('jadwal')" id="btnTabJadwalMenu"
+        <button type="button" onclick="switchTabMenu('jadwal')" id="btnTabJadwalMenu"
           class="bg-slate-900 text-white font-bold text-xs py-2.5 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5 shadow-xs">
           <span>📅</span> Jadwal & Rekap
         </button>
-        <button onclick="switchTabMenu('voucher')" id="btnTabVoucherMenu"
+        <button type="button" onclick="switchTabMenu('voucher')" id="btnTabVoucherMenu"
           class="bg-transparent hover:bg-white/60 text-slate-600 font-bold text-xs py-2.5 px-3 rounded-lg text-center transition flex items-center justify-center gap-1.5">
           <span>🎁</span> Voucher
         </button>
@@ -95,7 +112,7 @@
               <h3 class="text-xs font-extrabold text-slate-900">🏅 Rekap Kehadiran Peserta (Lunas)</h3>
               <p class="text-[10px] text-slate-500" id="subInfoKehadiran">Menghitung riwayat kehadiran...</p>
             </div>
-            <button onclick="toggleSemuaKehadiran()" id="btnToggleKehadiran"
+            <button type="button" onclick="toggleSemuaKehadiran()" id="btnToggleKehadiran"
               class="hidden bg-white hover:bg-slate-100 text-slate-700 font-bold text-[10px] px-2.5 py-1 rounded-lg border border-slate-200 transition shrink-0">
               Lihat Semua
             </button>
@@ -115,15 +132,15 @@
         <!-- Sub-Tab Jadwal + Tombol Tambah Jadwal Cepat -->
         <div class="space-y-3">
           <div class="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200/70">
-            <button onclick="gantiTabJadwal('aktif')" id="tabJadwalAktif"
+            <button type="button" onclick="gantiTabJadwal('aktif')" id="tabJadwalAktif"
               class="flex-1 bg-white text-slate-900 font-bold text-[11px] sm:text-xs py-2 px-2 rounded-lg shadow-2xs transition">
               🟢 Aktif <span id="badgeCountAktif" class="text-[10px] text-slate-400 font-semibold"></span>
             </button>
-            <button onclick="gantiTabJadwal('nonaktif')" id="tabJadwalNonaktif"
+            <button type="button" onclick="gantiTabJadwal('nonaktif')" id="tabJadwalNonaktif"
               class="flex-1 bg-transparent text-slate-500 font-bold text-[11px] sm:text-xs py-2 px-2 rounded-lg transition">
               🔴 Riwayat <span id="badgeCountNonaktif" class="text-[10px] text-slate-400 font-semibold"></span>
             </button>
-            <button onclick="bukaModalTambahJadwal()"
+            <button type="button" onclick="bukaModalTambahJadwal()"
               class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] sm:text-xs py-2 px-3 rounded-lg shadow-2xs transition shrink-0 flex items-center gap-1">
               <span>➕</span> Jadwal
             </button>
@@ -147,7 +164,7 @@
             <h3 class="font-extrabold text-sm text-slate-900">🎁 Manajemen & Kirim Voucher</h3>
             <p class="text-[11px] text-slate-500">Buat, pantau kuota, dan kirim email voucher ke peserta.</p>
           </div>
-          <button onclick="bukaModalTambahVoucher()"
+          <button type="button" onclick="bukaModalTambahVoucher()"
             class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition shadow-xs shrink-0">
             ➕ Buat Voucher
           </button>
@@ -161,6 +178,46 @@
     </div>
   </div>
 
+  <!-- Modal Ganti Password -->
+  <div id="modalGantiPass"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-sm text-slate-900">🔑 Ganti Password Akun</h3>
+        <button type="button" onclick="tutupModalGantiPass()"
+          class="text-slate-400 hover:text-slate-700 text-sm font-bold">✕</button>
+      </div>
+      <p id="infoWajibGantiPass"
+        class="hidden text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-2.5">
+        Kamu masih menggunakan password awal. Silakan ganti password terlebih dahulu.
+      </p>
+      <div class="space-y-2.5 text-xs">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Password Saat Ini</label>
+          <input type="password" id="oldPassInput" placeholder="Masukkan password lama..."
+            class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Password Baru</label>
+          <input type="password" id="newPassInput" placeholder="Minimal 6 karakter..."
+            class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-600 mb-1">Konfirmasi Password Baru</label>
+          <input type="password" id="confirmPassInput" placeholder="Ulangi password baru..."
+            class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50">
+        </div>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="tutupModalGantiPass()"
+          class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+        <button type="button" onclick="simpanPasswordBaru(this)"
+          class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl">Simpan
+          Password</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Konfirmasi Custom -->
   <div id="customModal"
     class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-4">
@@ -168,9 +225,10 @@
       <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Konfirmasi Tindakan</h3>
       <p id="modalDesc" class="text-xs text-slate-600">Apakah kamu yakin ingin melanjutkan tindakan ini?</p>
       <div class="flex gap-2 pt-2">
-        <button id="modalBtnCancel"
+        <button type="button" id="modalBtnCancel"
           class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl transition">Batal</button>
-        <button id="modalBtnConfirm" class="flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white">Ya,
+        <button type="button" id="modalBtnConfirm"
+          class="flex-1 font-bold text-xs py-2.5 px-3 rounded-xl transition text-white">Ya,
           Lanjutkan</button>
       </div>
     </div>
@@ -182,7 +240,7 @@
     <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-5 space-y-3 max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b border-slate-100 pb-2">
         <h3 class="font-bold text-sm text-slate-900">➕ Tambah Jadwal Mabar</h3>
-        <button onclick="tutupModalTambahJadwal()"
+        <button type="button" onclick="tutupModalTambahJadwal()"
           class="text-slate-400 hover:text-slate-700 text-sm font-bold">✕</button>
       </div>
       <div class="space-y-2.5 text-xs">
@@ -227,9 +285,9 @@
         </div>
       </div>
       <div class="flex gap-2 pt-2">
-        <button onclick="tutupModalTambahJadwal()"
+        <button type="button" onclick="tutupModalTambahJadwal()"
           class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-        <button onclick="simpanJadwalBaru(this)"
+        <button type="button" onclick="simpanJadwalBaru(this)"
           class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Simpan
           Jadwal</button>
       </div>
@@ -255,9 +313,9 @@
       </div>
 
       <div class="flex gap-2 pt-2">
-        <button onclick="tutupModalAcc()"
+        <button type="button" onclick="tutupModalAcc()"
           class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-        <button onclick="eksekusiAccPemain(this)"
+        <button type="button" onclick="eksekusiAccPemain(this)"
           class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Ya,
           ACC & Kirim E-Ticket</button>
       </div>
@@ -299,9 +357,9 @@
       </div>
 
       <div class="flex gap-2 pt-2">
-        <button onclick="tutupModalEditNominal()"
+        <button type="button" onclick="tutupModalEditNominal()"
           class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-        <button onclick="simpanNominalBaru(this)"
+        <button type="button" onclick="simpanNominalBaru(this)"
           class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl">Simpan</button>
       </div>
     </div>
@@ -353,9 +411,9 @@
         </div>
       </div>
       <div class="flex gap-2 pt-2">
-        <button onclick="tutupModalEditJadwal()"
+        <button type="button" onclick="tutupModalEditJadwal()"
           class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-        <button onclick="simpanEditJadwal(this)"
+        <button type="button" onclick="simpanEditJadwal(this)"
           class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Simpan</button>
       </div>
     </div>
@@ -380,9 +438,9 @@
           class="w-full p-3 border border-slate-200 rounded-xl text-xs bg-slate-50 font-mono"></textarea>
       </div>
       <div class="flex gap-2 pt-2">
-        <button onclick="tutupModalKirimVoucher()"
+        <button type="button" onclick="tutupModalKirimVoucher()"
           class="flex-1 bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-        <button onclick="prosesKirimVoucherBulk(this)"
+        <button type="button" onclick="prosesKirimVoucherBulk(this)"
           class="flex-1 bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl">Kirim</button>
       </div>
     </div>
@@ -425,9 +483,9 @@
         </div>
       </div>
       <div class="flex gap-2 pt-2">
-        <button onclick="tutupModalTambahVoucher()"
+        <button type="button" onclick="tutupModalTambahVoucher()"
           class="flex-1 bg-slate-100 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
-        <button onclick="simpanVoucherBaru(this)"
+        <button type="button" onclick="simpanVoucherBaru(this)"
           class="flex-1 bg-blue-600 text-white font-bold text-xs py-2.5 rounded-xl">Simpan</button>
       </div>
     </div>
@@ -443,6 +501,11 @@
     let showAllKehadiran = false;
 
     document.addEventListener('DOMContentLoaded', () => { cekSesiLogin(); });
+
+    function togglePassVisibility(inputId) {
+      const el = document.getElementById(inputId);
+      el.type = el.type === 'password' ? 'text' : 'password';
+    }
 
     function switchTabMenu(menu) {
       const btnJadwal = document.getElementById('btnTabJadwalMenu');
@@ -504,35 +567,130 @@
     }
 
     function cekSesiLogin() {
-      const loginTime = localStorage.getItem('tepak_admin_login_time');
-      if (loginTime && (new Date().getTime() - parseInt(loginTime)) < SESSION_DURATION) {
+      const loginTime = parseInt(localStorage.getItem('tepak_admin_login_time') || '0', 10);
+      const role = localStorage.getItem('tepak_admin_role');
+      const nama = localStorage.getItem('tepak_admin_nama') || localStorage.getItem('tepak_admin_user') || 'Superadmin';
+      const wajibGanti = localStorage.getItem('tepak_admin_must_change_pass') === 'true';
+
+      if (loginTime && (Date.now() - loginTime) < SESSION_DURATION && role) {
+        if (role !== 'superadmin') {
+          window.location.href = 'admin-jadwal.html';
+          return;
+        }
         document.getElementById('loginSection').classList.add('hidden');
         document.getElementById('adminPanel').classList.remove('hidden');
         document.getElementById('statusOnline').classList.remove('hidden');
+        document.getElementById('labelSesiUser').innerText = `👑 ${nama} • Superadmin`;
         loadDataAdmin();
-      } else { logout(false); }
+        if (wajibGanti) {
+          bukaModalGantiPass(true);
+        }
+      } else {
+        logout(false);
+      }
     }
 
     async function login() {
+      const userId = document.getElementById('userIdInput').value.trim();
       const pass = document.getElementById('passInput').value;
+      if (!userId) return showCustomWarning("Perhatian", "Masukkan User ID terlebih dahulu!");
       if (!pass) return showCustomWarning("Perhatian", "Masukkan password terlebih dahulu!");
+
       try {
-        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'login_admin', password: pass }) });
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'login_admin', userId: userId, password: pass })
+        });
         const json = await res.json();
         if (json.status === 'success') {
-          localStorage.setItem('tepak_admin_login_time', new Date().getTime().toString());
+          const role = json.role || 'jadwal';
+          const nama = json.nama || json.userId || userId;
+          localStorage.setItem('tepak_admin_user', json.userId || userId);
+          localStorage.setItem('tepak_admin_nama', nama);
+          localStorage.setItem('tepak_admin_role', role);
+          localStorage.setItem('tepak_admin_must_change_pass', json.mustChangePassword ? 'true' : 'false');
+          localStorage.setItem('tepak_admin_login_time', Date.now().toString());
+          document.getElementById('passInput').value = '';
           cekSesiLogin();
-        } else { showCustomWarning("Login Gagal", "Password admin salah!"); }
-      } catch (err) { showCustomWarning("Koneksi Error", "Terjadi kesalahan server."); }
+        } else {
+          showCustomWarning("Login Gagal", json.message || "User ID atau password salah!");
+        }
+      } catch (err) {
+        showCustomWarning("Koneksi Error", "Terjadi kesalahan server.");
+      }
     }
 
     function logout(pesanAlert = true) {
+      localStorage.removeItem('tepak_admin_user');
+      localStorage.removeItem('tepak_admin_nama');
+      localStorage.removeItem('tepak_admin_role');
+      localStorage.removeItem('tepak_admin_must_change_pass');
       localStorage.removeItem('tepak_admin_login_time');
       document.getElementById('adminPanel').classList.add('hidden');
       document.getElementById('statusOnline').classList.add('hidden');
       document.getElementById('loginSection').classList.remove('hidden');
       document.getElementById('passInput').value = '';
-      if (pesanAlert) showCustomWarning("Keluar Sesi", "Berhasil keluar dari dashboard admin.");
+      if (pesanAlert) showCustomWarning("Keluar Sesi", "Berhasil keluar dari dashboard superadmin.");
+    }
+
+    function bukaModalGantiPass(wajib = false) {
+      document.getElementById('oldPassInput').value = '';
+      document.getElementById('newPassInput').value = '';
+      document.getElementById('confirmPassInput').value = '';
+      const info = document.getElementById('infoWajibGantiPass');
+      if (wajib) info.classList.remove('hidden');
+      else info.classList.add('hidden');
+      document.getElementById('modalGantiPass').classList.remove('hidden');
+    }
+
+    function tutupModalGantiPass() {
+      document.getElementById('modalGantiPass').classList.add('hidden');
+    }
+
+    async function simpanPasswordBaru(btn) {
+      const userId = localStorage.getItem('tepak_admin_user');
+      const passwordLama = document.getElementById('oldPassInput').value;
+      const passwordBaru = document.getElementById('newPassInput').value;
+      const konfirmasi = document.getElementById('confirmPassInput').value;
+
+      if (!passwordLama || !passwordBaru) {
+        return showCustomWarning("Validasi", "Password lama dan password baru wajib diisi!");
+      }
+      if (passwordBaru.length < 6) {
+        return showCustomWarning("Validasi", "Password baru minimal 6 karakter!");
+      }
+      if (passwordBaru !== konfirmasi) {
+        return showCustomWarning("Validasi", "Konfirmasi password baru tidak cocok!");
+      }
+
+      const oldText = btn.innerText;
+      btn.innerText = 'Menyimpan...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'change_password',
+            userId: userId,
+            passwordLama: passwordLama,
+            passwordBaru: passwordBaru
+          })
+        });
+        const json = await res.json();
+        if (json.status === 'success') {
+          localStorage.setItem('tepak_admin_must_change_pass', 'false');
+          tutupModalGantiPass();
+          showCustomWarning("Berhasil", "Password berhasil diperbarui!");
+        } else {
+          throw new Error(json.message || 'Gagal mengganti password.');
+        }
+      } catch (err) {
+        showCustomWarning("Gagal", err.message);
+      } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+      }
     }
 
     function showConfirmModal(title, desc, confirmButtonText, confirmButtonClass, onConfirm) {
@@ -572,7 +730,6 @@
       });
     }
 
-    // Hitung & Render Rekap Kehadiran Peserta (Status Lunas)
     function hitungRekapKehadiran(pemainList) {
       const mapHadir = {};
       (pemainList || []).forEach(p => {
@@ -680,10 +837,8 @@
         document.getElementById('totalDanaLunas').innerText = formatRp.format(totalLunasNum);
         document.getElementById('totalDanaPending').innerText = formatRp.format(totalPendingNum);
 
-        // Hitung rekap kehadiran peserta
         hitungRekapKehadiran(data.pemain || []);
 
-        // Render Voucher List
         const voucherList = data.voucherList || [];
         if (voucherList.length === 0) {
           divVoucherList.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl border">Belum ada voucher terdaftar.</div>';
@@ -695,14 +850,14 @@
                   <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${v.status === 'Aktif' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}">${v.status}</span>
                   <h4 class="font-extrabold text-sm text-slate-900 mt-1 font-mono tracking-wider">${escapeHtml(v.kode)}</h4>
                 </div>
-                <button onclick="hapusVoucherAdmin('${escapeHtml(v.kode)}')" class="text-slate-400 hover:text-rose-600 text-xs p-1">🗑️</button>
+                <button type="button" onclick="hapusVoucherAdmin('${escapeHtml(v.kode)}')" class="text-slate-400 hover:text-rose-600 text-xs p-1">🗑️</button>
               </div>
               <div class="bg-slate-50 rounded-xl p-2.5 text-xs space-y-1 border border-slate-100 text-slate-600">
                 <div class="flex justify-between"><span>Diskon:</span><span class="font-bold text-slate-800">${v.tipe === 'persen' ? v.persen + '%' : 'Rp ' + Number(v.nilai).toLocaleString('id-ID')}</span></div>
                 <div class="flex justify-between"><span>Terpakai / Kuota:</span><span class="font-bold text-slate-800">${v.terpakai} / ${v.kuota === 0 ? '∞' : v.kuota}</span></div>
                 <div class="flex justify-between"><span>Kadaluwarsa:</span><span class="font-bold text-rose-600">${escapeHtml(v.kadaluwarsa)}</span></div>
               </div>
-              <button onclick="bukaModalKirimVoucher('${escapeHtml(v.kode)}', '${escapeHtml(v.kadaluwarsa)}')" class="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs py-2 rounded-xl border border-blue-200 transition">✉️ Kirim Voucher ke Email</button>
+              <button type="button" onclick="bukaModalKirimVoucher('${escapeHtml(v.kode)}', '${escapeHtml(v.kadaluwarsa)}')" class="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs py-2 rounded-xl border border-blue-200 transition">✉️ Kirim Voucher ke Email</button>
             </div>
           `).join('');
         }
@@ -731,7 +886,7 @@
             if (isLunas) totalEventLunas += parseInt(p.tagihan || 0);
 
             const actionAccBtn = !isLunas
-              ? `<button onclick="bukaModalAcc(${p.rowIndex}, '${escapeHtml(p.nama)}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2 py-1 rounded-md transition shadow-2xs">ACC</button>`
+              ? `<button type="button" onclick="bukaModalAcc(${p.rowIndex}, '${escapeHtml(p.nama)}')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-2 py-1 rounded-md transition shadow-2xs">ACC</button>`
               : '';
 
             let namaColorClass = isLunas ? 'text-emerald-700 font-bold' : (isMenunggu ? 'text-amber-600 font-bold' : 'text-slate-800');
@@ -748,8 +903,8 @@
                   <div><span class="block font-mono font-semibold text-slate-700">${formatRp.format(p.tagihan || 0)}</span></div>
                   <div class="flex items-center gap-1">
                     ${actionAccBtn}
-                    <button onclick="bukaModalEditNominal(${p.rowIndex})" class="bg-slate-100 p-1.5 rounded-lg border hover:bg-slate-200 transition" title="Edit Nama, Tagihan & Voucher">✏️</button>
-                    <button onclick="hapusPemain(${p.rowIndex})" class="bg-rose-50 text-rose-600 p-1.5 rounded-lg border hover:bg-rose-100 transition" title="Hapus">🗑️</button>
+                    <button type="button" onclick="bukaModalEditNominal(${p.rowIndex})" class="bg-slate-100 p-1.5 rounded-lg border hover:bg-slate-200 transition" title="Edit Nama, Tagihan & Voucher">✏️</button>
+                    <button type="button" onclick="hapusPemain(${p.rowIndex})" class="bg-rose-50 text-rose-600 p-1.5 rounded-lg border hover:bg-rose-100 transition" title="Hapus">🗑️</button>
                   </div>
                 </div>
               </li>`;
@@ -758,21 +913,28 @@
           const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-';
           const jamBersih = formatJam(j.jam);
           let bannerPreviewHtml = (j.bannerUrl && j.bannerUrl.trim() !== '') ? `<div class="mb-2"><img src="${j.bannerUrl}" class="w-full h-28 object-cover rounded-xl border"></div>` : '';
+          const pembuat = j.dibuatOleh || j.pembuat || '';
+          const badgePembuat = pembuat
+            ? `<span class="text-[10px] bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded-md border">✍️ ${escapeHtml(pembuat)}</span>`
+            : '';
 
           const cardHtml = `
             <div class="border ${isNonaktif ? 'border-slate-200 bg-slate-50/50' : 'border-emerald-100 bg-white shadow-sm'} rounded-2xl p-4 space-y-3">
               ${bannerPreviewHtml}
               <div class="border-b border-slate-100 pb-3 space-y-2">
-                <div class="flex justify-between items-center">
-                  <span class="text-[10px] bg-slate-100 text-slate-700 font-extrabold px-2.5 py-0.5 rounded-md border font-mono">${escapeHtml(j.id)}</span>
+                <div class="flex justify-between items-center gap-2 flex-wrap">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-[10px] bg-slate-100 text-slate-700 font-extrabold px-2.5 py-0.5 rounded-md border font-mono">${escapeHtml(j.id)}</span>
+                    ${badgePembuat}
+                  </div>
                   <span class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-100">Slot: ${pesertaJadwal.length}/${j.kuota}</span>
                 </div>
                 <h3 class="font-bold text-sm text-slate-900">${escapeHtml(j.infoRaw)}</h3>
                 <div class="flex items-center gap-1.5 flex-wrap pt-1">
-                  <button onclick="bukaModalEditJadwal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-amber-50 text-amber-700 border-amber-200">✏️ Edit</button>
-                  <button onclick="hapusJadwalMaster('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-rose-50 text-rose-700 border-rose-200">🗑️ Hapus</button>
-                  <button onclick="copyListKeWA('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200">📋 Copy WA</button>
-                  <button onclick="toggleStatusJadwal('${escapeHtml(j.id)}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}', this)" class="text-[10px] font-bold px-2 py-1 rounded-lg border ${isNonaktif ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">${isNonaktif ? '🟢 Aktifkan' : '🔴 Nonaktifkan'}</button>
+                  <button type="button" onclick="bukaModalEditJadwal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-amber-50 text-amber-700 border-amber-200">✏️ Edit</button>
+                  <button type="button" onclick="hapusJadwalMaster('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-rose-50 text-rose-700 border-rose-200">🗑️ Hapus</button>
+                  <button type="button" onclick="copyListKeWA('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2 py-1 rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200">📋 Copy WA</button>
+                  <button type="button" onclick="toggleStatusJadwal('${escapeHtml(j.id)}', '${isNonaktif ? 'Aktif' : 'Nonaktif'}', this)" class="text-[10px] font-bold px-2 py-1 rounded-lg border ${isNonaktif ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}">${isNonaktif ? '🟢 Aktifkan' : '🔴 Nonaktifkan'}</button>
                 </div>
               </div>
               <div class="text-xs text-slate-600 flex justify-between items-center bg-slate-50 p-2.5 rounded-xl border">
@@ -837,6 +999,7 @@
       const htm = parseInt(document.getElementById('addJadwalHtm').value) || 0;
       const kuota = parseInt(document.getElementById('addJadwalKuota').value) || 12;
       const bannerInput = document.getElementById('addJadwalBanner');
+      const dibuatOleh = localStorage.getItem('tepak_admin_nama') || localStorage.getItem('tepak_admin_user') || 'Superadmin';
 
       if (!id || !tanggal || !info || !jam) {
         return showCustomWarning("Validasi", "ID Jadwal, Tanggal, Lokasi/GOR, dan Jam Main wajib diisi!");
@@ -859,6 +1022,7 @@
           body: JSON.stringify({
             action: 'add_jadwal',
             id, tanggal, info, jam, htm, kuota,
+            dibuatOleh,
             bannerBase64, bannerName
           })
         });
@@ -971,6 +1135,7 @@
     async function eksekusiAccPemain(btn) {
       const rowIndex = document.getElementById('accRowIndexInput').value;
       const voucher = document.getElementById('inputAccVoucher').value.trim().toUpperCase();
+      const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
 
       const oldText = btn.innerText;
       btn.innerText = 'Memproses...';
@@ -979,7 +1144,7 @@
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'update_status', rowIndex: parseInt(rowIndex), voucher: voucher })
+          body: JSON.stringify({ action: 'update_status', role: role, rowIndex: parseInt(rowIndex), voucher: voucher })
         });
         const result = await response.json();
 
@@ -1041,6 +1206,7 @@
       const nominalBaru = document.getElementById('inputNominalBaru').value.trim();
       const voucherTerkunci = document.getElementById('editVoucherTerkunciInput').value.trim().toUpperCase();
       const voucherBaru = voucherTerkunci || document.getElementById('inputVoucherBaru').value.trim().toUpperCase();
+      const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
 
       if (!namaBaru) return showCustomWarning("Validasi", "Nama peserta wajib diisi!");
       if (!nominalBaru || isNaN(nominalBaru)) return showCustomWarning("Validasi", "Masukkan nominal angka tagihan yang valid!");
@@ -1054,6 +1220,7 @@
           method: 'POST',
           body: JSON.stringify({
             action: 'update_tagihan',
+            role: role,
             rowIndex: parseInt(rowIndex),
             namaBaru: namaBaru,
             tagihanBaru: parseInt(nominalBaru),
@@ -1101,6 +1268,7 @@
       const kode = document.getElementById('inputKodeTarget').value;
       const kadaluwarsa = document.getElementById('inputExpiredTarget').value;
       const rawText = document.getElementById('inputListPenerima').value.trim();
+      const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
       if (!rawText) return alert("Masukkan minimal satu nama dan email penerima!");
 
       let listPenerima = [];
@@ -1118,7 +1286,7 @@
       try {
         const res = await fetch(GAS_URL, {
           method: 'POST',
-          body: JSON.stringify({ action: 'kirim_voucher_bulk', kodeVoucher: kode, kadaluwarsa: kadaluwarsa, listPenerima: listPenerima })
+          body: JSON.stringify({ action: 'kirim_voucher_bulk', role: role, kodeVoucher: kode, kadaluwarsa: kadaluwarsa, listPenerima: listPenerima })
         });
         const json = await res.json();
         if (json.status === 'success') {
@@ -1136,10 +1304,11 @@
       const nilai = document.getElementById('addNilaiVoucher').value;
       const kuota = document.getElementById('addKuotaVoucher').value;
       const kadaluwarsa = document.getElementById('addExpiredVoucher').value;
+      const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
       if (!kode || !nilai) return alert("Kode dan Nilai Diskon wajib diisi!");
 
       try {
-        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'add_voucher', kode, tipe, nilai, kuota, kadaluwarsa }) });
+        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'add_voucher', role: role, kode, tipe, nilai, kuota, kadaluwarsa }) });
         const json = await res.json();
         if (json.status === 'success') {
           alert("Voucher berhasil dibuat!");
@@ -1150,8 +1319,9 @@
     }
 
     async function hapusVoucherAdmin(kode) {
+      const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
       showConfirmModal("Hapus Voucher", `Yakin ingin menghapus voucher "${kode}"?`, "Ya, Hapus", "bg-rose-600 hover:bg-rose-700", async () => {
-        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_voucher', kode: kode }) });
+        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_voucher', role: role, kode: kode }) });
         loadDataAdmin();
       });
     }
