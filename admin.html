@@ -17,7 +17,8 @@
     <div class="flex justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-3.5">
       <div class="min-w-0">
         <h1 class="text-sm sm:text-base font-extrabold text-slate-900 truncate">🛠️ Panel Superadmin Tepak Friendly</h1>
-        <p class="text-[11px] text-slate-500 leading-snug">Kelola jadwal, ACC, peserta, kehadiran, rekap dana, voucher &
+        <p class="text-[11px] text-slate-500 leading-snug">Kelola jadwal, ACC, peserta, kehadiran, rekap dana, voucher
+          &amp;
           user</p>
       </div>
       <div id="statusOnline"
@@ -135,6 +136,31 @@
           </div>
         </div>
 
+        <!-- Rekap Pengguna Voucher -->
+        <div class="bg-blue-50/50 border border-blue-200/80 rounded-2xl p-3.5 space-y-2.5">
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+            <div class="min-w-0">
+              <h3 class="text-xs font-extrabold text-slate-900 truncate">🎟️ Pengguna Voucher</h3>
+              <p class="text-[10px] text-slate-500 truncate" id="subInfoPenggunaVoucher">Memuat data pengguna voucher...
+              </p>
+            </div>
+            <div class="flex items-center gap-1.5 w-full sm:w-auto">
+              <select id="filterKodeVoucher" onchange="renderPenggunaVoucher()"
+                class="flex-1 sm:flex-initial px-2.5 py-1.5 bg-white border border-slate-200 rounded-xl text-[11px] font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Semua Kode Voucher</option>
+              </select>
+              <button type="button" onclick="copyDaftarPenggunaVoucher()"
+                class="bg-white hover:bg-blue-50 text-blue-700 border border-blue-200 font-bold text-[10px] px-2.5 py-1.5 rounded-xl transition shrink-0">
+                📋 Copy
+              </button>
+            </div>
+          </div>
+
+          <div id="containerPenggunaVoucher" class="space-y-1.5 max-h-60 overflow-y-auto">
+            <span class="text-[11px] text-slate-400">Memuat daftar pengguna voucher...</span>
+          </div>
+        </div>
+
         <!-- Sub-Tab Jadwal + Tombol Tambah Jadwal Cepat -->
         <div class="space-y-3">
           <div
@@ -169,8 +195,8 @@
         <div
           class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
           <div>
-            <h3 class="font-extrabold text-sm text-slate-900">🎁 Manajemen & Kirim Voucher</h3>
-            <p class="text-[11px] text-slate-500">Buat, pantau kuota, dan kirim email voucher ke peserta.</p>
+            <h3 class="font-extrabold text-sm text-slate-900">🎁 Manajemen &amp; Kirim Voucher</h3>
+            <p class="text-[11px] text-slate-500">Atur penerima yang berhak, pantau kuota, dan kirim voucher.</p>
           </div>
           <button type="button" onclick="bukaModalTambahVoucher()"
             class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-2 rounded-xl transition shadow-xs shrink-0 text-center">
@@ -188,7 +214,7 @@
         <div
           class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2.5 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
           <div>
-            <h3 class="font-extrabold text-sm text-slate-900">👥 Kelola Akun Admin & Host</h3>
+            <h3 class="font-extrabold text-sm text-slate-900">👥 Kelola Akun Admin &amp; Host</h3>
             <p class="text-[11px] text-slate-500">Buat akun baru, atur status aktif, atau reset password awal.</p>
           </div>
           <button type="button" onclick="bukaModalTambahUser()"
@@ -414,7 +440,7 @@
           class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
         <button type="button" onclick="eksekusiAccPemain(this)"
           class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Ya,
-          ACC & Kirim E-Ticket</button>
+          ACC &amp; Kirim E-Ticket</button>
       </div>
     </div>
   </div>
@@ -423,7 +449,7 @@
   <div id="modalEditNominal"
     class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
     <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
-      <h3 class="font-bold text-sm text-slate-900">✏️ Edit Data, Tagihan & Voucher</h3>
+      <h3 class="font-bold text-sm text-slate-900">✏️ Edit Data, Tagihan &amp; Voucher</h3>
       <p class="text-xs text-slate-500" id="editNamaPesertaLabel">-</p>
       <input type="hidden" id="editRowIndexInput">
       <input type="hidden" id="editVoucherTerkunciInput">
@@ -449,8 +475,13 @@
           <input type="text" id="inputVoucherBaru" placeholder="Contoh: HEMAT10"
             class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono disabled:bg-slate-200/70 disabled:text-slate-600 disabled:cursor-not-allowed">
           <span id="helperVoucherEdit" class="block text-[9px] text-slate-400 mt-0.5 leading-snug">Kosongkan jika
-            peserta tidak
-            memakai voucher.</span>
+            peserta tidak memakai voucher.</span>
+          <div id="boxBatalkanVoucher" class="hidden pt-1.5">
+            <button type="button" id="btnBatalkanVoucherPeserta" onclick="batalkanVoucherPeserta(this)"
+              class="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-[11px] py-2 rounded-xl transition">
+              ❌ Batalkan Pemakaian Voucher
+            </button>
+          </div>
         </div>
       </div>
 
@@ -579,6 +610,13 @@
             <input type="date" id="addExpiredVoucher" class="w-full p-2.5 border border-slate-200 rounded-xl">
           </div>
         </div>
+        <div>
+          <label class="block font-bold text-slate-600 mb-1">Daftar Yang Berhak Pakai (Opsional)</label>
+          <textarea id="addPenerimaVoucher" rows="2"
+            placeholder="Kosongkan jika bebas dipakai siapa saja, atau isi nama/email/WA pisah koma..."
+            class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50 text-[11px]"></textarea>
+          <span class="block text-[9px] text-slate-400 mt-0.5">Contoh: Syifa, Andi, budi@gmail.com</span>
+        </div>
       </div>
       <div class="flex gap-2 pt-2">
         <button type="button" onclick="tutupModalTambahVoucher()"
@@ -593,9 +631,11 @@
   <script>
     const GAS_URL = CONFIG.GAS_URL;
     const SESSION_DURATION = 6 * 60 * 60 * 1000;
+    const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
     let currentTabJadwal = 'aktif';
     let cachedDataAdmin = { jadwal: [], pemain: [], voucherList: [], usersList: [] };
     let rekapKehadiranData = [];
+    let penggunaVoucherData = [];
     let showAllKehadiran = false;
 
     document.addEventListener('DOMContentLoaded', () => { cekSesiLogin(); });
@@ -1071,6 +1111,105 @@
       }).join('');
     }
 
+    function renderPenggunaVoucher() {
+      const container = document.getElementById('containerPenggunaVoucher');
+      const subInfo = document.getElementById('subInfoPenggunaVoucher');
+      const selectFilter = document.getElementById('filterKodeVoucher');
+      if (!container || !subInfo || !selectFilter) return;
+
+      const pemainList = cachedDataAdmin.pemain || [];
+      const jadwalList = cachedDataAdmin.jadwal || [];
+      const mapJadwal = {};
+      jadwalList.forEach(j => {
+        mapJadwal[String(j.id)] = j;
+      });
+
+      penggunaVoucherData = pemainList
+        .filter(p => p.status && !String(p.status).includes('Dihapus') && p.voucher && String(p.voucher).trim() !== '')
+        .map(p => {
+          const kode = String(p.voucher).trim().toUpperCase();
+          const j = mapJadwal[String(p.jadwalId)] || {};
+          const tglSingkat = j.tanggal
+            ? new Date(j.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+            : '-';
+          return {
+            rowIndex: p.rowIndex,
+            nama: p.nama || '-',
+            kode: kode,
+            jadwalLabel: j.infoRaw ? `${j.infoRaw} (${tglSingkat})` : (p.jadwalId || '-'),
+            tagihan: parseInt(p.tagihan || 0, 10),
+            status: p.status || '-'
+          };
+        });
+
+      const selectedPrev = selectFilter.value;
+      const uniqueCodes = [...new Set(penggunaVoucherData.map(item => item.kode))].sort();
+      selectFilter.innerHTML = '<option value="">Semua Kode Voucher</option>' +
+        uniqueCodes.map(kode => `<option value="${escapeHtml(kode)}">${escapeHtml(kode)}</option>`).join('');
+      if (uniqueCodes.includes(selectedPrev)) {
+        selectFilter.value = selectedPrev;
+      }
+
+      const activeKode = selectFilter.value;
+      const filtered = activeKode
+        ? penggunaVoucherData.filter(item => item.kode === activeKode)
+        : penggunaVoucherData;
+
+      if (penggunaVoucherData.length === 0) {
+        subInfo.innerText = 'Belum ada peserta yang tercatat memakai voucher';
+        container.innerHTML = '<div class="text-[11px] text-slate-400 italic py-1">Belum ada pengguna voucher.</div>';
+        return;
+      }
+
+      subInfo.innerText = activeKode
+        ? `${filtered.length} peserta memakai kode ${activeKode}`
+        : `Total ${penggunaVoucherData.length} pemakaian voucher dari ${uniqueCodes.length} kode`;
+
+      container.innerHTML = filtered.map(item => {
+        const tagihanText = item.tagihan === 0
+          ? '<span class="font-mono font-bold text-emerald-700">Rp 0</span>'
+          : `<span class="font-mono font-semibold text-slate-700">${formatRp.format(item.tagihan)}</span>`;
+
+        return `
+          <div class="bg-white border border-slate-200/90 rounded-xl px-3 py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 text-xs">
+            <div class="min-w-0 space-y-0.5">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="font-bold text-slate-900 break-words">${escapeHtml(item.nama)}</span>
+                <span class="text-[10px] font-mono font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-200 break-all">🎟️ ${escapeHtml(item.kode)}</span>
+              </div>
+              <p class="text-[10px] text-slate-500 truncate">📍 ${escapeHtml(item.jadwalLabel)}</p>
+            </div>
+            <div class="flex items-center justify-between sm:justify-end gap-2 shrink-0 pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+              ${tagihanText}
+              <button type="button" onclick="bukaModalEditNominal(${item.rowIndex})"
+                class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg border transition">
+                ✏️ Kelola
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function copyDaftarPenggunaVoucher() {
+      const activeKode = document.getElementById('filterKodeVoucher')?.value || '';
+      const filtered = activeKode
+        ? penggunaVoucherData.filter(item => item.kode === activeKode)
+        : penggunaVoucherData;
+
+      if (filtered.length === 0) {
+        return showCustomWarning("Kosong", "Tidak ada data pengguna voucher untuk disalin.");
+      }
+
+      const judul = activeKode ? `🎟️ *PENGGUNA VOUCHER: ${activeKode}*` : `🎟️ *REKAP PENGGUNA VOUCHER*`;
+      const lines = filtered.map((item, idx) => `${idx + 1}. ${item.nama} — ${item.kode} (${item.jadwalLabel})`);
+      const text = `${judul}\n\n${lines.join('\n')}`;
+
+      navigator.clipboard.writeText(text).then(() => {
+        showCustomWarning("Berhasil", "Daftar pengguna voucher berhasil disalin ke clipboard!");
+      });
+    }
+
     async function loadDataAdmin() {
       const divAktif = document.getElementById('containerJadwalAktif');
       const divNonaktif = document.getElementById('containerJadwalNonaktif');
@@ -1087,7 +1226,6 @@
         divAktif.innerHTML = '';
         divNonaktif.innerHTML = '';
 
-        const formatRp = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 });
         let totalLunasNum = 0, totalPendingNum = 0;
 
         (data.pemain || []).forEach(item => {
@@ -1099,13 +1237,18 @@
         document.getElementById('totalDanaPending').innerText = formatRp.format(totalPendingNum);
 
         hitungRekapKehadiran(data.pemain || []);
+        renderPenggunaVoucher();
         renderUsersAdmin(data.usersList || []);
 
         const voucherList = data.voucherList || [];
         if (voucherList.length === 0) {
           divVoucherList.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl border">Belum ada voucher terdaftar.</div>';
         } else {
-          divVoucherList.innerHTML = voucherList.map(v => `
+          divVoucherList.innerHTML = voucherList.map(v => {
+            const penerimaInfo = v.penerima && String(v.penerima).trim() !== ''
+              ? escapeHtml(v.penerima)
+              : 'Semua peserta (bebas)';
+            return `
             <div class="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 shadow-2xs space-y-3">
               <div class="flex justify-between items-start gap-2">
                 <div class="min-w-0">
@@ -1118,10 +1261,12 @@
                 <div class="flex justify-between gap-2"><span>Diskon:</span><span class="font-bold text-slate-800">${v.tipe === 'persen' ? v.persen + '%' : 'Rp ' + Number(v.nilai).toLocaleString('id-ID')}</span></div>
                 <div class="flex justify-between gap-2"><span>Terpakai / Kuota:</span><span class="font-bold text-slate-800">${v.terpakai} / ${v.kuota === 0 ? '∞' : v.kuota}</span></div>
                 <div class="flex justify-between gap-2"><span>Kadaluwarsa:</span><span class="font-bold text-rose-600 text-right">${escapeHtml(v.kadaluwarsa)}</span></div>
+                <div class="flex justify-between gap-2 pt-1 border-t border-slate-200/60"><span>Hak Pakai:</span><span class="font-semibold text-slate-800 text-right break-words max-w-[65%]">${penerimaInfo}</span></div>
               </div>
               <button type="button" onclick="bukaModalKirimVoucher('${escapeHtml(v.kode)}', '${escapeHtml(v.kadaluwarsa)}')" class="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs py-2 rounded-xl border border-blue-200 transition">✉️ Kirim Voucher ke Email</button>
             </div>
-          `).join('');
+          `;
+          }).join('');
         }
 
         const jadwalList = data.jadwal || [];
@@ -1174,7 +1319,7 @@
                   <div>${labelTagihanHtml}</div>
                   <div class="flex items-center gap-1.5 shrink-0">
                     ${actionAccBtn}
-                    <button type="button" onclick="bukaModalEditNominal(${p.rowIndex})" class="bg-slate-100 px-2.5 py-1.5 rounded-lg border hover:bg-slate-200 transition text-xs" title="Edit Nama, Tagihan & Voucher">✏️</button>
+                    <button type="button" onclick="bukaModalEditNominal(${p.rowIndex})" class="bg-slate-100 px-2.5 py-1.5 rounded-lg border hover:bg-slate-200 transition text-xs" title="Edit Nama, Tagihan &amp; Voucher">✏️</button>
                     <button type="button" onclick="hapusPemain(${p.rowIndex})" class="bg-rose-50 text-rose-600 px-2.5 py-1.5 rounded-lg border hover:bg-rose-100 transition text-xs" title="Hapus">🗑️</button>
                   </div>
                 </div>
@@ -1458,6 +1603,7 @@
       const badgeVoucher = document.getElementById('badgeStatusVoucherEdit');
       const helperVoucher = document.getElementById('helperVoucherEdit');
       const hiddenVoucherTerkunci = document.getElementById('editVoucherTerkunciInput');
+      const boxBatalkanVoucher = document.getElementById('boxBatalkanVoucher');
 
       if (voucherSudahAda) {
         hiddenVoucherTerkunci.value = voucherSudahAda;
@@ -1465,13 +1611,15 @@
         inputVoucher.disabled = true;
         badgeVoucher.classList.remove('hidden');
         badgeVoucher.innerText = '🎟️ Pakai Voucher';
-        helperVoucher.innerText = `Peserta menggunakan voucher "${voucherSudahAda}".`;
+        helperVoucher.innerText = `Peserta memakai voucher "${voucherSudahAda}". Klik tombol di bawah untuk membatalkannya.`;
+        boxBatalkanVoucher.classList.remove('hidden');
       } else {
         hiddenVoucherTerkunci.value = '';
         inputVoucher.value = '';
         inputVoucher.disabled = false;
         badgeVoucher.classList.add('hidden');
         helperVoucher.innerText = 'Peserta tidak memakai voucher. Isi jika ingin mencatat voucher.';
+        boxBatalkanVoucher.classList.add('hidden');
       }
 
       document.getElementById('modalEditNominal').classList.remove('hidden');
@@ -1479,6 +1627,54 @@
 
     function tutupModalEditNominal() {
       document.getElementById('modalEditNominal').classList.add('hidden');
+    }
+
+    async function batalkanVoucherPeserta(btn) {
+      const rowIndex = parseInt(document.getElementById('editRowIndexInput').value, 10);
+      const kodeLama = document.getElementById('editVoucherTerkunciInput').value.trim().toUpperCase();
+      const namaPeserta = document.getElementById('inputNamaBaru').value.trim();
+      const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
+
+      const p = (cachedDataAdmin.pemain || []).find(item => Number(item.rowIndex) === rowIndex);
+      const j = p ? (cachedDataAdmin.jadwal || []).find(jd => String(jd.id) === String(p.jadwalId)) : null;
+      const htmNormal = j ? parseInt(j.htm || 0, 10) : parseInt(document.getElementById('inputNominalBaru').value || 0, 10);
+
+      showConfirmModal(
+        "Batalkan Voucher",
+        `Batalkan voucher "${kodeLama}" untuk ${namaPeserta} dan kembalikan tagihan ke HTM normal (${formatRp.format(htmNormal)})?`,
+        "Ya, Batalkan",
+        "bg-rose-600 hover:bg-rose-700",
+        async () => {
+          const oldText = btn.innerText;
+          btn.innerText = 'Membatalkan...';
+          btn.disabled = true;
+          try {
+            const res = await fetch(GAS_URL, {
+              method: 'POST',
+              body: JSON.stringify({
+                action: 'batalkan_voucher_peserta',
+                role: role,
+                rowIndex: rowIndex,
+                kodeVoucher: kodeLama,
+                tagihanBaru: htmNormal
+              })
+            });
+            const json = await res.json();
+            if (json.status === 'success') {
+              tutupModalEditNominal();
+              await loadDataAdmin();
+              showCustomWarning("Berhasil", `Voucher "${kodeLama}" berhasil dibatalkan.`);
+            } else {
+              throw new Error(json.message || 'Gagal membatalkan voucher.');
+            }
+          } catch (err) {
+            showCustomWarning("Gagal", err.message);
+          } finally {
+            btn.innerText = oldText;
+            btn.disabled = false;
+          }
+        }
+      );
     }
 
     async function simpanNominalBaru(btn) {
@@ -1528,7 +1724,14 @@
       document.getElementById('modalKirimVoucher').classList.remove('hidden');
     }
     function tutupModalKirimVoucher() { document.getElementById('modalKirimVoucher').classList.add('hidden'); }
-    function bukaModalTambahVoucher() { document.getElementById('modalTambahVoucher').classList.remove('hidden'); }
+    function bukaModalTambahVoucher() {
+      document.getElementById('addKodeVoucher').value = '';
+      document.getElementById('addNilaiVoucher').value = '';
+      document.getElementById('addKuotaVoucher').value = '0';
+      document.getElementById('addExpiredVoucher').value = '';
+      document.getElementById('addPenerimaVoucher').value = '';
+      document.getElementById('modalTambahVoucher').classList.remove('hidden');
+    }
     function tutupModalTambahVoucher() { document.getElementById('modalTambahVoucher').classList.add('hidden'); }
 
     function updateCounterPenerima() {
@@ -1550,7 +1753,7 @@
       const kadaluwarsa = document.getElementById('inputExpiredTarget').value;
       const rawText = document.getElementById('inputListPenerima').value.trim();
       const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
-      if (!rawText) return alert("Masukkan minimal satu nama dan email penerima!");
+      if (!rawText) return showCustomWarning("Validasi", "Masukkan minimal satu nama dan email penerima!");
 
       let listPenerima = [];
       rawText.split('\n').forEach(line => {
@@ -1558,7 +1761,7 @@
         if (parts.length >= 2) listPenerima.push({ nama: parts[0].trim(), email: parts[1].trim() });
       });
 
-      if (listPenerima.length === 0) return alert("Format penulisan salah! Gunakan format: Nama, email@domain.com");
+      if (listPenerima.length === 0) return showCustomWarning("Format Salah", "Gunakan format: Nama, email@domain.com");
 
       const oldText = btn.innerText;
       btn.innerText = `Mengirim...`;
@@ -1571,32 +1774,41 @@
         });
         const json = await res.json();
         if (json.status === 'success') {
-          alert(json.message);
           tutupModalKirimVoucher();
-          loadDataAdmin();
+          await loadDataAdmin();
+          showCustomWarning("Berhasil", json.message || "Voucher berhasil dikirim!");
         } else { throw new Error(json.message); }
-      } catch (err) { alert("Error: " + err.message); }
+      } catch (err) { showCustomWarning("Error", err.message); }
       finally { btn.innerText = oldText; btn.disabled = false; }
     }
 
     async function simpanVoucherBaru(btn) {
-      const kode = document.getElementById('addKodeVoucher').value.trim();
+      const kode = document.getElementById('addKodeVoucher').value.trim().toUpperCase();
       const tipe = document.getElementById('addTipeVoucher').value;
       const nilai = document.getElementById('addNilaiVoucher').value;
       const kuota = document.getElementById('addKuotaVoucher').value;
       const kadaluwarsa = document.getElementById('addExpiredVoucher').value;
+      const penerima = document.getElementById('addPenerimaVoucher').value.trim();
       const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
-      if (!kode || !nilai) return alert("Kode dan Nilai Diskon wajib diisi!");
+      if (!kode || !nilai) return showCustomWarning("Validasi", "Kode dan Nilai Diskon wajib diisi!");
+
+      const oldText = btn.innerText;
+      btn.innerText = 'Menyimpan...';
+      btn.disabled = true;
 
       try {
-        const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'add_voucher', role: role, kode, tipe, nilai, kuota, kadaluwarsa }) });
+        const res = await fetch(GAS_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'add_voucher', role: role, kode, tipe, nilai, kuota, kadaluwarsa, penerima })
+        });
         const json = await res.json();
         if (json.status === 'success') {
-          alert("Voucher berhasil dibuat!");
           tutupModalTambahVoucher();
-          loadDataAdmin();
-        } else { alert("Gagal: " + json.message); }
-      } catch (err) { alert("Kesalahan: " + err.message); }
+          await loadDataAdmin();
+          showCustomWarning("Berhasil", "Voucher berhasil dibuat!");
+        } else { throw new Error(json.message || 'Gagal membuat voucher.'); }
+      } catch (err) { showCustomWarning("Gagal", err.message); }
+      finally { btn.innerText = oldText; btn.disabled = false; }
     }
 
     async function hapusVoucherAdmin(kode) {
