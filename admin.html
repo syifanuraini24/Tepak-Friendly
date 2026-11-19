@@ -1444,7 +1444,7 @@
       });
 
       penggunaVoucherData = pemainList
-        .filter(p => p.status && !String(p.status).includes('Dihapus') && p.voucher && String(p.voucher).trim() !== '')
+        .filter(p => p.status && !String(p.status).includes('Dihapus') && bersihkanKodeVoucher_(p.voucher) !== '')
         .map(p => {
           const kode = bersihkanKodeVoucher_(p.voucher);
           const j = mapJadwal[String(p.jadwalId)] || {};
