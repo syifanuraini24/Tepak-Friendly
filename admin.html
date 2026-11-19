@@ -532,6 +532,59 @@
     </div>
   </div>
 
+  <!-- Modal Hapus Massal per Rentang Nomor -->
+  <div id="modalHapusMassal"
+    class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-xs w-full p-4 sm:p-5 space-y-3 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+        <h3 class="font-bold text-sm text-slate-900">🗑️ Hapus Massal Peserta</h3>
+        <button type="button" onclick="tutupModalHapusMassal()"
+          class="text-slate-400 hover:text-slate-700 text-sm font-bold p-1">✕</button>
+      </div>
+      <div class="space-y-0.5">
+        <p class="text-xs font-bold text-slate-800" id="hapusMassalJadwalLabel">-</p>
+        <p class="text-[10px] text-slate-500" id="hapusMassalInfoKuota">-</p>
+      </div>
+      <input type="hidden" id="hapusMassalJadwalId">
+
+      <div class="space-y-2.5 text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Dari No.</label>
+            <input type="number" id="inputHapusDariNo" min="1" value="1"
+              class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50 font-mono text-center focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 mb-1">Sampai No.</label>
+            <input type="number" id="inputHapusSampaiNo" min="1" value="1"
+              class="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50 font-mono text-center focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500">
+          </div>
+        </div>
+        <button type="button" onclick="setRentangSemuaHapusMassal()"
+          class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px] py-1.5 rounded-lg border border-slate-200 transition">
+          📌 Pilih Semua Nomor di Jadwal Ini
+        </button>
+
+        <div class="bg-rose-50/70 border border-rose-200/80 rounded-xl p-2.5 space-y-1.5">
+          <label class="flex items-start gap-2 text-[11px] text-rose-800 font-semibold cursor-pointer">
+            <input type="checkbox" id="chkKembalikanKuotaVoucherHapus" checked class="mt-0.5 rounded border-rose-300">
+            <span>Kembalikan kuota voucher jika peserta memakai voucher</span>
+          </label>
+          <p class="text-[9px] text-rose-600 leading-snug">Peserta dalam rentang akan ditandai Dihapus 🔴 dan slot
+            jadwal akan terbuka kembali.</p>
+        </div>
+      </div>
+
+      <div class="flex gap-2 pt-2">
+        <button type="button" onclick="tutupModalHapusMassal()"
+          class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl">Batal</button>
+        <button type="button" onclick="eksekusiHapusMassal(this)"
+          class="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs">Hapus
+          Peserta</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal ACC Pembayaran (Seamless) -->
   <div id="modalAccPembayaran"
     class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-[9999] hidden p-3 sm:p-4">
@@ -1646,6 +1699,7 @@
                   <button type="button" onclick="syncPaymentJadwal('${escapeHtml(j.id)}', this)" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100">🔄 Sync Payment</button>
                   <button type="button" onclick="bukaModalAccMassal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100">⚡ ACC Massal</button>
                   <button type="button" onclick="bukaModalBatalAccMassal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100">↩️ Batal ACC Massal</button>
+                  <button type="button" onclick="bukaModalHapusMassal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100">🗑️ Hapus Massal</button>
                   <button type="button" onclick="bukaModalEditJadwal('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-amber-50 text-amber-700 border-amber-200">✏️ Edit</button>
                   <button type="button" onclick="hapusJadwalMaster('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-rose-50 text-rose-700 border-rose-200">🗑️ Hapus</button>
                   <button type="button" onclick="copyListKeWA('${escapeHtml(j.id)}')" class="text-[10px] font-bold px-2.5 py-1.5 rounded-lg border bg-emerald-50 text-emerald-700 border-emerald-200">📋 Copy WA</button>
@@ -2110,6 +2164,129 @@
           showCustomWarning(
             "Selesai Sebagian",
             `Berhasil membatalkan ACC ${sukses} peserta, gagal ${gagalList.length}:\n• ${gagalList.join('\n• ')}`
+          );
+        }
+      } finally {
+        btn.innerText = oldText;
+        btn.disabled = false;
+      }
+    }
+
+    function bukaModalHapusMassal(jadwalId) {
+      const j = (cachedDataAdmin.jadwal || []).find(item => String(item.id) === String(jadwalId));
+      const peserta = getPesertaAktifJadwal_(jadwalId);
+      const totalPeserta = peserta.length;
+
+      if (totalPeserta === 0) {
+        return showCustomWarning("Info", "Belum ada peserta aktif pada jadwal ini.");
+      }
+
+      document.getElementById('hapusMassalJadwalId').value = jadwalId;
+      document.getElementById('hapusMassalJadwalLabel').innerText = `${j ? j.infoRaw : jadwalId} (${jadwalId})`;
+      document.getElementById('hapusMassalInfoKuota').innerText = `Jumlah peserta aktif saat ini: 1 s/d ${totalPeserta}`;
+      document.getElementById('inputHapusDariNo').value = 1;
+      document.getElementById('inputHapusSampaiNo').value = totalPeserta;
+      document.getElementById('chkKembalikanKuotaVoucherHapus').checked = true;
+      document.getElementById('modalHapusMassal').classList.remove('hidden');
+    }
+
+    function tutupModalHapusMassal() {
+      document.getElementById('modalHapusMassal').classList.add('hidden');
+    }
+
+    function setRentangSemuaHapusMassal() {
+      const jadwalId = document.getElementById('hapusMassalJadwalId').value;
+      const totalPeserta = getPesertaAktifJadwal_(jadwalId).length;
+      if (totalPeserta > 0) {
+        document.getElementById('inputHapusDariNo').value = 1;
+        document.getElementById('inputHapusSampaiNo').value = totalPeserta;
+      }
+    }
+
+    async function eksekusiHapusMassal(btn) {
+      const jadwalId = document.getElementById('hapusMassalJadwalId').value;
+      const dariNo = parseInt(document.getElementById('inputHapusDariNo').value, 10);
+      const sampaiNo = parseInt(document.getElementById('inputHapusSampaiNo').value, 10);
+      const kembalikanKuotaVoucher = document.getElementById('chkKembalikanKuotaVoucherHapus').checked;
+      const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
+
+      const peserta = getPesertaAktifJadwal_(jadwalId);
+      if (peserta.length === 0) {
+        return showCustomWarning("Info", "Tidak ada peserta aktif di jadwal ini.");
+      }
+      if (!dariNo || !sampaiNo || dariNo < 1 || sampaiNo < 1) {
+        return showCustomWarning("Validasi", "Nomor urut awal dan akhir harus lebih besar dari 0!");
+      }
+      if (dariNo > sampaiNo) {
+        return showCustomWarning("Validasi", "Nomor 'Dari No.' tidak boleh lebih besar dari 'Sampai No.'!");
+      }
+      if (sampaiNo > peserta.length) {
+        return showCustomWarning("Validasi", `Nomor 'Sampai No.' melebihi jumlah peserta aktif (${peserta.length} peserta).`);
+      }
+
+      const targetSlice = peserta.slice(dariNo - 1, sampaiNo);
+      const oldText = btn.innerText;
+      btn.disabled = true;
+
+      let sukses = 0;
+      const gagalList = [];
+
+      try {
+        for (let i = 0; i < targetSlice.length; i++) {
+          const p = targetSlice[i];
+          btn.innerText = `Hapus ${i + 1}/${targetSlice.length}...`;
+
+          try {
+            const voucherRaw = String(p.voucher || '').trim().toUpperCase();
+            const matchKode = voucherRaw.match(/[A-Z0-9_-]{2,}/i);
+            const kodeVoucher = matchKode ? matchKode[0].toUpperCase() : '';
+
+            if (kembalikanKuotaVoucher && kodeVoucher) {
+              const resV = await fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                  action: 'batalkan_voucher_peserta',
+                  role: role,
+                  rowIndex: parseInt(p.rowIndex, 10),
+                  kodeVoucher: kodeVoucher
+                })
+              });
+              const jsonV = await resV.json();
+              if (jsonV.status !== 'success') {
+                throw new Error(jsonV.message || 'Gagal mengembalikan kuota voucher');
+              }
+            }
+
+            const res = await fetch(GAS_URL, {
+              method: 'POST',
+              body: JSON.stringify({
+                action: 'delete_row',
+                rowIndex: parseInt(p.rowIndex, 10)
+              })
+            });
+            const json = await res.json();
+            if (json.status === 'success') {
+              sukses++;
+            } else {
+              gagalList.push(`${p.nama}: ${json.message || 'Gagal'}`);
+            }
+          } catch (err) {
+            gagalList.push(`${p.nama}: ${err.message}`);
+          }
+        }
+
+        tutupModalHapusMassal();
+        await loadDataAdmin();
+
+        if (gagalList.length === 0) {
+          showCustomWarning(
+            "Berhasil",
+            `${sukses} peserta (no. ${dariNo}–${sampaiNo}) berhasil dihapus dari jadwal ini.`
+          );
+        } else {
+          showCustomWarning(
+            "Selesai Sebagian",
+            `Berhasil menghapus ${sukses} peserta, gagal ${gagalList.length}:\n• ${gagalList.join('\n• ')}`
           );
         }
       } finally {
