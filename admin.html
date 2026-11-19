@@ -2033,13 +2033,13 @@
       }
 
       const targetSlice = peserta.slice(dariNo - 1, sampaiNo).filter(p => {
-        const isLunas = String(p.status || '').includes('Lunas');
+        const statusStr = String(p.status || '');
         const hasVoucher = Boolean(p.voucher && String(p.voucher).trim() !== '');
-        return isLunas || (batalVoucher && hasVoucher);
+        return statusStr.includes('Lunas') || (batalVoucher && hasVoucher);
       });
 
       if (targetSlice.length === 0) {
-        return showCustomWarning("Info", `Tidak ada peserta yang perlu dibatalkan ACC-nya pada nomor ${dariNo} s/d ${sampaiNo}.`);
+        return showCustomWarning("Info", `Tidak ada peserta berstatus Lunas pada nomor ${dariNo} s/d ${sampaiNo}.`);
       }
 
       const oldText = btn.innerText;
@@ -2055,9 +2055,7 @@
 
           const kodeVoucherPeserta = p.voucher ? String(p.voucher).trim().toUpperCase() : '';
           const tagihanTarget = resetKeHtm ? htmNormal : parseInt(p.tagihan || 0, 10);
-          const statusTarget = (!batalVoucher && kodeVoucherPeserta && tagihanTarget === 0)
-            ? 'Lunas 🟢 (Voucher)'
-            : 'Menunggu Konfirmasi 🟡';
+          const statusTarget = 'Menunggu Konfirmasi 🟡';
 
           try {
             if (batalVoucher && kodeVoucherPeserta) {
@@ -2104,7 +2102,10 @@
         await loadDataAdmin();
 
         if (gagalList.length === 0) {
-          showCustomWarning("Berhasil", `ACC untuk ${sukses} peserta (no. ${dariNo}–${sampaiNo}) berhasil dibatalkan!`);
+          showCustomWarning(
+            "Berhasil",
+            `ACC untuk ${sukses} peserta (no. ${dariNo}–${sampaiNo}) berhasil dibatalkan dan status diubah menjadi Menunggu Konfirmasi 🟡.`
+          );
         } else {
           showCustomWarning(
             "Selesai Sebagian",
