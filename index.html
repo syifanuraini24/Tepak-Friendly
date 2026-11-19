@@ -126,7 +126,7 @@
                         <input type="text" id="inputVoucher" placeholder="Cth: TEPAKHEMAT"
                             oninput="this.value = this.value.toUpperCase()"
                             class="w-full p-2 border border-slate-200 rounded-lg text-xs uppercase bg-white focus:outline-none transition font-bold tracking-wider">
-                        <button type="button" onclick="terapkanVoucher()"
+                        <button type="button" id="btnPakaiVoucher" onclick="terapkanVoucher()"
                             class="bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-bold px-3 py-2 rounded-lg transition">
                             Pakai
                         </button>
@@ -187,6 +187,7 @@
         let rawTotalTagihanVal = 0;
         let htmDasarVoucher = 0;
         let kodeVoucherTerpakai = '';
+        let pendaftaranAktifGlobal = null;
         let cachedIndexData = { jadwal: [], pemain: [] };
         const openListIds = new Set();
         let isFetchingIndex = false;
@@ -456,6 +457,14 @@ ${listPemainHtml}
             const htmPerOrang = Math.max(0, parseInt(jadwalDipilihGlobal?.htm || 0, 10) || 0);
             htmDasarVoucher = htmPerOrang * jumlahPeserta;
             kodeVoucherTerpakai = '';
+            pendaftaranAktifGlobal = {
+                nama: namaBersih,
+                email: email,
+                jadwalId: jadwalDipilihGlobal.id,
+                jadwalInfo: jadwalDipilihGlobal.info,
+                htm: jadwalDipilihGlobal.htm,
+                rowIndex: null
+            };
 
             const btn = document.getElementById('btnKirimDaftar');
             const oldText = btn.innerText;
@@ -477,6 +486,9 @@ ${listPemainHtml}
                 });
 
                 const result = await response.json();
+                if (result && (result.rowIndex || result.row_index)) {
+                    pendaftaranAktifGlobal.rowIndex = parseInt(result.rowIndex || result.row_index, 10);
+                }
                 tutupModalDaftar();
 
                 try {
@@ -505,14 +517,49 @@ ${listPemainHtml}
             }
         }
 
+        async function sinkronVoucherKeBackend_(kodeVoucher, tagihanBaru, diskon) {
+            const payload = {
+                action: 'apply_voucher',
+                nama: pendaftaranAktifGlobal?.nama || '',
+                email: pendaftaranAktifGlobal?.email || '',
+                jadwalId: pendaftaranAktifGlobal?.jadwalId || jadwalDipilihGlobal?.id || '',
+                jadwalInfo: pendaftaranAktifGlobal?.jadwalInfo || jadwalDipilihGlobal?.info || '',
+                rowIndex: pendaftaranAktifGlobal?.rowIndex || null,
+                kodeVoucher: kodeVoucher,
+                voucher: kodeVoucher,
+                tagihanBaru: tagihanBaru,
+                totalTagihan: tagihanBaru,
+                diskon: diskon
+            };
+
+            const res = await fetch(getFreshGasUrl(), {
+                method: 'POST',
+                cache: 'no-store',
+                body: JSON.stringify(payload)
+            });
+
+            try {
+                return await res.json();
+            } catch (_) {
+                return { status: res.ok ? 'success' : 'error' };
+            }
+        }
+
         async function terapkanVoucher() {
             const kode = document.getElementById('inputVoucher').value.trim().toUpperCase();
             const notif = document.getElementById('notifVoucher');
+            const btnPakai = document.getElementById('btnPakaiVoucher');
 
             if (!kode) {
                 notif.innerText = "⚠️ Masukkan kode voucher.";
                 notif.className = "text-[10px] mt-1 font-medium text-amber-600";
                 return;
+            }
+
+            const oldBtnText = btnPakai ? btnPakai.innerText : 'Pakai';
+            if (btnPakai) {
+                btnPakai.innerText = '...';
+                btnPakai.disabled = true;
             }
 
             try {
@@ -540,8 +587,16 @@ ${listPemainHtml}
                     document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(rawTotalTagihanVal);
 
                     let infoPotongan = persenVal > 0 ? `${persenVal}%` : `Rp ${nominalVal.toLocaleString('id-ID')}`;
-                    notif.innerText = `✅ Voucher ${kodeVoucherTerpakai} berhasil! Diskon ${infoPotongan} (dihitung dari HTM ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(dasarHtm)})`;
-                    notif.className = "text-[10px] mt-1 font-medium text-emerald-600";
+
+                    try {
+                        await sinkronVoucherKeBackend_(kodeVoucherTerpakai, rawTotalTagihanVal, diskon);
+                        notif.innerText = `✅ Voucher ${kodeVoucherTerpakai} berhasil! Diskon ${infoPotongan} & tersimpan ke sistem.`;
+                        notif.className = "text-[10px] mt-1 font-medium text-emerald-600";
+                    } catch (errSync) {
+                        console.warn("Gagal sinkron voucher ke backend:", errSync);
+                        notif.innerText = `✅ Voucher ${kodeVoucherTerpakai} terpotong di layar (${infoPotongan}), tetapi gagal tersimpan ke sistem.`;
+                        notif.className = "text-[10px] mt-1 font-medium text-amber-600";
+                    }
                 } else {
                     kodeVoucherTerpakai = '';
                     notif.innerText = "❌ Kode voucher tidak valid / kedaluwarsa.";
@@ -551,6 +606,11 @@ ${listPemainHtml}
                 console.error("Gagal cek voucher:", e);
                 notif.innerText = "❌ Gagal memvalidasi voucher.";
                 notif.className = "text-[10px] mt-1 font-medium text-rose-600";
+            } finally {
+                if (btnPakai) {
+                    btnPakai.innerText = oldBtnText;
+                    btnPakai.disabled = false;
+                }
             }
         }
 
