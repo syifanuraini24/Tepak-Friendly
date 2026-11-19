@@ -53,7 +53,7 @@
             </div>
         </div>
 
-        <!-- MODAL PENDAFTARAN MABAR (Super Ringkas Tanpa Voucher) -->
+        <!-- MODAL PENDAFTARAN MABAR -->
         <div id="modalDaftar"
             class="fixed inset-0 w-full h-full bg-slate-900/70 backdrop-blur-xs flex items-center justify-center z-50 hidden p-4">
             <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 max-h-[90vh] overflow-y-auto space-y-3">
@@ -62,16 +62,23 @@
 
                 <div class="space-y-3">
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Pemain (Pisahkan dengan
-                            koma)</label>
-                        <textarea id="namaPemain" rows="2" placeholder="Cth: Budi, Andi, Siti"
-                            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition"></textarea>
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                            Nama Depan Resmi <span class="text-rose-600">*</span>
+                        </label>
+                        <textarea id="namaPemain" rows="2"
+                            placeholder="Wajib nama awalan resmi (Cth: Syifa Nuraini, Budi Santoso)"
+                            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition"></textarea>
+                        <p class="text-[10px] text-slate-500 mt-1 leading-tight">
+                            Gunakan <strong>nama awalan resmi</strong> (hindari panggilan/singkatan) agar pendataan
+                            akurat. Pisahkan dengan koma jika mendaftarkan lebih dari 1 orang.
+                        </p>
                     </div>
                     <div>
-                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Email (Opsional untuk
-                            E-Ticket)</label>
-                        <input type="text" id="emailPemain" placeholder="Email contoh lorem@gmail.com"
-                            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none transition">
+                        <label class="block text-[11px] font-bold text-slate-700 mb-1">
+                            Email Aktif (Wajib untuk E-Ticket) <span class="text-rose-600">*</span>
+                        </label>
+                        <input type="email" id="emailPemain" required placeholder="Contoh: syifa@gmail.com"
+                            class="w-full p-2.5 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                     </div>
                     <div
                         class="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-[11px] text-amber-800 space-y-1">
@@ -82,9 +89,9 @@
                 </div>
 
                 <div class="flex gap-2 mt-4">
-                    <button onclick="tutupModalDaftar()"
+                    <button type="button" onclick="tutupModalDaftar()"
                         class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 rounded-xl transition">Batal</button>
-                    <button onclick="kirimDaftarMabar()" id="btnKirimDaftar"
+                    <button type="button" onclick="kirimDaftarMabar()" id="btnKirimDaftar"
                         class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl shadow-xs transition">Daftar
                         Sekarang</button>
                 </div>
@@ -105,7 +112,7 @@
                             Unik):</span>
                         <div class="flex items-center gap-1.5">
                             <strong id="invTotalTagihan" class="text-blue-600 text-sm font-extrabold">Rp 0</strong>
-                            <button onclick="salinTagihanUnik()"
+                            <button type="button" onclick="salinTagihanUnik()"
                                 class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold px-2 py-1 rounded-md transition shadow-2xs">📋
                                 Salin</button>
                         </div>
@@ -140,7 +147,7 @@
                     </a>
                 </div>
 
-                <button onclick="tutupModalInvoice()"
+                <button type="button" onclick="tutupModalInvoice()"
                     class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-3 rounded-xl transition shadow-sm">Tutup
                     & Selesai</button>
             </div>
@@ -152,7 +159,7 @@
             <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-5 space-y-3 text-center">
                 <h3 id="modalTitle" class="font-bold text-sm text-slate-900">Notifikasi</h3>
                 <p id="modalDesc" class="text-xs text-slate-600">-</p>
-                <button onclick="tutupCustomModal()"
+                <button type="button" onclick="tutupCustomModal()"
                     class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition">OK</button>
             </div>
         </div>
@@ -178,9 +185,9 @@
         const GAS_URL = CONFIG.GAS_URL;
         let jadwalDipilihGlobal = null;
         let rawTotalTagihanVal = 0;
-        let baseTagihanAwal = 0; // Menyimpan tagihan asli sebelum diskon
+        let baseTagihanAwal = 0;
         let cachedIndexData = { jadwal: [], pemain: [] };
-        const openListIds = new Set(); // Menyimpan ID jadwal yang daftar anggotanya sedang dibuka
+        const openListIds = new Set();
 
         function formatJam(jam) {
             if (!jam) return '-';
@@ -318,13 +325,13 @@ ${sisaSlot > 0 ? `Sisa: ${sisaSlot}` : 'Full'}
 </span>
 </div>
 
-<!-- Accordion Ringkas (Tetap terbuka jika sedang dibuka oleh user) -->
+<!-- Accordion Ringkas Tanpa Scrollbar Internal -->
 <div class="bg-slate-50 rounded-xl border border-slate-200/80 overflow-hidden">
 <button type="button" onclick="toggleDaftarPemain('${escapeHtml(j.id)}')" class="w-full px-3 py-2 text-[11px] font-bold text-slate-700 flex justify-between items-center hover:bg-slate-100 transition">
 <span class="flex items-center gap-1.5">👥 <span id="btnToggleText-${escapeHtml(j.id)}" data-count="${countText}">${isOpen ? `Sembunyikan Anggota (${countText})` : `Lihat Anggota (${countText})`}</span></span>
 <span id="arrow-${escapeHtml(j.id)}" class="text-xs text-slate-400">${isOpen ? '▲' : '▼'}</span>
 </button>
-<ul id="listPemain-${escapeHtml(j.id)}" class="divide-y divide-slate-100 max-h-40 overflow-y-auto no-scrollbar p-2 space-y-1 bg-white ${isOpen ? '' : 'hidden'} border-t border-slate-100">
+<ul id="listPemain-${escapeHtml(j.id)}" class="divide-y divide-slate-100 p-2 space-y-1 bg-white ${isOpen ? '' : 'hidden'} border-t border-slate-100">
 ${listPemainHtml}
 </ul>
 </div>
@@ -404,10 +411,33 @@ ${listPemainHtml}
         function tutupModalDaftar() { document.getElementById('modalDaftar').classList.add('hidden'); }
 
         async function kirimDaftarMabar() {
-            const nama = document.getElementById('namaPemain').value.trim();
+            const rawNama = document.getElementById('namaPemain').value;
             const email = document.getElementById('emailPemain').value.trim();
 
-            if (!nama) return showCustomMsg("Perhatian", "Nama pemain harus diisi!");
+            const daftarNama = rawNama
+                .split(',')
+                .map(n => n.trim().replace(/\s+/g, ' '))
+                .filter(n => n.length > 0);
+
+            if (daftarNama.length === 0) {
+                return showCustomMsg("Nama Wajib Diisi", "Silakan masukkan nama depan resmi peserta!");
+            }
+
+            const namaTerlaluPendek = daftarNama.find(n => n.length < 3);
+            if (namaTerlaluPendek) {
+                return showCustomMsg("Format Nama Kurang Lengkap", `Nama "${namaTerlaluPendek}" terlalu singkat. Mohon tulis nama depan resmi minimal 3 huruf.`);
+            }
+
+            if (!email) {
+                return showCustomMsg("Email Wajib Diisi", "Alamat email wajib diisi untuk pengiriman E-Ticket & bukti pembayaran.");
+            }
+
+            const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            if (!emailValid) {
+                return showCustomMsg("Format Email Salah", "Masukkan alamat email yang valid (contoh: nama@gmail.com).");
+            }
+
+            const namaBersih = daftarNama.join(', ');
 
             const btn = document.getElementById('btnKirimDaftar');
             const oldText = btn.innerText;
@@ -419,7 +449,7 @@ ${listPemainHtml}
                     method: 'POST',
                     body: JSON.stringify({
                         action: 'register',
-                        nama: nama,
+                        nama: namaBersih,
                         email: email,
                         jadwalId: jadwalDipilihGlobal.id,
                         jadwalInfo: jadwalDipilihGlobal.info,
@@ -432,7 +462,7 @@ ${listPemainHtml}
 
                 try {
                     if (typeof kirimTelegram === 'function') {
-                        await kirimTelegram(nama, jadwalDipilihGlobal.info, (result ? result.totalTagihan : 0));
+                        await kirimTelegram(namaBersih, jadwalDipilihGlobal.info, (result ? result.totalTagihan : 0));
                     }
                 } catch (errTelegram) {
                     console.warn("Telegram warning:", errTelegram);
