@@ -185,7 +185,8 @@
         const GAS_URL = CONFIG.GAS_URL;
         let jadwalDipilihGlobal = null;
         let rawTotalTagihanVal = 0;
-        let baseTagihanAwal = 0;
+        let htmDasarVoucher = 0;
+        let kodeVoucherTerpakai = '';
         let cachedIndexData = { jadwal: [], pemain: [] };
         const openListIds = new Set();
         let isFetchingIndex = false;
@@ -451,6 +452,10 @@ ${listPemainHtml}
             }
 
             const namaBersih = daftarNama.join(', ');
+            const jumlahPeserta = daftarNama.length;
+            const htmPerOrang = Math.max(0, parseInt(jadwalDipilihGlobal?.htm || 0, 10) || 0);
+            htmDasarVoucher = htmPerOrang * jumlahPeserta;
+            kodeVoucherTerpakai = '';
 
             const btn = document.getElementById('btnKirimDaftar');
             const oldText = btn.innerText;
@@ -482,8 +487,7 @@ ${listPemainHtml}
                     console.warn("Telegram warning:", errTelegram);
                 }
 
-                rawTotalTagihanVal = result.totalTagihan || 0;
-                baseTagihanAwal = rawTotalTagihanVal;
+                rawTotalTagihanVal = parseInt(result.totalTagihan ?? htmDasarVoucher, 10) || 0;
 
                 document.getElementById('inputVoucher').value = '';
                 document.getElementById('notifVoucher').innerText = '';
@@ -514,26 +518,32 @@ ${listPemainHtml}
             try {
                 const res = await fetch(getFreshGasUrl(), { cache: 'no-store' });
                 const data = await res.json();
-                const found = (data.voucherList || []).find(v => v.kode === kode && v.status.toLowerCase() === 'aktif');
+                const found = (data.voucherList || []).find(v => String(v.kode || '').trim().toUpperCase() === kode && String(v.status || '').toLowerCase() === 'aktif');
 
                 if (found) {
+                    const dasarHtm = Math.max(0, htmDasarVoucher || 0);
+                    const persenVal = parseFloat(found.persen ?? (String(found.tipe || '').toLowerCase() === 'persen' ? found.nilai : 0) ?? 0) || 0;
+                    const nominalVal = parseInt(found.nominal ?? (String(found.tipe || '').toLowerCase() !== 'persen' ? found.nilai : 0) ?? 0, 10) || 0;
+
                     let diskon = 0;
-                    if (found.persen > 0) {
-                        diskon = Math.round((found.persen / 100) * baseTagihanAwal);
-                    } else if (found.nominal > 0) {
-                        diskon = found.nominal;
+                    if (persenVal > 0) {
+                        diskon = Math.round((persenVal / 100) * dasarHtm);
+                    } else if (nominalVal > 0) {
+                        diskon = nominalVal;
                     }
 
-                    if (diskon > baseTagihanAwal) diskon = baseTagihanAwal;
+                    if (diskon > dasarHtm) diskon = dasarHtm;
 
-                    rawTotalTagihanVal = (baseTagihanAwal - diskon);
+                    kodeVoucherTerpakai = String(found.kode || kode).trim().toUpperCase();
+                    rawTotalTagihanVal = Math.max(0, dasarHtm - diskon);
 
                     document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(rawTotalTagihanVal);
 
-                    let infoPotongan = found.persen > 0 ? `${found.persen}%` : `Rp ${found.nominal.toLocaleString('id-ID')}`;
-                    notif.innerText = `✅ Voucher ${found.kode} berhasil! Diskon ${infoPotongan}`;
+                    let infoPotongan = persenVal > 0 ? `${persenVal}%` : `Rp ${nominalVal.toLocaleString('id-ID')}`;
+                    notif.innerText = `✅ Voucher ${kodeVoucherTerpakai} berhasil! Diskon ${infoPotongan} (dihitung dari HTM ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(dasarHtm)})`;
                     notif.className = "text-[10px] mt-1 font-medium text-emerald-600";
                 } else {
+                    kodeVoucherTerpakai = '';
                     notif.innerText = "❌ Kode voucher tidak valid / kedaluwarsa.";
                     notif.className = "text-[10px] mt-1 font-medium text-rose-600";
                 }
