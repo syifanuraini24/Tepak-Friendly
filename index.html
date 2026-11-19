@@ -179,10 +179,12 @@
         let jadwalDipilihGlobal = null;
         let rawTotalTagihanVal = 0;
         let baseTagihanAwal = 0; // Menyimpan tagihan asli sebelum diskon
+        let cachedIndexData = { jadwal: [], pemain: [] };
+        const openListIds = new Set(); // Menyimpan ID jadwal yang daftar anggotanya sedang dibuka
 
         function formatJam(jam) {
             if (!jam) return '-';
-            if (jam.includes('1899-12-30') || jam.includes('T')) {
+            if (String(jam).includes('1899-12-30') || String(jam).includes('T')) {
                 try {
                     const d = new Date(jam);
                     if (!isNaN(d.getTime())) {
@@ -191,6 +193,15 @@
                 } catch (e) { }
             }
             return jam;
+        }
+
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
         function showCustomMsg(title, desc) {
@@ -202,13 +213,14 @@
             document.getElementById('customModal').classList.add('hidden');
         }
 
-        function toggleDaftarPemain(id) {
+        function syncToggleUi(id, isOpen) {
             const el = document.getElementById(`listPemain-${id}`);
             const arrow = document.getElementById(`arrow-${id}`);
             const btnText = document.getElementById(`btnToggleText-${id}`);
-            const countStr = btnText.getAttribute('data-count');
+            if (!el || !arrow || !btnText) return;
 
-            if (el.classList.contains('hidden')) {
+            const countStr = btnText.getAttribute('data-count');
+            if (isOpen) {
                 el.classList.remove('hidden');
                 arrow.innerText = '▲';
                 btnText.innerText = `Sembunyikan Anggota (${countStr})`;
@@ -219,10 +231,23 @@
             }
         }
 
+        function toggleDaftarPemain(id) {
+            const key = String(id);
+            if (openListIds.has(key)) {
+                openListIds.delete(key);
+                syncToggleUi(key, false);
+            } else {
+                openListIds.add(key);
+                syncToggleUi(key, true);
+            }
+        }
+
         async function loadDataIndex() {
             try {
                 const response = await fetch(GAS_URL);
                 const data = await response.json();
+                cachedIndexData = data || { jadwal: [], pemain: [] };
+
                 const container = document.getElementById('containerJadwal');
                 container.innerHTML = '';
 
@@ -235,7 +260,7 @@
                     let dateA = a.tanggal ? new Date(a.tanggal) : new Date(0);
                     let dateB = b.tanggal ? new Date(b.tanggal) : new Date(0);
                     if (dateA - dateB !== 0) return dateA - dateB;
-                    return (a.jam || '').localeCompare(b.jam || '');
+                    return String(a.jam || '').localeCompare(String(b.jam || ''));
                 });
 
                 const listPemain = data.pemain || [];
@@ -246,7 +271,7 @@
                 }
 
                 listJadwal.forEach(j => {
-                    const pemainJadwal = listPemain.filter(p => p.jadwalId === j.id && p.status && !p.status.includes('Dihapus'));
+                    const pemainJadwal = listPemain.filter(p => String(p.jadwalId) === String(j.id) && p.status && !p.status.includes('Dihapus'));
                     const sisaSlot = parseInt(j.kuota) - pemainJadwal.length;
 
                     const displayTanggal = j.tanggal ? new Date(j.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '-';
@@ -263,7 +288,7 @@
 
                             listPemainHtml += `
 <li class="py-1.5 px-2.5 rounded-lg bg-slate-50/80 border border-slate-100 flex justify-between items-center text-xs">
-<span class="font-bold text-slate-800">${idx + 1}. ${p.nama}</span>
+<span class="font-bold text-slate-800">${idx + 1}. ${escapeHtml(p.nama)}</span>
 <div>${badge}</div>
 </li>`;
                         });
@@ -271,6 +296,7 @@
 
                     const infoLengkap = `${displayTanggal} | ${j.infoRaw}`;
                     const countText = `${pemainJadwal.length}/${j.kuota}`;
+                    const isOpen = openListIds.has(String(j.id));
 
                     let bannerHtml = '';
                     if (j.bannerUrl && j.bannerUrl.trim() !== '') {
@@ -282,8 +308,8 @@
 ${bannerHtml}
 <div class="flex justify-between items-start">
 <div>
-<span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">[${j.id}]</span>
-<h3 class="font-bold text-sm text-slate-900 mt-1">${j.infoRaw}</h3>
+<span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">[${escapeHtml(j.id)}]</span>
+<h3 class="font-bold text-sm text-slate-900 mt-1">${escapeHtml(j.infoRaw)}</h3>
 <p class="text-[11px] text-slate-500 mt-0.5 font-medium">🗓️ ${displayTanggal}</p>
 <p class="text-[11px] text-slate-500">🕒 ${jamBersih} | HTM: Rp ${parseInt(j.htm || 0).toLocaleString('id-ID')}</p>
 </div>
@@ -292,22 +318,22 @@ ${sisaSlot > 0 ? `Sisa: ${sisaSlot}` : 'Full'}
 </span>
 </div>
 
-<!-- Accordion Ringkas -->
+<!-- Accordion Ringkas (Tetap terbuka jika sedang dibuka oleh user) -->
 <div class="bg-slate-50 rounded-xl border border-slate-200/80 overflow-hidden">
-<button onclick="toggleDaftarPemain('${j.id}')" class="w-full px-3 py-2 text-[11px] font-bold text-slate-700 flex justify-between items-center hover:bg-slate-100 transition">
-<span class="flex items-center gap-1.5">👥 <span id="btnToggleText-${j.id}" data-count="${countText}">Lihat Anggota (${countText})</span></span>
-<span id="arrow-${j.id}" class="text-xs text-slate-400">▼</span>
+<button type="button" onclick="toggleDaftarPemain('${escapeHtml(j.id)}')" class="w-full px-3 py-2 text-[11px] font-bold text-slate-700 flex justify-between items-center hover:bg-slate-100 transition">
+<span class="flex items-center gap-1.5">👥 <span id="btnToggleText-${escapeHtml(j.id)}" data-count="${countText}">${isOpen ? `Sembunyikan Anggota (${countText})` : `Lihat Anggota (${countText})`}</span></span>
+<span id="arrow-${escapeHtml(j.id)}" class="text-xs text-slate-400">${isOpen ? '▲' : '▼'}</span>
 </button>
-<ul id="listPemain-${j.id}" class="divide-y divide-slate-100 max-h-40 overflow-y-auto no-scrollbar p-2 space-y-1 bg-white hidden border-t border-slate-100">
+<ul id="listPemain-${escapeHtml(j.id)}" class="divide-y divide-slate-100 max-h-40 overflow-y-auto no-scrollbar p-2 space-y-1 bg-white ${isOpen ? '' : 'hidden'} border-t border-slate-100">
 ${listPemainHtml}
 </ul>
 </div>
 
 <div class="flex gap-2 pt-1">
-<button onclick="bukaModalDaftar('${j.id}', \`${infoLengkap}\`, ${j.htm})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">
+<button type="button" onclick="bukaModalDaftar('${escapeHtml(j.id)}', \`${infoLengkap}\`, ${j.htm})" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition shadow-xs">
 + Daftar Mabar Ini
 </button>
-<button onclick="shareJadwal('${j.id}', \`${j.infoRaw}\`, '${displayTanggal}', '${jamBersih}')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-emerald-200 transition" title="Bagikan Link Jadwal">
+<button type="button" onclick="shareJadwal('${escapeHtml(j.id)}')" class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-emerald-200 transition" title="Bagikan Format Rekap WA">
 🔗
 </button>
 </div>
@@ -316,17 +342,45 @@ ${listPemainHtml}
             } catch (e) { console.error("Error loadDataIndex:", e); }
         }
 
-        function shareJadwal(id, infoGor, tanggal, jam) {
+        function shareJadwal(jadwalId) {
+            const jadwalItem = (cachedIndexData.jadwal || []).find(j => String(j.id) === String(jadwalId));
+            if (!jadwalItem) return;
+
+            const pesertaJadwal = (cachedIndexData.pemain || []).filter(p => String(p.jadwalId) === String(jadwalId) && p.status && !p.status.includes('Dihapus'));
+            const totalKuota = parseInt(jadwalItem.kuota) || 12;
+
+            let displayTgl = jadwalItem.tanggal || '-';
+            try {
+                if (jadwalItem.tanggal) {
+                    displayTgl = new Date(jadwalItem.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                }
+            } catch (e) { }
+
             const currentUrl = window.location.origin + window.location.pathname;
-            const shareUrl = `${currentUrl}?jadwal=${id}`;
-            const teksShare = `🏸 *Yuk Gabung Mabar Tepak Friendly!* 🏸\n\n📍 *${infoGor}*\n🗓️ ${tanggal}\n⏰ ${jam}\n\nKlik link di bawah untuk langsung mendaftar:\n${shareUrl}`;
+            const shareUrl = `${currentUrl}?jadwal=${jadwalId}`;
+
+            let teksShare = `🏸 *PESERTA MABAR Tepak Friendly* 🏸\n`;
+            teksShare += `📍 *${jadwalItem.infoRaw}* | 🗓️ *${displayTgl}*\n`;
+            if (jadwalItem.jam) {
+                teksShare += `⏰ Jam: ${formatJam(jadwalItem.jam)}\n`;
+            }
+            if (jadwalItem.htm !== undefined && jadwalItem.htm !== '') {
+                teksShare += `💰 HTM: Rp ${parseInt(jadwalItem.htm).toLocaleString('id-ID')}\n`;
+            }
+            teksShare += `👥 Slot Terisi: ${pesertaJadwal.length}/${totalKuota}\n\n`;
+
+            for (let i = 1; i <= totalKuota; i++) {
+                teksShare += `${i}. ${pesertaJadwal[i - 1] ? pesertaJadwal[i - 1].nama : '-'}\n`;
+            }
+
+            teksShare += `\nYuk amankan slotnya!\nKlik link di bawah untuk langsung mendaftar:\n${shareUrl}`;
 
             if (navigator.clipboard) {
                 navigator.clipboard.writeText(teksShare).then(() => {
-                    showCustomMsg("Berhasil Disalin!", "Link & detail jadwal berhasil disalin ke clipboard!");
+                    showCustomMsg("Berhasil Disalin!", "Format rekap WA lengkap & link jadwal berhasil disalin ke clipboard!");
                 });
             } else {
-                prompt("Salin link jadwal berikut:", shareUrl);
+                prompt("Salin teks berikut:", teksShare);
             }
         }
 
@@ -385,9 +439,8 @@ ${listPemainHtml}
                 }
 
                 rawTotalTagihanVal = result.totalTagihan || 0;
-                baseTagihanAwal = rawTotalTagihanVal; // Simpan nilai awal untuk acuan diskon voucher
+                baseTagihanAwal = rawTotalTagihanVal;
 
-                // Reset form input voucher di modal invoice
                 document.getElementById('inputVoucher').value = '';
                 document.getElementById('notifVoucher').innerText = '';
 
@@ -404,7 +457,6 @@ ${listPemainHtml}
             }
         }
 
-        // FUNGSI CEK & TERAPKAN VOUCHER LANGSUNG DI INVOICE
         async function terapkanVoucher() {
             const kode = document.getElementById('inputVoucher').value.trim().toUpperCase();
             const notif = document.getElementById('notifVoucher');
@@ -430,8 +482,6 @@ ${listPemainHtml}
 
                     if (diskon > baseTagihanAwal) diskon = baseTagihanAwal;
 
-                    // Update total tagihan baru (pertahankan kode unik jika ada di digit terakhir)
-                    let kodeUnikLama = rawTotalTagihanVal % 1000;
                     rawTotalTagihanVal = (baseTagihanAwal - diskon);
 
                     document.getElementById('invTotalTagihan').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(rawTotalTagihanVal);
@@ -461,16 +511,14 @@ ${listPemainHtml}
                 const targetJadwalId = urlParams.get('jadwal');
 
                 if (targetJadwalId) {
-                    fetch(GAS_URL).then(res => res.json()).then(data => {
-                        const jadwalDitemukan = (data.jadwal || []).find(j => String(j.id) === String(targetJadwalId));
-                        if (jadwalDitemukan) {
-                            const displayTgl = jadwalDitemukan.tanggal ? new Date(jadwalDitemukan.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
-                            const infoLengkap = `${displayTgl} | ${jadwalDitemukan.infoRaw}`;
+                    const jadwalDitemukan = (cachedIndexData.jadwal || []).find(j => String(j.id) === String(targetJadwalId));
+                    if (jadwalDitemukan) {
+                        const displayTgl = jadwalDitemukan.tanggal ? new Date(jadwalDitemukan.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : '';
+                        const infoLengkap = `${displayTgl} | ${jadwalDitemukan.infoRaw}`;
 
-                            bukaModalDaftar(jadwalDitemukan.id, infoLengkap, jadwalDitemukan.htm);
-                            document.getElementById('pageTitle').innerText = `Daftar Mabar: ${jadwalDitemukan.infoRaw}`;
-                        }
-                    });
+                        bukaModalDaftar(jadwalDitemukan.id, infoLengkap, jadwalDitemukan.htm);
+                        document.getElementById('pageTitle').innerText = `Daftar Mabar: ${jadwalDitemukan.infoRaw}`;
+                    }
                 }
             });
 
