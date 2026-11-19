@@ -882,35 +882,42 @@
         .replace(/'/g, '&#39;');
     }
 
+    function bersihkanKodeVoucher_(raw) {
+      if (!raw) return '';
+      return String(raw)
+        .replace(/voucher\s*digunakan\s*:/i, '')
+        .trim()
+        .toUpperCase();
+    }
+
     function hitungSpentVoucherItem_(voucherObj, jadwalObj, pemainObj) {
       const statusStr = String(pemainObj?.status || '');
       if (statusStr.includes('Dihapus') || statusStr.includes('Expired')) {
         return 0;
       }
 
-      const htmNormal = Math.max(0, parseInt(jadwalObj?.htm ?? pemainObj?.tagihan ?? 0, 10) || 0);
-      const tagihanAktual = Math.max(0, parseInt(pemainObj?.tagihan ?? htmNormal, 10) || 0);
+      const htmNormal = Math.max(0, parseInt(jadwalObj?.htm ?? 0, 10) || 0);
+      const tagihanAktual = Math.max(0, parseInt(pemainObj?.tagihan ?? 0, 10) || 0);
 
-      if (voucherObj) {
-        const tipe = String(voucherObj.tipe || '').toLowerCase();
-        if (tipe === 'persen') {
-          const persen = Math.max(0, Math.min(100, parseFloat(voucherObj.persen ?? voucherObj.nilai ?? 0) || 0));
-          const potongan = Math.round((htmNormal * persen) / 100);
-          return Math.min(htmNormal, potongan);
-        }
-        const nilaiNominal = Math.max(0, parseInt(voucherObj.nilai || 0, 10) || 0);
-        if (nilaiNominal > 0) {
-          return Math.min(htmNormal, nilaiNominal);
-        }
+      if (htmNormal > 0 && tagihanAktual < htmNormal) {
+        return htmNormal - tagihanAktual;
       }
 
-      return Math.max(0, htmNormal - tagihanAktual);
+      if (htmNormal === 0 && tagihanAktual === 0 && voucherObj) {
+        if (String(voucherObj.tipe || '').toLowerCase() === 'persen') {
+          const persen = Math.max(0, Math.min(100, parseFloat(voucherObj.persen ?? voucherObj.nilai ?? 0) || 0));
+          return persen === 100 ? tagihanAktual : 0;
+        }
+        return Math.max(0, parseInt(voucherObj.nilai || 0, 10) || 0);
+      }
+
+      return 0;
     }
 
     function getInfoSpentVoucher_(kodeVoucher) {
-      const kodeNorm = String(kodeVoucher || '').trim().toUpperCase();
+      const kodeNorm = bersihkanKodeVoucher_(kodeVoucher);
       const voucherObj = (cachedDataAdmin.voucherList || []).find(
-        v => String(v.kode || '').trim().toUpperCase() === kodeNorm
+        v => bersihkanKodeVoucher_(v.kode) === kodeNorm
       );
       const jadwalMap = {};
       (cachedDataAdmin.jadwal || []).forEach(j => {
@@ -924,7 +931,7 @@
       const pemakaiList = Array.isArray(voucherObj?.pemakaiVoucher) && voucherObj.pemakaiVoucher.length > 0
         ? voucherObj.pemakaiVoucher
         : (cachedDataAdmin.pemain || [])
-            .filter(p => String(p.voucher || '').trim().toUpperCase() === kodeNorm)
+            .filter(p => bersihkanKodeVoucher_(p.voucher) === kodeNorm)
             .map(p => ({
               rowIndex: p.rowIndex,
               nama: p.nama,
@@ -1423,13 +1430,13 @@
       });
       const mapVoucher = {};
       voucherList.forEach(v => {
-        mapVoucher[String(v.kode || '').trim().toUpperCase()] = v;
+        mapVoucher[bersihkanKodeVoucher_(v.kode)] = v;
       });
 
       penggunaVoucherData = pemainList
         .filter(p => p.status && !String(p.status).includes('Dihapus') && p.voucher && String(p.voucher).trim() !== '')
         .map(p => {
-          const kode = String(p.voucher).trim().toUpperCase();
+          const kode = bersihkanKodeVoucher_(p.voucher);
           const j = mapJadwal[String(p.jadwalId)] || {};
           const vObj = mapVoucher[kode];
           const tglSingkat = j.tanggal
@@ -1536,6 +1543,7 @@
           ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">${escapeHtml(p.status)}</span>`
           : `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">${escapeHtml(p.status || 'Aktif')}</span>`;
         const itemSpent = isDihapusAtauExp ? 0 : (spentByRow[Number(p.rowIndex)] || 0);
+        const kodeBersih = bersihkanKodeVoucher_(v.kode);
 
         return `
           <div class="flex items-center justify-between gap-2 py-1.5 px-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-[11px]">
@@ -1548,7 +1556,7 @@
               <div class="text-[10px] text-slate-500 truncate">${escapeHtml(p.jadwalInfo || p.jadwalId || '-')}</div>
             </div>
             <button type="button"
-              onclick="hapusPemakaianVoucher('${escapeHtml(v.kode)}', ${p.rowIndex}, '${escapeHtml(p.nama || 'Peserta')}')"
+              onclick="hapusPemakaianVoucher('${escapeHtml(kodeBersih)}', ${p.rowIndex}, '${escapeHtml(p.nama || 'Peserta')}')"
               class="shrink-0 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-[10px] px-2.5 py-1 rounded-lg transition">
               Hapus
             </button>
@@ -1559,13 +1567,14 @@
 
     async function hapusPemakaianVoucher(kodeVoucher, rowIndex, namaPeserta) {
       const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
+      const kodeBersih = bersihkanKodeVoucher_(kodeVoucher);
       const p = (cachedDataAdmin.pemain || []).find(item => Number(item.rowIndex) === Number(rowIndex));
       const j = p ? (cachedDataAdmin.jadwal || []).find(jd => String(jd.id) === String(p.jadwalId)) : null;
       const htmNormal = j ? parseInt(j.htm || 0, 10) : parseInt(p?.tagihan || 0, 10);
 
       showConfirmModal(
         "Hapus Pemakaian Voucher",
-        `Hapus pemakaian voucher "${kodeVoucher}" untuk ${namaPeserta}? Kuota terpakai akan berkurang 1 dan tagihan dikembalikan ke HTM normal (${formatRp.format(htmNormal)}).`,
+        `Hapus pemakaian voucher "${kodeBersih}" untuk ${namaPeserta}? Kuota terpakai akan berkurang 1 dan tagihan dikembalikan ke HTM normal (${formatRp.format(htmNormal)}).`,
         "Ya, Hapus",
         "bg-rose-600 hover:bg-rose-700",
         async () => {
@@ -1575,7 +1584,7 @@
               body: JSON.stringify({
                 action: 'hapus_pemakaian_voucher',
                 role: role,
-                kodeVoucher: kodeVoucher,
+                kodeVoucher: kodeBersih,
                 rowIndex: parseInt(rowIndex, 10),
                 tagihanBaru: htmNormal,
                 kembalikanTagihan: true
@@ -1584,7 +1593,7 @@
             const json = await res.json();
             if (json.status === 'success') {
               await loadDataAdmin();
-              showCustomWarning("Berhasil", `Pemakaian voucher "${kodeVoucher}" untuk ${namaPeserta} berhasil dihapus.`);
+              showCustomWarning("Berhasil", `Pemakaian voucher "${kodeBersih}" untuk ${namaPeserta} berhasil dihapus.`);
             } else {
               throw new Error(json.message || 'Gagal menghapus pemakaian voucher.');
             }
@@ -1671,12 +1680,13 @@
           divVoucherList.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-2xl border">Belum ada voucher terdaftar.</div>';
         } else {
           divVoucherList.innerHTML = voucherList.map(v => {
+            const kodeBersih = bersihkanKodeVoucher_(v.kode);
             const penerimaInfo = v.penerima && String(v.penerima).trim() !== ''
               ? escapeHtml(v.penerima)
               : 'Semua peserta (bebas)';
             const jumlahPemakai = (v.pemakaiVoucher || []).length;
             const terpakaiAktifLabel = v.terpakaiAktif !== undefined ? ` (Aktif: ${v.terpakaiAktif})` : '';
-            const spentInfo = getInfoSpentVoucher_(v.kode);
+            const spentInfo = getInfoSpentVoucher_(kodeBersih);
             const statusBadgeClass = v.status === 'Aktif'
               ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
               : (v.status === 'Belum Berlaku'
@@ -1688,9 +1698,9 @@
               <div class="flex justify-between items-start gap-2">
                 <div class="min-w-0">
                   <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border ${statusBadgeClass}">${escapeHtml(v.status)}</span>
-                  <h4 class="font-extrabold text-sm text-slate-900 mt-1 font-mono tracking-wider break-all">${escapeHtml(v.kode)}</h4>
+                  <h4 class="font-extrabold text-sm text-slate-900 mt-1 font-mono tracking-wider break-all">${escapeHtml(kodeBersih)}</h4>
                 </div>
-                <button type="button" onclick="hapusVoucherAdmin('${escapeHtml(v.kode)}')" class="text-slate-400 hover:text-rose-600 text-xs p-1.5 shrink-0">🗑️</button>
+                <button type="button" onclick="hapusVoucherAdmin('${escapeHtml(kodeBersih)}')" class="text-slate-400 hover:text-rose-600 text-xs p-1.5 shrink-0">🗑️</button>
               </div>
               <div class="bg-slate-50 rounded-xl p-2.5 text-xs space-y-1 border border-slate-100 text-slate-600">
                 <div class="flex justify-between gap-2"><span>Diskon:</span><span class="font-bold text-slate-800">${v.tipe === 'persen' ? v.persen + '%' : 'Rp ' + Number(v.nilai).toLocaleString('id-ID')}</span></div>
@@ -1708,7 +1718,7 @@
                   ${renderDaftarPemakaiVoucherKartu(v, spentInfo)}
                 </div>
               </div>
-              <button type="button" onclick="bukaModalKirimVoucher('${escapeHtml(v.kode)}', '${escapeHtml(v.kadaluwarsa)}')" class="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs py-2 rounded-xl border border-blue-200 transition">✉️ Kirim Voucher ke Email</button>
+              <button type="button" onclick="bukaModalKirimVoucher('${escapeHtml(kodeBersih)}', '${escapeHtml(v.kadaluwarsa)}')" class="w-full bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold text-xs py-2 rounded-xl border border-blue-200 transition">✉️ Kirim Voucher ke Email</button>
             </div>
           `;
           }).join('');
@@ -1736,7 +1746,8 @@
 
           pesertaJadwal.forEach((p, idx) => {
             const nominalTagihan = parseInt(p.tagihan || 0);
-            const hasVoucher = Boolean(p.voucher && String(p.voucher).trim() !== '');
+            const kodeBersih = bersihkanKodeVoucher_(p.voucher);
+            const hasVoucher = Boolean(kodeBersih);
             const isLunas = p.status.includes('Lunas') || (nominalTagihan === 0 && hasVoucher);
             const isMenunggu = !isLunas && (p.status.includes('Menunggu') || p.status.includes('Pending'));
             if (isLunas) totalEventLunas += nominalTagihan;
@@ -1747,7 +1758,7 @@
 
             let namaColorClass = isLunas ? 'text-emerald-700 font-bold' : (isMenunggu ? 'text-amber-600 font-bold' : 'text-slate-800');
             const voucherBadgeHtml = hasVoucher
-              ? `<span class="inline-flex items-center gap-1 text-[10px] font-mono font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-200 max-w-full break-all">🎟️ ${escapeHtml(p.voucher)}</span>`
+              ? `<span class="inline-flex items-center gap-1 text-[10px] font-mono font-bold bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md border border-blue-200 max-w-full break-all">🎟️ ${escapeHtml(kodeBersih)}</span>`
               : '';
 
             const labelTagihanHtml = (nominalTagihan === 0 && hasVoucher)
@@ -2056,7 +2067,7 @@
       const jadwalId = document.getElementById('accMassalJadwalId').value;
       const dariNo = parseInt(document.getElementById('inputAccDariNo').value, 10);
       const sampaiNo = parseInt(document.getElementById('inputAccSampaiNo').value, 10);
-      const voucher = document.getElementById('inputAccMassalVoucher').value.trim().toUpperCase();
+      const voucher = bersihkanKodeVoucher_(document.getElementById('inputAccMassalVoucher').value);
       const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
 
       const peserta = getPesertaAktifJadwal_(jadwalId);
@@ -2075,7 +2086,7 @@
 
       const targetSlice = peserta.slice(dariNo - 1, sampaiNo).filter(p => {
         const nominalTagihan = parseInt(p.tagihan || 0, 10);
-        const hasVoucher = Boolean(p.voucher && String(p.voucher).trim() !== '');
+        const hasVoucher = Boolean(bersihkanKodeVoucher_(p.voucher));
         const isLunas = String(p.status || '').includes('Lunas') || (nominalTagihan === 0 && hasVoucher);
         return !isLunas;
       });
@@ -2192,7 +2203,7 @@
 
       const targetSlice = peserta.slice(dariNo - 1, sampaiNo).filter(p => {
         const statusStr = String(p.status || '');
-        const hasVoucher = Boolean(p.voucher && String(p.voucher).trim() !== '');
+        const hasVoucher = Boolean(bersihkanKodeVoucher_(p.voucher));
         return statusStr.includes('Lunas') || (batalVoucher && hasVoucher);
       });
 
@@ -2211,7 +2222,7 @@
           const p = targetSlice[i];
           btn.innerText = `Batal ${i + 1}/${targetSlice.length}...`;
 
-          const kodeVoucherPeserta = p.voucher ? String(p.voucher).trim().toUpperCase() : '';
+          const kodeVoucherPeserta = bersihkanKodeVoucher_(p.voucher);
           const tagihanTarget = resetKeHtm ? htmNormal : parseInt(p.tagihan || 0, 10);
           const statusTarget = 'Menunggu Konfirmasi 🟡';
 
@@ -2341,9 +2352,7 @@
           btn.innerText = `Hapus ${i + 1}/${targetSlice.length}...`;
 
           try {
-            const voucherRaw = String(p.voucher || '').trim().toUpperCase();
-            const matchKode = voucherRaw.match(/[A-Z0-9_-]{2,}/i);
-            const kodeVoucher = matchKode ? matchKode[0].toUpperCase() : '';
+            const kodeVoucher = bersihkanKodeVoucher_(p.voucher);
 
             if (kembalikanKuotaVoucher && kodeVoucher) {
               const resV = await fetch(GAS_URL, {
@@ -2412,7 +2421,7 @@
 
     async function eksekusiAccPemain(btn) {
       const rowIndex = document.getElementById('accRowIndexInput').value;
-      const voucher = document.getElementById('inputAccVoucher').value.trim().toUpperCase();
+      const voucher = bersihkanKodeVoucher_(document.getElementById('inputAccVoucher').value);
       const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
 
       const oldText = btn.innerText;
@@ -2445,7 +2454,7 @@
       const p = (cachedDataAdmin.pemain || []).find(item => Number(item.rowIndex) === Number(rowIndex));
       const namaAwal = p ? String(p.nama || '') : '';
       const tagihanAwal = p ? parseInt(p.tagihan || 0) : 0;
-      const voucherSudahAda = p && p.voucher ? String(p.voucher).trim().toUpperCase() : '';
+      const voucherSudahAda = p && p.voucher ? bersihkanKodeVoucher_(p.voucher) : '';
 
       document.getElementById('editRowIndexInput').value = rowIndex;
       document.getElementById('editNamaPesertaLabel').innerText = `Peserta: ${namaAwal || '-'}`;
@@ -2484,7 +2493,7 @@
 
     async function batalkanVoucherPeserta(btn) {
       const rowIndex = parseInt(document.getElementById('editRowIndexInput').value, 10);
-      const kodeLama = document.getElementById('editVoucherTerkunciInput').value.trim().toUpperCase();
+      const kodeLama = bersihkanKodeVoucher_(document.getElementById('editVoucherTerkunciInput').value);
       const namaPeserta = document.getElementById('inputNamaBaru').value.trim();
       const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
 
@@ -2534,8 +2543,8 @@
       const rowIndex = document.getElementById('editRowIndexInput').value;
       const namaBaru = document.getElementById('inputNamaBaru').value.trim().replace(/\s+/g, ' ');
       const nominalBaru = document.getElementById('inputNominalBaru').value.trim();
-      const voucherTerkunci = document.getElementById('editVoucherTerkunciInput').value.trim().toUpperCase();
-      const voucherBaru = voucherTerkunci || document.getElementById('inputVoucherBaru').value.trim().toUpperCase();
+      const voucherTerkunci = bersihkanKodeVoucher_(document.getElementById('editVoucherTerkunciInput').value);
+      const voucherBaru = voucherTerkunci || bersihkanKodeVoucher_(document.getElementById('inputVoucherBaru').value);
       const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
 
       if (!namaBaru) return showCustomWarning("Validasi", "Nama peserta wajib diisi!");
@@ -2637,7 +2646,7 @@
     }
 
     async function simpanVoucherBaru(btn) {
-      const kode = document.getElementById('addKodeVoucher').value.trim().toUpperCase();
+      const kode = bersihkanKodeVoucher_(document.getElementById('addKodeVoucher').value);
       const tipe = document.getElementById('addTipeVoucher').value;
       const nilai = document.getElementById('addNilaiVoucher').value;
       const tanggalMulai = document.getElementById('addMulaiVoucher').value;
@@ -2683,8 +2692,9 @@
 
     async function hapusVoucherAdmin(kode) {
       const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
-      showConfirmModal("Hapus Voucher", `Yakin ingin menghapus voucher "${kode}"?`, "Ya, Hapus", "bg-rose-600 hover:bg-rose-700", async () => {
-        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_voucher', role: role, kode: kode }) });
+      const kodeBersih = bersihkanKodeVoucher_(kode);
+      showConfirmModal("Hapus Voucher", `Yakin ingin menghapus voucher "${kodeBersih}"?`, "Ya, Hapus", "bg-rose-600 hover:bg-rose-700", async () => {
+        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'delete_voucher', role: role, kode: kodeBersih }) });
         loadDataAdmin();
       });
     }
