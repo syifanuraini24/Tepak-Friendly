@@ -2055,6 +2055,9 @@
 
           const kodeVoucherPeserta = p.voucher ? String(p.voucher).trim().toUpperCase() : '';
           const tagihanTarget = resetKeHtm ? htmNormal : parseInt(p.tagihan || 0, 10);
+          const statusTarget = (!batalVoucher && kodeVoucherPeserta && tagihanTarget === 0)
+            ? 'Lunas 🟢 (Voucher)'
+            : 'Menunggu Konfirmasi 🟡';
 
           try {
             if (batalVoucher && kodeVoucherPeserta) {
@@ -2082,6 +2085,7 @@
                 rowIndex: parseInt(p.rowIndex, 10),
                 namaBaru: String(p.nama || '').trim(),
                 tagihanBaru: tagihanTarget,
+                statusBaru: statusTarget,
                 voucher: (batalVoucher && kodeVoucherPeserta) ? '' : kodeVoucherPeserta
               })
             });
@@ -2451,7 +2455,8 @@
     }
 
     async function toggleStatusJadwal(jadwalId, statusBaru, btn) {
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'toggle_status_jadwal', jadwalId, statusBaru }) });
+      const role = localStorage.getItem('tepak_admin_role') || 'superadmin';
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'toggle_status_jadwal', role, jadwalId, statusBaru }) });
       loadDataAdmin();
     }
   </script>
